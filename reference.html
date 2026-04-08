@@ -1,0 +1,643 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Share2, Printer, RefreshCcw, Home, ChevronRight, Quote, BookOpen, UserCheck, ArrowUpRight } from
+'lucide-react';
+
+// --- 전역 스타일 ---
+const GlobalStyles = () => (
+<style>
+    {
+        ` @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', sans-serif;
+            /* 글로벌 배경색 제거, 각 컴포넌트에서 독립적으로 제어 */
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            touch-action: pan-y pinch-zoom;
+            -webkit-tap-highlight-color: transparent;
+            background-color: #F8F9FA;
+        }
+
+        .no-select {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .page-enter {
+            animation: slideInRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slideInRight {
+            0% {
+                opacity: 0;
+                transform: translateX(40px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        @media print {
+            body {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .print-border {
+                border-color: #000000 !important;
+            }
+
+            .print-bg-white {
+                background-color: #ffffff !important;
+            }
+
+            .print-bg-black {
+                background-color: #000000 !important;
+            }
+
+            .print-text-white {
+                color: #ffffff !important;
+            }
+
+            .print-text-black {
+                color: #000000 !important;
+            }
+
+            .print-red {
+                background-color: #E50914 !important;
+            }
+
+            .print-break-inside-avoid {
+                break-inside: avoid;
+            }
+        }
+
+        `
+    }
+</style>
+);
+
+// --- 문항 데이터베이스 ---
+const questionsData = [
+{
+id: 'q1',
+step: '01',
+title: '나는 현재 어떤 사람인가요?',
+desc: '가장 가까운 현재의 상황을 선택해주세요.',
+options: [
+{ id: "전업 수험생", label: "전업 수험생", desc: "오직 합격만을 향한 풀타임 러너", img:
+"https://images.unsplash.com/photo-1522204523234-8729aa6e3d5f?q=80&w=800&auto=format&fit=crop" },
+{ id: "맘시생", label: "맘시생", desc: "육아와 가사, 꿈을 동시에 짊어진 알케미스트", img:
+"https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=800&auto=format&fit=crop" },
+{ id: "직장 병행", label: "직장 병행", desc: "낮에는 현실, 밤에는 이상을 좇는 투잡러", img:
+"https://images.unsplash.com/photo-1497215728101-856f4ea42174?q=80&w=800&auto=format&fit=crop" },
+{ id: "대학생", label: "대학생", desc: "유연하고 흡수력이 빠른 무한한 도화지", img:
+"https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=800&auto=format&fit=crop" },
+{ id: "취준생", label: "취준생", desc: "불확실성이라는 밧줄 위를 걷는 곡예사", img:
+"https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop" }
+]
+},
+{
+id: 'q2',
+step: '02',
+title: '공무원 시험에 대한 내 기초는?',
+desc: '솔직하게 본인의 베이스를 진단해주세요.',
+options: [
+{ id: "노베이스", label: "노베이스", desc: "백지상태, 이제 막 펜을 든 비기너", img:
+"https://images.unsplash.com/photo-1517842645767-c639042777db?q=80&w=800&auto=format&fit=crop" },
+{ id: "전공자", label: "전공자", desc: "관련 학과 졸업, 뼈대는 이미 완성된 상태", img:
+"https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=800&auto=format&fit=crop" },
+{ id: "수능점수 중간", label: "수능점수 중간", desc: "기본적인 독해력과 이해력을 갖춘 베이스", img:
+"https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=800&auto=format&fit=crop" },
+{ id: "특정과목만 잘함", label: "특정과목만 잘함", desc: "특정 과목에 강력한 무기를 가진 저격수", img:
+"https://images.unsplash.com/photo-1506784926709-22f1ec395907?q=80&w=800&auto=format&fit=crop" }
+]
+}
+];
+
+// --- 결과 데이터베이스 (Q1 기반 상세 확장) ---
+const resultDatabase = {
+"전업 수험생": {
+type: "고독한 마라토너",
+typeEng: "RELENTLESS RUNNER",
+story: {
+title: "하루 14시간, 무식하게 파고들어 1년 만에 합격한 이야기",
+content: "처음엔 막막했지만, 스마트폰을 없애고 오직 책상에만 앉아있었습니다. 불안감은 공부로 잊어야 합니다. 저도 매일 밤 울면서 문제집을 풀었지만, 결국 그 시간들이 모여 합격을 만들었습니다."
+},
+recommendations: [
+{ title: "국어 기출 2000제", desc: "양치기로 실전 감각을 극대화하는 회독법" },
+{ title: "영어 하프모의고사", desc: "매일 아침 30분, 예외 없는 고정 루틴 만들기" }
+],
+advice: "완벽주의를 버리세요. '오늘 계획을 다 못 지켰네'라며 자책할 시간에 영단어 하나를 더 외우는 것이 진짜 수험생의 멘탈입니다. 고립감을 즐기셔야 합니다.",
+mentor: { name: "국가직 합격생 김지원", id: "342", tag: "멘탈 관리 전문" }
+},
+"맘시생": {
+type: "시간의 마법사",
+typeEng: "TIME ALCHEMIST",
+story: {
+title: "새벽 4시 기상, 아이가 깨기 전 3시간이 만든 기적",
+content: "육아와 병행하다 보니 절대적인 시간이 부족했습니다. 그래서 아이가 자는 새벽 시간과 낮잠 시간을 목숨처럼 여겼어요. 완벽하지 않아도 매일 책을 펼친 꾸준함이 비결입니다."
+},
+recommendations: [
+{ title: "압축 기본서 인강", desc: "불필요한 설명 제외, 빠른 1회독을 위한 필수 코스" },
+{ title: "모바일 영단어/기출", desc: "설거지, 이동 시간 등 자투리 시간을 100% 활용" }
+],
+advice: "절대적인 시간이 부족한 것은 당연합니다. 남들과 비교하며 조급해하지 마세요. 방해받지 않는 당신의 '밀도 높은 하루 4시간' 집중력은 전업 수험생의 10시간과 맞먹습니다.",
+mentor: { name: "지방직 합격생 이수진", id: "218", tag: "워킹맘 출신 멘토" }
+},
+"직장 병행": {
+type: "야행성 헌터",
+typeEng: "NIGHT HUSTLER",
+story: {
+title: "퇴근 후 지친 몸을 이끌고 스터디 카페로 출근했던 1년 6개월",
+content: "회식 다음 날에도 꾸역꾸역 인강을 켰습니다. 피곤함에 코피를 쏟은 적도 있지만, 내 손으로 내 미래를 바꾸겠다는 절박함이 저를 책상 앞으로 이끌었습니다."
+},
+recommendations: [
+{ title: "주말 몰아치기 모의고사", desc: "평일에 부족했던 실전 연습을 주말에 120% 보충" },
+{ title: "핵심 요약 인강 (배속)", desc: "시간 단축을 위한 1.5배속 수강 및 단권화 노트 활용" }
+],
+advice: "회식, 야근 등 예측 불가능한 변수가 많습니다. 진도를 완벽히 빼겠다는 욕심보다는, 핵심 기출문제 위주로 실전 감각을 유지하는 '방어적 공부'가 필수입니다.",
+mentor: { name: "국가직 합격생 박현우", id: "405", tag: "투잡러 출신 멘토" }
+},
+"대학생": {
+type: "무한한 도화지",
+typeEng: "BLANK CANVAS",
+story: {
+title: "학점 챙기며 7급 준비, 낭만 대신 도서관을 선택한 이유",
+content: "동기들이 MT를 갈 때 저는 노량진행 지하철을 탔습니다. 유혹이 많았지만 빨리 안정적인 직장을 잡고 싶다는 목표 하나로 휴학 없이 1년 반을 달렸습니다."
+},
+recommendations: [
+{ title: "전공 과목 연계 심화특강", desc: "대학 전공 지식을 수험에 맞게 최적화하는 스킬업" },
+{ title: "방학 단기 완성 훈련", desc: "방학 2개월 동안 기본 이론을 끝내는 스파르타식 학습" }
+],
+advice: "학업과 병행하다 보면 두 마리 토끼를 다 놓칠 위험이 큽니다. 이번 학기의 우선순위가 학점 방어인지, 수험 진도인지 스스로에게 명확한 선 긋기가 필요합니다.",
+mentor: { name: "7급 합격생 최민수", id: "112", tag: "재학 중 단기합격" }
+},
+"취준생": {
+type: "줄타기 곡예사",
+typeEng: "TIGHTROPE WALKER",
+story: {
+title: "서류 탈락의 늪에서 공무원 시험으로 방향을 틀고 찾은 확신",
+content: "계속되는 불합격에 자존감이 바닥이었지만, 공무원 시험은 내가 공부한 만큼 정직하게 점수가 나온다는 점이 좋았습니다. 마인드 컨트롤이 제 가장 큰 무기였습니다."
+},
+recommendations: [
+{ title: "공통과목 베이스업 특강", desc: "수능 이후 잊혀진 국어/영어/한국사 감각 빠르게 깨우기" },
+{ title: "면접 대비 스피치 훈련", desc: "필기시험 직후 사기업 면접 경험을 살린 실전 대비" }
+],
+advice: "사기업 취업 실패의 쓰라림이 공무원 시험의 원동력이 될 순 있지만, 도피처가 되어선 안 됩니다. 백지상태라는 겸손한 마음가짐으로 기초부터 탄탄히 닦아야 합니다.",
+mentor: { name: "지방직 합격생 정아름", id: "599", tag: "취준 2년차 전향" }
+}
+};
+
+
+// --- 1. INTRO 페이지 (모던 매거진/아키텍처 스타일 라이트 테마) ---
+const IntroScreen = ({ onStart }) => (
+<div
+    className="min-h-screen bg-[#F8F9FA] text-zinc-900 flex flex-col page-enter no-select relative px-6 md:px-12 py-8 overflow-hidden">
+    {/* Top Navigation */}
+    <header className="flex flex-row justify-between items-start z-10 w-full mb-8 md:mb-12">
+        <div
+            className="border border-zinc-300 rounded-full px-4 md:px-6 py-1.5 md:py-2 text-[10px] md:text-xs font-bold tracking-widest uppercase bg-white/50 backdrop-blur-sm shadow-sm">
+            Persona Analysis Platform
+        </div>
+        <div className="text-right text-[10px] md:text-xs font-mono uppercase text-zinc-500 flex flex-col gap-1">
+            <p><strong className="text-zinc-900 text-sm md:text-base">10K+</strong> TESTED</p>
+            <p><strong className="text-zinc-900 text-sm md:text-base">5K+</strong> SUCCESS SCENARIOS</p>
+            <p><strong className="text-zinc-900 text-sm md:text-base">15+</strong> PRO MENTORS</p>
+        </div>
+    </header>
+
+    {/* Main Hero Section */}
+    <main className="flex-1 flex flex-col justify-center relative z-10 w-full mt-6 md:mt-10">
+        {/* Massive Typography */}
+        <h1
+            className="text-[14vw] md:text-[11vw] leading-[0.85] font-black tracking-tighter uppercase z-20 text-[#111111] drop-shadow-sm pointer-events-none">
+            DISCOVER<br />YOUR CORE.
+        </h1>
+
+        {/* Overlapping Image */}
+        <div
+            className="absolute top-[15%] md:top-[5%] right-[0%] w-[80vw] md:w-[45vw] h-[35vh] md:h-[60vh] rounded-[2rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.15)] z-10">
+            <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=1200&auto=format&fit=crop"
+                className="w-full h-full object-cover" alt="Modern interior" />
+        </div>
+    </main>
+
+    {/* Footer Area */}
+    <footer className="z-20 mt-16 md:mt-20 flex flex-col md:flex-row justify-between items-start md:items-end gap-10">
+        <p className="max-w-lg text-zinc-500 font-medium text-sm md:text-base leading-relaxed uppercase tracking-wide">
+            A modern analysis platform incorporating advanced digital tools and trusted local expertise to find your
+            optimal path.
+        </p>
+        <button onClick={onStart}
+            className="w-full md:w-auto shrink-0 bg-[#111111] text-white px-10 py-5 md:py-6 rounded-full font-bold text-sm md:text-lg hover:bg-[#E50914] transition-colors duration-300 shadow-xl active:scale-95 flex justify-center items-center gap-3">
+            START ANALYSIS
+            <ArrowUpRight size={20} />
+        </button>
+    </footer>
+</div>
+);
+
+// --- 2. 문항 페이지 (다크 스와이프 인터페이스 유지 - 몰입감) ---
+const QuestionScreen = ({ questionData, currentIndex, total, onSelect }) => {
+const [tappedIndex, setTappedIndex] = useState(null);
+const [activeIndex, setActiveIndex] = useState(0);
+const scrollRef = useRef(null);
+
+const [isDragging, setIsDragging] = useState(false);
+const [startX, setStartX] = useState(0);
+const [scrollLeft, setScrollLeft] = useState(0);
+
+useEffect(() => {
+setTappedIndex(null);
+setActiveIndex(0);
+if (scrollRef.current) scrollRef.current.scrollLeft = 0;
+}, [currentIndex]);
+
+const handleScroll = () => {
+if (!scrollRef.current) return;
+const container = scrollRef.current;
+const centerPosition = container.scrollLeft + container.clientWidth / 2;
+
+let minDistance = Infinity;
+let closestIndex = 0;
+
+const cards = container.querySelectorAll('.card-item');
+cards.forEach((card, index) => {
+const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+const distance = Math.abs(centerPosition - cardCenter);
+if (distance < minDistance) { minDistance=distance; closestIndex=index; } }); if (closestIndex !==activeIndex) {
+    setActiveIndex(closestIndex); } }; const handleOptionTap=(optionId, index)=> {
+    if (tappedIndex !== null || isDragging) return;
+    setTappedIndex(index);
+
+    const container = scrollRef.current;
+    const cards = container.querySelectorAll('.card-item');
+    if (cards[index]) {
+    const cardCenter = cards[index].offsetLeft + cards[index].offsetWidth / 2;
+    container.scrollTo({
+    left: cardCenter - container.clientWidth / 2,
+    behavior: 'smooth'
+    });
+    }
+
+    setTimeout(() => onSelect(optionId), 600);
+    };
+
+    const handleMouseDown = (e) => {
+    setIsDragging(true);
+    setStartX(e.pageX - scrollRef.current.offsetLeft);
+    setScrollLeft(scrollRef.current.scrollLeft);
+    };
+    const handleMouseLeave = () => setIsDragging(false);
+    const handleMouseUp = () => setIsDragging(false);
+    const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    scrollRef.current.scrollLeft = scrollLeft - walk;
+    };
+
+    return (
+    <div className="h-screen w-full flex flex-col page-enter no-select relative overflow-hidden bg-[#121212]"
+        key={`q-${currentIndex}`}>
+        {/* 동적 배경 */}
+        <div className="absolute inset-0 z-0">
+            {questionData.options.map((opt, i) => (
+            <img key={`bg-${opt.id}`} src={opt.img} alt="" className={`absolute inset-0 w-full h-full object-cover
+                transition-opacity duration-1000 ease-in-out ${activeIndex===i ? 'opacity-100' : 'opacity-0' }`}
+                style={{ transform: 'scale(1.05)' }} />
+            ))}
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-10 pointer-events-none"></div>
+        </div>
+
+        {/* 상단 진행바 */}
+        <div className="w-full h-1 bg-white/20 absolute top-0 left-0 z-20">
+            <div className="h-full bg-white transition-all duration-300 shadow-[0_0_10px_rgba(255,255,255,0.8)]"
+                style={{ width: `${((currentIndex) / total) * 100}%` }}></div>
+        </div>
+
+        {/* 질문 텍스트 */}
+        <div className="relative z-20 p-6 md:p-16 pt-16 md:pt-24 flex-shrink-0 pointer-events-none">
+            <div
+                className="flex items-center gap-3 text-white font-mono font-bold text-sm md:text-lg mb-3 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
+                <span className="w-6 md:w-8 h-[2px] bg-white inline-block"></span>
+                <span>STEP {questionData.step} <span className="text-white/40">/ 0{total}</span></span>
+            </div>
+            <h2
+                className="text-3xl md:text-5xl lg:text-6xl font-black leading-tight break-keep mb-3 text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)]">
+                {questionData.title}
+            </h2>
+            <p className="text-white/80 text-sm md:text-xl font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
+                {questionData.desc}</p>
+        </div>
+
+        {/* 카드 리스트 */}
+        <div ref={scrollRef} onScroll={handleScroll} onMouseDown={handleMouseDown} onMouseLeave={handleMouseLeave}
+            onMouseUp={handleMouseUp} onMouseMove={handleMouseMove} className={` relative z-20 flex-1 flex w-full
+            overflow-x-auto hide-scrollbar items-center pb-12 ${isDragging ? 'cursor-grabbing'
+            : 'cursor-grab snap-x snap-mandatory' } `}>
+            <div className="shrink-0 w-[calc(12.5vw-8px)] md:w-[calc(50vw-206px)]"></div>
+
+            {questionData.options.map((option, index) => {
+            const isTapped = tappedIndex === index;
+            const isOtherTapped = tappedIndex !== null && tappedIndex !== index;
+            const isActive = activeIndex === index;
+
+            return (
+            <button key={option.id} onClick={()=> handleOptionTap(option.id, index)}
+                className={`
+                card-item shrink-0 mx-2 md:mx-4
+                w-[75vw] sm:w-[320px] md:w-[380px]
+                h-[60vh] max-h-[480px] md:h-[550px]
+                rounded-3xl overflow-hidden flex flex-col justify-end text-left
+                transition-all duration-500 relative border border-white/20
+                ${isDragging ? '' : 'snap-center'}
+                ${isActive ? 'scale-100 opacity-100 z-10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-white/40' :
+                'scale-[0.85] opacity-50 z-0 shadow-lg border-white/10'}
+                ${isTapped ? 'ring-4 ring-white/60 scale-[0.95]' : ''}
+                ${isOtherTapped ? 'opacity-0 scale-90' : ''}
+                `}
+                >
+                <img src={option.img} alt={option.label}
+                    className="absolute inset-0 w-full h-full object-cover pointer-events-none" />
+                <div
+                    className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent pointer-events-none">
+                </div>
+
+                <div className={`relative z-10 p-6 md:p-8 w-full transition-all duration-500 pointer-events-none
+                    ${isActive ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0' }`}>
+                    <div
+                        className="font-mono text-[10px] md:text-sm tracking-[0.2em] mb-2 uppercase text-white/70 drop-shadow-md">
+                        Option 0{index + 1}
+                    </div>
+                    <h3
+                        className="text-4xl md:text-5xl font-black text-white break-keep drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] leading-tight mb-3">
+                        {option.label}
+                    </h3>
+                    <div
+                        className="font-light text-base md:text-lg text-white/90 break-keep drop-shadow-[0_2px_5px_rgba(0,0,0,0.8)] leading-relaxed">
+                        {option.desc}
+                    </div>
+                </div>
+            </button>
+            );
+            })}
+
+            <div className="shrink-0 w-[calc(12.5vw-8px)] md:w-[calc(50vw-206px)]"></div>
+        </div>
+    </div>
+    );
+    };
+
+    // --- 3. 로딩 화면 ---
+    const LoadingScreen = () => (
+    <div className="h-screen w-full flex flex-col items-center justify-center page-enter bg-[#F8F9FA] text-[#111]">
+        <div className="relative flex items-center justify-center">
+            <div className="w-24 h-24 border-4 border-zinc-200 border-t-[#111111] rounded-full animate-spin"></div>
+            <div className="absolute w-10 h-10 bg-[#E50914] rounded-full animate-pulse"></div>
+        </div>
+        <div className="mt-12 text-center">
+            <h3 className="text-2xl md:text-4xl font-black tracking-widest uppercase mb-4 text-[#111]">Analyzing</h3>
+            <div className="text-zinc-500 font-mono text-sm md:text-base flex flex-col gap-2">
+                <p>응답 데이터 분석 중...</p>
+                <p>최적의 합격 로드맵 매핑...</p>
+            </div>
+        </div>
+    </div>
+    );
+
+    // --- 4. 결과 페이지 (Bento Box 스타일 & 라이트 테마) ---
+    const ResultScreen = ({ answers, onReset, onGoHome }) => {
+    const data = resultDatabase[answers[0]] || resultDatabase["전업 수험생"];
+    const [toastMsg, setToastMsg] = useState('');
+
+    // 선택된 항목의 상세 정보 (이미지 포함) 찾기
+    const selectedDetails = answers.map((ans, i) => {
+    return questionsData[i].options.find(opt => opt.label === ans) || { label: ans, img: "" };
+    });
+
+    const handlePrint = () => window.print();
+    const handleShare = () => {
+    setToastMsg('결과 링크가 클립보드에 복사되었습니다.');
+    setTimeout(() => setToastMsg(''), 3000);
+    };
+
+    return (
+    <div className="min-h-screen bg-[#F4F5F7] text-zinc-900 p-4 md:p-8 lg:p-12 pb-24 page-enter">
+
+        {/* 상단 컨트롤러 (인쇄 시 숨김) */}
+        <div className="flex justify-between items-center mb-8 no-print max-w-6xl mx-auto">
+            <div className="flex items-center gap-1 md:gap-4">
+                <button onClick={onGoHome}
+                    className="flex items-center gap-1 md:gap-2 text-xs md:text-sm font-bold tracking-widest text-zinc-500 hover:text-black transition-colors p-2 bg-white rounded-full shadow-sm px-4">
+                    <Home size={16} /> HOME
+                </button>
+                <button onClick={onReset}
+                    className="flex items-center gap-1 md:gap-2 text-xs md:text-sm font-bold tracking-widest text-zinc-500 hover:text-black transition-colors p-2 bg-white rounded-full shadow-sm px-4">
+                    <RefreshCcw size={16} /> RESTART
+                </button>
+            </div>
+            <div className="flex gap-2 md:gap-3">
+                <button onClick={handleShare}
+                    className="flex items-center gap-2 px-4 py-2 bg-white border border-zinc-200 rounded-full text-[10px] md:text-sm font-bold active:scale-95 shadow-sm hover:bg-zinc-50">
+                    <Share2 size={16} /> SHARE
+                </button>
+                <button onClick={handlePrint}
+                    className="flex items-center gap-2 px-4 py-2 bg-[#111111] text-white rounded-full text-[10px] md:text-sm font-bold active:scale-95 shadow-md hover:bg-black">
+                    <Printer size={16} /> PRINT
+                </button>
+            </div>
+        </div>
+
+        {toastMsg && (
+        <div
+            className="fixed top-6 left-1/2 -translate-x-1/2 bg-[#111] text-white px-6 py-3 rounded-full font-bold text-sm z-50 shadow-2xl no-print">
+            {toastMsg}
+        </div>
+        )}
+
+        {/* 메인 결과 그리드 (Bento Box) */}
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6 print:block">
+
+            {/* 1. Hero / Title Card (Red) */}
+            <div
+                className="md:col-span-5 bg-[#E50914] text-white rounded-[2rem] p-8 md:p-10 shadow-sm flex flex-col justify-between overflow-hidden relative group print-break-inside-avoid print:mb-6">
+                <div className="relative z-10">
+                    <span
+                        className="text-white/80 font-mono text-xs md:text-sm tracking-widest uppercase border border-white/30 px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm">
+                        Persona Result
+                    </span>
+                    <h1 className="text-4xl md:text-5xl font-black mt-6 leading-tight break-keep drop-shadow-md">
+                        {data.type}
+                    </h1>
+                    <p className="text-white/60 font-mono mt-2 text-sm">{data.typeEng}</p>
+                </div>
+                {/* Abstract typography decor */}
+                <div
+                    className="absolute -bottom-6 -right-6 text-[120px] font-black text-black/10 leading-none group-hover:scale-110 transition-transform duration-700 pointer-events-none">
+                    01
+                </div>
+            </div>
+
+            {/* 2. Selected Answers */}
+            <div
+                className="md:col-span-7 bg-white rounded-[2rem] p-8 md:p-10 shadow-sm border border-zinc-100 flex flex-col justify-center print-break-inside-avoid print:mb-6">
+                <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-2">
+                        <UserCheck size={18} /> My Input
+                    </h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {selectedDetails.map((item, i) => (
+                    <div key={i}
+                        className="flex items-center gap-4 bg-[#F8F9FA] p-3 md:p-4 rounded-2xl border border-zinc-100">
+                        <img src={item.img} className="w-16 h-16 md:w-20 md:h-20 rounded-xl object-cover shadow-sm"
+                            alt={item.label} />
+                        <div>
+                            <div className="text-[10px] md:text-xs text-zinc-500 font-mono font-bold mb-1">STEP 0{i+1}
+                            </div>
+                            <div className="font-bold text-base md:text-lg text-zinc-900 break-keep">{item.label}</div>
+                        </div>
+                    </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* 3. 합격 수기 (Success Story) */}
+            <div
+                className="md:col-span-7 bg-white rounded-[2rem] p-8 md:p-10 shadow-sm border border-zinc-100 flex flex-col justify-center print-break-inside-avoid print:mb-6">
+                <div className="flex items-center gap-2 mb-6">
+                    <span
+                        className="bg-[#111111] text-white px-4 py-1.5 rounded-full text-xs font-bold tracking-widest flex items-center gap-2">
+                        <BookOpen size={14} /> 합격수기
+                    </span>
+                </div>
+                <h2 className="text-2xl md:text-3xl font-black mb-4 break-keep text-zinc-900 leading-snug">
+                    {data.story.title}
+                </h2>
+                <p className="text-zinc-600 font-medium leading-relaxed break-keep text-base md:text-lg">
+                    "{data.story.content}"
+                </p>
+            </div>
+
+            {/* 4. 추천 강좌 및 학습법 */}
+            <div
+                className="md:col-span-5 bg-[#F0F2F5] rounded-[2rem] p-8 md:p-10 shadow-inner flex flex-col print-break-inside-avoid print:mb-6">
+                <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-widest mb-6">추천 강좌 & 학습법</h3>
+                <div className="flex flex-col gap-6 flex-1 justify-center">
+                    {data.recommendations.map((rec, i) => (
+                    <div key={i} className="border-l-4 border-[#E50914] pl-5 bg-white p-4 rounded-r-xl shadow-sm">
+                        <div className="font-black text-lg text-zinc-900">{rec.title}</div>
+                        <div className="text-sm font-medium text-zinc-500 mt-1 break-keep">{rec.desc}</div>
+                    </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* 5. 현실 조언 (Dark Card) */}
+            <div
+                className="md:col-span-8 bg-[#111111] text-white rounded-[2rem] p-8 md:p-12 shadow-xl flex flex-col justify-center relative overflow-hidden print-break-inside-avoid print:mb-6 print-bg-black print-text-white">
+                <Quote size={40} className="text-[#E50914] opacity-50 absolute top-8 right-8" />
+                <h3 className="text-xs md:text-sm font-bold text-zinc-400 uppercase tracking-widest mb-6">수험상담가의 현실 조언
+                </h3>
+                <p className="text-xl md:text-2xl font-medium leading-relaxed break-keep text-white/95">
+                    {data.advice}
+                </p>
+            </div>
+
+            {/* 6. 멘토링 추천 */}
+            <div
+                className="md:col-span-4 bg-white border-2 border-zinc-200 rounded-[2rem] p-8 md:p-10 flex flex-col justify-between hover:border-[#E50914] transition-colors group print-break-inside-avoid print:mb-6">
+                <div>
+                    <div className="inline-block px-3 py-1 bg-red-50 text-[#E50914] rounded-lg text-xs font-bold mb-4">
+                        {data.mentor.tag}
+                    </div>
+                    <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-widest mb-1">추천 합격생 상담</h3>
+                    <div className="text-xl md:text-2xl font-black mt-2 text-zinc-900">{data.mentor.name}</div>
+                    <p className="text-sm text-zinc-500 mt-3 font-medium break-keep">
+                        나와 가장 비슷한 상황을 이겨낸 선배의 노하우를 지금 바로 들어보세요.
+                    </p>
+                </div>
+                <button
+                    className="mt-8 w-full bg-[#111111] text-white py-4 rounded-xl font-bold text-sm md:text-base group-hover:bg-[#E50914] transition-colors flex items-center justify-center gap-2 shadow-md active:scale-95">
+                    @{data.mentor.id}번 멘토 상담받기
+                    <ChevronRight size={18} />
+                </button>
+            </div>
+
+        </div>
+
+        <div
+            className="max-w-6xl mx-auto mt-12 pt-6 border-t border-zinc-200 flex justify-between items-center text-xs font-mono text-zinc-400 no-print">
+            <span>GENERATED BY PERSONA AI</span>
+            <span>{new Date().toLocaleDateString()}</span>
+        </div>
+    </div>
+    );
+    };
+
+    // --- 메인 앱 컨트롤러 ---
+    export default function App() {
+    const [step, setStep] = useState('intro');
+    const [currentQIndex, setCurrentQIndex] = useState(0);
+    const [answers, setAnswers] = useState([]);
+
+    const handleStart = () => {
+    setStep('question');
+    setCurrentQIndex(0);
+    setAnswers([]);
+    };
+
+    const handleGoHome = () => {
+    setStep('intro');
+    setCurrentQIndex(0);
+    setAnswers([]);
+    };
+
+    const handleSelectOption = (option) => {
+    const newAnswers = [...answers, option];
+    setAnswers(newAnswers);
+
+    if (currentQIndex < questionsData.length - 1) { setCurrentQIndex(currentQIndex + 1); } else { setStep('loading');
+        setTimeout(()=> {
+        setStep('result');
+        }, 2000);
+        }
+        };
+
+        return (
+        <div className="min-h-screen w-full selection:bg-[#E50914] selection:text-white">
+            <GlobalStyles />
+            {step === 'intro' &&
+            <IntroScreen onStart={handleStart} />}
+            {step === 'question' && (
+            <QuestionScreen questionData={questionsData[currentQIndex]} currentIndex={currentQIndex}
+                total={questionsData.length} onSelect={handleSelectOption} />
+            )}
+            {step === 'loading' &&
+            <LoadingScreen />}
+            {step === 'result' &&
+            <ResultScreen answers={answers} onReset={handleStart} onGoHome={handleGoHome} />}
+        </div>
+        );
+        }
