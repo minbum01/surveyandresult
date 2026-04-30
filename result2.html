@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>합격 가능성 리포트</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&family=Noto+Serif+KR:wght@400;600;700&family=Playfair+Display:wght@700;900&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #FAFAF7;
+            --bg-card: #FFFFFF;
+            --bg-dark: #1A1A2E;
+            --bg-accent: #F0EDE6;
+            --bg-highlight: #FFF8E7;
+            --text-primary: #1A1A2E;
+            --text-secondary: #5A5A6E;
+            --text-muted: #8E8E9E;
+            --text-inverse: #FAFAF7;
+            --accent-gold: #C8A84E;
+            --accent-gold-light: #E8D59E;
+            --accent-blue: #3A5BA0;
+            --accent-blue-light: #E8EEF8;
+            --accent-green: #2D8A5E;
+            --accent-green-light: #E6F5ED;
+            --accent-warm: #D4734A;
+            --accent-warm-light: #FFF0EB;
+            --border-light: #E8E6DF;
+            --border-medium: #D0CEC7;
+            --shadow-sm: 0 1px 3px rgba(26,26,46,0.06);
+            --shadow-md: 0 4px 12px rgba(26,26,46,0.08);
+            --shadow-lg: 0 8px 30px rgba(26,26,46,0.12);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+        }
+        .page {
+            width: 1280px;
+            height: 900px;
+            margin: 16px auto;
+            background: var(--bg-primary);
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+        }
+        /* ===== PAGE 1 ===== */
+        .page-1 { display: grid; grid-template-columns: 380px 1fr; }
+        .report-card {
+            background: var(--bg-dark);
+            color: var(--text-inverse);
+            padding: 36px 32px 28px;
+            display: flex; flex-direction: column;
+            position: relative; overflow: hidden;
+        }
+        .report-card::before {
+            content:''; position:absolute; top:-60px; right:-60px;
+            width:200px; height:200px;
+            background: radial-gradient(circle, rgba(200,168,78,0.12) 0%, transparent 70%);
+            border-radius:50%;
+        }
+        .report-card::after {
+            content:''; position:absolute; bottom:-40px; left:-40px;
+            width:160px; height:160px;
+            background: radial-gradient(circle, rgba(58,91,160,0.1) 0%, transparent 70%);
+            border-radius:50%;
+        }
+        .report-header { margin-bottom: 20px; position: relative; z-index: 1; }
+        .report-brand {
+            font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+            color: var(--accent-gold); font-weight: 600; margin-bottom: 10px;
+        }
+        .report-title {
+            font-family: 'Noto Serif KR', serif;
+            font-size: 19px; font-weight: 700;
+            line-height: 1.5; margin-bottom: 6px;
+        }
+        .report-subtitle {
+            font-size: 12.5px;
+            color: rgba(250,250,247,0.6);
+            line-height: 1.6; font-weight: 300;
+        }
+        .empathy-stat {
+            background: rgba(200,168,78,0.1);
+            border: 1px solid rgba(200,168,78,0.2);
+            border-radius: 8px;
+            padding: 12px 14px; margin-bottom: 20px;
+            position: relative; z-index: 1;
+        }
+        .empathy-stat p {
+            font-size: 11.5px;
+            color: rgba(250,250,247,0.8); line-height: 1.6;
+        }
+        .empathy-stat strong { color: var(--accent-gold-light); font-weight: 600; }
+        .tag-strip {
+            display: flex; flex-wrap: wrap; gap: 6px;
+            margin-bottom: 20px;
+            position: relative; z-index: 1;
+        }
+        .tag {
+            font-size: 10.5px; padding: 4px 10px;
+            border-radius: 20px;
+            background: rgba(250,250,247,0.08);
+            border: 1px solid rgba(250,250,247,0.15);
+            color: rgba(250,250,247,0.75);
+            font-weight: 400;
+        }
+        .tag.primary {
+            background: rgba(200,168,78,0.15);
+            border-color: rgba(200,168,78,0.3);
+            color: var(--accent-gold-light);
+        }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; gap: 10px;
+            margin-bottom: 18px;
+            position: relative; z-index: 1;
+        }
+        .metric-card {
+            background: rgba(250,250,247,0.05);
+            border: 1px solid rgba(250,250,247,0.08);
+            border-radius: 10px;
+            padding: 14px 12px; text-align: center;
+        }
+        .metric-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px; font-weight: 900;
+            color: var(--accent-gold-light); line-height: 1;
+            margin-bottom: 4px;
+        }
+        .metric-value .unit { font-size: 14px; font-weight: 700; margin-left: 1px; }
+        .metric-label { font-size: 10.5px; color: rgba(250,250,247,0.55); font-weight: 400; }
+        .analysis-text {
+            font-size: 12px; line-height: 1.8;
+            color: rgba(250,250,247,0.7);
+            position: relative; z-index: 1;
+            flex: 1; font-weight: 300;
+        }
+        .analysis-text strong { color: rgba(250,250,247,0.95); font-weight: 500; }
+
+        /* RIGHT */
+        .right-panel {
+            padding: 28px 32px;
+            display: flex; flex-direction: column; gap: 16px;
+            overflow: hidden;
+        }
+        .page-indicator {
+            font-size: 10px; letter-spacing: 2px;
+            color: var(--text-muted); text-transform: uppercase;
+            text-align: right; font-weight: 500;
+        }
+        .section-block {
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            padding: 20px 22px;
+            box-shadow: var(--shadow-sm);
+        }
+        .section-header {
+            display: flex; align-items: center; gap: 8px;
+            margin-bottom: 14px;
+        }
+        .section-icon {
+            width: 28px; height: 28px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; flex-shrink: 0;
+        }
+        .section-title {
+            font-family: 'Noto Serif KR', serif;
+            font-size: 14px; font-weight: 700;
+        }
+        .section-badge {
+            margin-left: auto;
+            font-size: 10.5px;
+            color: var(--text-muted);
+            background: var(--bg-accent);
+            padding: 3px 10px; border-radius: 20px;
+            font-weight: 500;
+        }
+        .combo-label {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 12px;
+            color: var(--accent-blue);
+            font-weight: 600;
+            margin-bottom: 12px;
+            background: var(--accent-blue-light);
+            padding: 5px 12px; border-radius: 6px;
+        }
+        .combo-label .sep { color: var(--accent-blue); opacity: 0.4; }
+        .data-row-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+            margin-bottom: 12px;
+        }
+        .data-cell {
+            text-align: center; padding: 8px 4px;
+            background: var(--bg-primary); border-radius: 8px;
+        }
+        .data-cell-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 22px; font-weight: 900;
+            color: var(--text-primary); line-height: 1.2;
+        }
+        .data-cell-value .small-unit { font-size: 12px; font-weight: 700; }
+        .data-cell-label { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+        .pattern-box { display: flex; gap: 10px; }
+        .pattern-item {
+            flex: 1; padding: 10px 12px;
+            background: var(--bg-highlight); border-radius: 8px;
+            border-left: 3px solid var(--accent-gold);
+        }
+        .pattern-item-label {
+            font-size: 9.5px; color: var(--text-muted);
+            font-weight: 500; margin-bottom: 3px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .pattern-item-value {
+            font-size: 12px; font-weight: 600;
+            color: var(--text-primary); line-height: 1.4;
+        }
+        .goal-check-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+        }
+        .distribution-chart { position: relative; }
+        .dist-title {
+            font-size: 11px; font-weight: 600;
+            color: var(--text-secondary); margin-bottom: 10px;
+        }
+        .dist-bar-group { display: flex; flex-direction: column; gap: 6px; }
+        .dist-bar-row { display: flex; align-items: center; gap: 8px; }
+        .dist-bar-label {
+            font-size: 10px; color: var(--text-muted);
+            width: 64px; text-align: right; flex-shrink: 0;
+        }
+        .dist-bar-track {
+            flex: 1; height: 16px;
+            background: var(--bg-accent); border-radius: 4px;
+            overflow: hidden; position: relative;
+        }
+        .dist-bar-fill {
+            height: 100%; border-radius: 4px;
+            background: var(--accent-blue-light);
+            transition: width 0.6s ease;
+        }
+        .dist-bar-fill.mine { background: var(--accent-blue); }
+        .dist-bar-fill.highlight { background: var(--accent-gold); }
+        .dist-bar-pct { font-size: 9.5px; color: var(--text-muted); width: 36px; flex-shrink: 0; }
+        .my-marker {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 10px; color: var(--accent-blue); font-weight: 600;
+            margin-top: 8px; padding: 4px 10px;
+            background: var(--accent-blue-light); border-radius: 4px;
+        }
+        .verdict-box {
+            background: var(--accent-green-light);
+            border-radius: 10px;
+            padding: 16px;
+            display: flex; flex-direction: column; justify-content: center;
+        }
+        .verdict-label {
+            font-size: 10px; color: var(--accent-green); font-weight: 600;
+            text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;
+        }
+        .verdict-text {
+            font-family: 'Noto Serif KR', serif;
+            font-size: 16px; font-weight: 700;
+            color: var(--accent-green); line-height: 1.5; margin-bottom: 8px;
+        }
+        .verdict-detail {
+            font-size: 11px; color: var(--text-secondary); line-height: 1.6;
+        }
+        .verdict-detail strong { color: var(--text-primary); font-weight: 600; }
+
+        /* ===== PAGE 2 ===== */
+        .page-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto auto auto;
+            gap: 0;
+            padding: 28px 32px 20px;
+        }
+        .page2-header {
+            grid-column: 1 / -1;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 16px;
+        }
+        .page2-title {
+            font-family: 'Noto Serif KR', serif;
+            font-size: 18px; font-weight: 700;
+        }
+        .stories-section {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px; margin-bottom: 16px;
+        }
+        .story-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: var(--shadow-sm);
+            display: flex; flex-direction: column;
+            position: relative; overflow: hidden;
+        }
+        .story-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
+        .story-card:nth-child(1)::before { background: var(--accent-gold); }
+        .story-card:nth-child(2)::before { background: var(--accent-blue); }
+        .story-card:nth-child(3)::before { background: var(--accent-green); }
+        .story-match {
+            font-size: 10px; font-weight: 600;
+            color: var(--accent-gold); margin-bottom: 6px;
+        }
+        .story-profile {
+            font-size: 11.5px; font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px; line-height: 1.4;
+        }
+        .story-quote {
+            font-family: 'Noto Serif KR', serif;
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.7; font-style: italic;
+            flex: 1; padding: 10px 0;
+            border-top: 1px solid var(--border-light);
+            position: relative;
+        }
+        .story-quote::before {
+            content: '"'; font-family: 'Playfair Display', serif;
+            font-size: 36px; color: var(--accent-gold-light);
+            position: absolute; top: 2px; left: 0; line-height: 1;
+        }
+        .story-quote p { padding-left: 22px; }
+        .story-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+        .story-tag {
+            font-size: 9px; padding: 2px 7px;
+            background: var(--bg-accent); border-radius: 10px;
+            color: var(--text-muted);
+        }
+        .story-tag.matched { background: var(--accent-gold); color: white; }
+        .bottom-grid {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: 1fr 1fr 280px;
+            gap: 14px; margin-bottom: 16px;
+        }
+        .insight-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: var(--shadow-sm);
+        }
+        .insight-header {
+            display: flex; align-items: center; gap: 6px;
+            margin-bottom: 10px;
+        }
+        .insight-icon { font-size: 14px; }
+        .insight-title { font-size: 12.5px; font-weight: 700; color: var(--text-primary); }
+        .strategy-item { margin-bottom: 10px; }
+        .strategy-stat {
+            font-size: 10.5px; color: var(--accent-gold);
+            font-weight: 600; margin-bottom: 4px;
+        }
+        .strategy-text { font-size: 11.5px; color: var(--text-secondary); line-height: 1.6; }
+        .strategy-tip {
+            font-size: 11px; background: var(--bg-highlight);
+            padding: 8px 10px; border-radius: 6px;
+            color: var(--text-primary); line-height: 1.5; margin-top: 6px;
+        }
+        .strategy-tip strong { font-weight: 600; }
+        .first-month-list { display: flex; flex-direction: column; gap: 8px; }
+        .fm-item { display: flex; align-items: flex-start; gap: 8px; }
+        .fm-number {
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            background: var(--accent-blue);
+            color: white; font-size: 11px; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; margin-top: 1px;
+        }
+        .fm-content { font-size: 11.5px; color: var(--text-secondary); line-height: 1.5; }
+        .fm-content strong { color: var(--text-primary); font-weight: 600; }
+        .fm-pct { font-size: 10px; color: var(--accent-blue); font-weight: 600; }
+        .focus-subject {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: var(--shadow-sm);
+            display: flex; flex-direction: column;
+        }
+        .subject-bars { display: flex; flex-direction: column; gap: 7px; flex: 1; }
+        .subject-row { display: flex; align-items: center; gap: 8px; }
+        .subject-name {
+            font-size: 11px; width: 50px;
+            text-align: right; color: var(--text-secondary);
+            flex-shrink: 0; font-weight: 500;
+        }
+        .subject-bar-track {
+            flex: 1; height: 14px;
+            background: var(--bg-accent);
+            border-radius: 3px; overflow: hidden;
+        }
+        .subject-bar-fill {
+            height: 100%; border-radius: 3px;
+            background: var(--accent-warm); opacity: 0.7;
+        }
+        .subject-bar-fill.top { opacity: 1; background: var(--accent-warm); }
+        .subject-pct { font-size: 10px; color: var(--text-muted); width: 36px; flex-shrink: 0; }
+        .subject-tip {
+            margin-top: 10px; padding-top: 10px;
+            border-top: 1px solid var(--border-light);
+            font-size: 10.5px; color: var(--text-secondary); line-height: 1.5;
+        }
+        .cta-footer {
+            grid-column: 1 / -1;
+            display: flex; align-items: center; gap: 20px;
+            background: var(--bg-dark);
+            border-radius: 12px;
+            padding: 18px 28px;
+            position: relative; overflow: hidden;
+        }
+        .cta-footer::before {
+            content:''; position:absolute; top:0; left:0; right:0; bottom:0;
+            background: linear-gradient(135deg, rgba(200,168,78,0.08) 0%, transparent 60%);
+        }
+        .cta-message { flex: 1; position: relative; z-index: 1; }
+        .cta-closing-quote {
+            font-family: 'Noto Serif KR', serif;
+            font-size: 13px;
+            color: rgba(250,250,247,0.7);
+            font-style: italic; line-height: 1.6; margin-bottom: 4px;
+        }
+        .cta-closing-source {
+            font-size: 10px; color: rgba(250,250,247,0.4);
+        }
+        .cta-buttons { display: flex; gap: 10px; position: relative; z-index: 1; }
+        .btn-primary {
+            background: var(--accent-gold);
+            color: var(--bg-dark);
+            border: none; padding: 12px 28px;
+            border-radius: 8px;
+            font-size: 13px; font-weight: 700;
+            cursor: pointer;
+            font-family: 'Noto Sans KR', sans-serif;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(200,168,78,0.4);
+        }
+        .btn-secondary {
+            background: transparent;
+            color: rgba(250,250,247,0.7);
+            border: 1px solid rgba(250,250,247,0.2);
+            padding: 12px 24px; border-radius: 8px;
+            font-size: 13px; font-weight: 500;
+            cursor: pointer;
+            font-family: 'Noto Sans KR', sans-serif;
+            transition: all 0.15s ease;
+        }
+        .btn-secondary:hover {
+            border-color: rgba(250,250,247,0.5);
+            color: rgba(250,250,247,0.95);
+        }
+        .print-goal-box { display: none; }
+
+        /* loading state */
+        .loading-overlay {
+            position: fixed; inset: 0;
+            background: var(--bg-primary);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 999;
+            font-size: 13px; color: var(--text-muted);
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        .loading-overlay.hidden { display: none; }
+
+        /* ===== PRINT ===== */
+        @media print {
+            @page { size: A4 landscape; margin: 8mm; }
+            body { background: white; }
+            .page {
+                width: 100%; height: auto;
+                margin: 0; box-shadow: none; border-radius: 0;
+                page-break-after: always; page-break-inside: avoid;
+            }
+            .page-1, .page-2 { min-height: 100vh; }
+            .cta-footer .btn-primary, .cta-footer .btn-secondary { display: none; }
+            .print-goal-box {
+                display: block !important;
+                grid-column: 1 / -1;
+                border: 2px solid var(--border-medium);
+                border-radius: 12px;
+                padding: 24px; margin-top: 8px;
+            }
+            .print-goal-title {
+                font-size: 12px; font-weight: 600;
+                color: var(--text-muted); margin-bottom: 16px;
+                text-transform: uppercase; letter-spacing: 1px;
+            }
+            .print-goal-line {
+                border-bottom: 1px solid var(--border-medium);
+                padding: 10px 0; font-size: 13px;
+                color: var(--text-secondary);
+                display: flex; align-items: center; gap: 8px;
+            }
+            .print-goal-line .blank {
+                flex: 1; border-bottom: 1px solid var(--border-medium);
+                min-width: 120px;
+            }
+            .print-qr-area {
+                text-align: right; margin-top: 12px;
+                font-size: 10px; color: var(--text-muted);
+            }
+        }
+
+        @keyframes fadeUp {
+            from { opacity:0; transform: translateY(12px); }
+            to { opacity:1; transform: translateY(0); }
+        }
+        .section-block, .story-card, .insight-card, .focus-subject {
+            animation: fadeUp 0.5s ease both;
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="loading" class="loading-overlay">합격수기 매칭 중...</div>
+
+<!-- ==================== PAGE 1 ==================== -->
+<div class="page page-1">
+  <div class="report-card">
+    <div class="report-header">
+      <div class="report-brand">HACKERS PASS REPORT</div>
+      <div class="report-title" id="rpt-title">—</div>
+      <div class="report-subtitle" id="rpt-subtitle">—</div>
+    </div>
+
+    <div class="empathy-stat">
+      <p id="rpt-empathy">—</p>
+    </div>
+
+    <div class="tag-strip" id="rpt-tags"></div>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-value" id="m-match">0<span class="unit">명</span></div>
+        <div class="metric-label">나와 비슷한 합격생</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value" id="m-period">—</div>
+        <div class="metric-label">가장 많은 준비 기간</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value" id="m-job">0<span class="unit">명</span></div>
+        <div class="metric-label">같은 직렬 합격생</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value" id="m-instr">—</div>
+        <div class="metric-label">가장 많이 들은 강사</div>
+      </div>
+    </div>
+
+    <div class="analysis-text" id="rpt-analysis">—</div>
+  </div>
+
+  <div class="right-panel">
+    <div class="page-indicator">Page 1 of 2</div>
+
+    <!-- Section A: 같은 조합으로 합격한 분들 -->
+    <div class="section-block">
+      <div class="section-header">
+        <div class="section-icon" style="background: var(--accent-blue-light); color: var(--accent-blue);">📊</div>
+        <div class="section-title">같은 조합으로 합격한 분들</div>
+        <div class="section-badge">상황 × 베이스 × 학습법</div>
+      </div>
+      <div class="combo-label" id="sa-combo">—</div>
+      <div class="data-row-grid">
+        <div class="data-cell">
+          <div class="data-cell-value" id="sa-match">0<span class="small-unit">명</span></div>
+          <div class="data-cell-label">매칭 합격생</div>
+        </div>
+        <div class="data-cell">
+          <div class="data-cell-value" id="sa-period">—</div>
+          <div class="data-cell-label">최다 준비 기간</div>
+        </div>
+        <div class="data-cell">
+          <div class="data-cell-value" id="sa-method">—</div>
+          <div class="data-cell-label">최다 학습법</div>
+        </div>
+        <div class="data-cell">
+          <div class="data-cell-value" id="sa-style">—</div>
+          <div class="data-cell-label">최다 학습 패턴</div>
+        </div>
+      </div>
+      <div class="pattern-box">
+        <div class="pattern-item">
+          <div class="pattern-item-label">가장 많이 등장한 키워드</div>
+          <div class="pattern-item-value" id="sa-pat1">—</div>
+        </div>
+        <div class="pattern-item">
+          <div class="pattern-item-label">두 번째 많이 등장한 키워드</div>
+          <div class="pattern-item-value" id="sa-pat2">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section B: 준비 기간 / 학습 시간 분포 -->
+    <div class="section-block">
+      <div class="section-header">
+        <div class="section-icon" style="background: var(--accent-green-light); color: var(--accent-green);">⏱</div>
+        <div class="section-title">목표 기간 & 시간 투입 체크</div>
+      </div>
+      <div class="goal-check-grid">
+        <div class="distribution-chart">
+          <div class="dist-title">같은 상황 합격생의 준비 기간 분포</div>
+          <div class="dist-bar-group" id="dist-period"></div>
+          <div class="my-marker" id="my-period-marker">—</div>
+          <div class="dist-title" style="margin-top: 14px;">하루 학습 시간 분포</div>
+          <div class="dist-bar-group" id="dist-hours"></div>
+          <div class="my-marker" id="my-hours-marker">—</div>
+        </div>
+        <div class="verdict-box">
+          <div class="verdict-label">VERDICT</div>
+          <div class="verdict-text" id="vdt-text">—</div>
+          <div class="verdict-detail" id="vdt-detail">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ==================== PAGE 2 ==================== -->
+<div class="page page-2">
+  <div class="page2-header">
+    <div class="page2-title">같은 처지의 합격생이 남긴 한 마디</div>
+    <div class="page-indicator">Page 2 of 2</div>
+  </div>
+
+  <div class="stories-section" id="stories"></div>
+
+  <div class="bottom-grid">
+    <!-- 합격자가 가장 많이 강조한 것 -->
+    <div class="insight-card">
+      <div class="insight-header">
+        <span class="insight-icon">💬</span>
+        <span class="insight-title">합격생이 가장 많이 강조한 것</span>
+      </div>
+      <div id="strategy-list"></div>
+    </div>
+
+    <!-- 첫 달에 한 것 -->
+    <div class="insight-card">
+      <div class="insight-header">
+        <span class="insight-icon">🚀</span>
+        <span class="insight-title">합격생이 가장 많이 들은 강사</span>
+      </div>
+      <div class="first-month-list" id="instr-list"></div>
+    </div>
+
+    <!-- 가장 많이 시간 투자한 과목 -->
+    <div class="focus-subject">
+      <div class="insight-header">
+        <span class="insight-icon">📚</span>
+        <span class="insight-title" id="focus-title">합격생이 시간을 가장 많이 쓴 과목</span>
+      </div>
+      <div class="subject-bars" id="focus-bars"></div>
+      <div class="subject-tip" id="focus-tip">—</div>
+    </div>
+  </div>
+
+  <div class="cta-footer">
+    <div class="cta-message">
+      <div class="cta-closing-quote" id="cta-quote">—</div>
+      <div class="cta-closing-source" id="cta-source">—</div>
+    </div>
+    <div class="cta-buttons">
+      <button class="btn-secondary" onclick="location.href='index.html'">↺ 다시 측정</button>
+      <button class="btn-secondary" onclick="window.print()">📄 리포트 출력</button>
+      <button class="btn-primary">무료 학습 상담 신청</button>
+    </div>
+  </div>
+
+  <!-- Print Only -->
+  <div class="print-goal-box">
+    <div class="print-goal-title">나의 합격 다짐</div>
+    <div class="print-goal-line">
+      나의 목표: <span class="blank"></span> 까지, <span class="blank"></span> 에 합격한다.
+    </div>
+    <div class="print-goal-line">
+      오늘 날짜: <span class="blank" style="max-width:120px;"></span>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 서명: <span class="blank" style="max-width: 160px;"></span>
+    </div>
+    <div class="print-qr-area">
+      상담 신청: hackers.ac.kr/consult &nbsp;|&nbsp; ☎ 02-000-0000
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ─────────────────── 답변 ───────────────────
+const DEMO = [
+  [{tagId:'직장병행', label:'직장 다니면서'}],
+  [{tagId:'국가직9급', label:'국가직 공무원'}],
+  [{tagId:'행정직', label:'일반행정직'}],
+  [{tagId:'노베이스', label:'공부는 처음이야!'}],
+  [{tagId:'1년이내', label:'1년 이내'}],
+  [{tagId:'하루10시간미만', label:'5 ~ 8시간'}],
+  [{tagId:'인강병행', label:'인강 중심'}, {tagId:'기출반복', label:'기출 반복'}],
+  [{tagId:'멘탈관리', label:'멘탈 관리'}],
+];
+let A;
+try {
+  const raw = sessionStorage.getItem('passNoteAnswers');
+  A = raw ? JSON.parse(raw) : DEMO;
+  if (!Array.isArray(A) || A.length < 8) A = DEMO;
+} catch(e) { A = DEMO; }
+
+const get = (i) => A[i]?.[0]?.tagId || null;
+const getLabel = (i) => A[i]?.[0]?.label || '';
+const getMulti = (i) => (A[i]||[]).map(x=>x.tagId);
+const getMultiLabel = (i) => (A[i]||[]).map(x=>x.label);
+
+const Q1 = get(0), Q2 = get(1), Q3 = get(2), Q4 = get(3),
+      Q5 = get(4), Q6 = get(5), Q7 = getMulti(6), Q8 = get(7);
+
+// ─────────────────── 매핑 헬퍼 ───────────────────
+// Q5: 1년이내/1년이상 → 실제 DB 태그 그룹
+const periodGroup = (Q5 === '1년이내')
+  ? new Set(['6개월미만', '6개월~1년'])
+  : new Set(['1년~1년6개월', '1년6개월~2년', '2년~3년']);
+
+// Q3: 공안직 → 실제 직렬 확장
+const jobGroup = (Q3 === '공안직')
+  ? new Set(['교정직', '검찰직', '보호직', '철도경찰직', '출입국관리직'])
+  : (Q3 ? new Set([Q3]) : new Set());
+
+// Q3: 미정(null) 처리
+const hasJobFilter = jobGroup.size > 0;
+
+// ─────────────────── 데이터 로드 + 매칭 ───────────────────
+fetch('reviews_data.json')
+  .then(r => r.json())
+  .then(data => render(data))
+  .catch(e => {
+    document.getElementById('loading').textContent = '데이터 로드 실패: ' + e.message;
+  });
+
+function score(p) {
+  const ts = new Set(p.tags || []);
+  let s = 0;
+  if (Q1 && ts.has(Q1)) s += 4;
+  if (Q4 && ts.has(Q4)) s += 3;
+  // 직렬: 태그 또는 job 컬럼 매칭
+  if (hasJobFilter) {
+    let jobMatch = false;
+    for (const j of jobGroup) {
+      if (ts.has(j) || p.job === j) { jobMatch = true; break; }
+    }
+    if (jobMatch) s += 3;
+  }
+  if (Q2 && ts.has(Q2)) s += 2;
+  // 기간
+  for (const pt of periodGroup) {
+    if (ts.has(pt)) { s += 1.5; break; }
+  }
+  if (Q6 && ts.has(Q6)) s += 1;
+  Q7.forEach(q => { if (ts.has(q)) s += 1; });
+  if (Q8 && ts.has(Q8)) s += 1;
+  return s;
+}
+
+function topCount(arr, n=1) {
+  // arr: 문자열 배열 → [(item, count)] 상위 n개
+  const m = new Map();
+  for (const x of arr) m.set(x, (m.get(x)||0) + 1);
+  return [...m.entries()].sort((a,b)=>b[1]-a[1]).slice(0, n);
+}
+
+function pluck(arr, key) { return arr.map(x => x[key]).filter(Boolean); }
+
+function render(data) {
+  const all = data.passnotes;
+  const total = data.totalCount;
+
+  // 점수 계산 + 정렬
+  const scored = all.map(p => ({ p, s: score(p) })).filter(x => x.s > 0);
+  scored.sort((a,b) => b.s - a.s);
+
+  // 상위 매칭 합격생 = score 상위
+  const top = scored.slice(0, 50).map(x => x.p);
+  const matchCount = scored.filter(x => x.s >= 7).length || top.length;
+
+  // ─── 좌측 다크 카드 ───
+  document.getElementById('rpt-title').innerHTML =
+    `${getLabel(0) || '수험생'} <br>${getLabel(2) || '공무원'}을 준비하는 분`;
+  document.getElementById('rpt-subtitle').textContent =
+    `${total.toLocaleString()}개 합격수기 중 같은 길을 걸은 분들을 찾았습니다`;
+
+  // 공감 메시지: 매칭된 합격생 중 멘탈관리 태그 보유한 수
+  const mentalCnt = top.filter(p => (p.tags||[]).includes('멘탈관리')).length;
+  document.getElementById('rpt-empathy').innerHTML =
+    `같은 길을 걸은 합격생 중 <strong>${mentalCnt}분</strong>이 ‘${SUCCESS_LABEL[Q8] || '꾸준한 페이스'}’를 함께 적어두셨습니다.<br>그리고 그분들 모두 합격하셨습니다.`;
+
+  // 태그 칩
+  const tagsEl = document.getElementById('rpt-tags');
+  const heroLabels = [getLabel(0), getLabel(1), getLabel(2), getLabel(3), getLabel(4), getLabel(5), getLabel(7)].filter(Boolean);
+  getMultiLabel(6).forEach(l => heroLabels.push(l));
+  heroLabels.forEach((l, i) => {
+    const span = document.createElement('span');
+    span.className = 'tag' + (i < 3 ? ' primary' : '');
+    span.textContent = '#' + l;
+    tagsEl.appendChild(span);
+  });
+
+  // 메트릭
+  const periodTop = topCount(pluck(top, 'tags').flat().filter(t => /개월|년/.test(t)), 1)[0];
+  const allInst = top.flatMap(p => (p.inst || []).map(x => x[1])).filter(Boolean);
+  const topInstr = topCount(allInst, 1)[0];
+  const jobMatchedCount = all.filter(p => {
+    const ts = new Set(p.tags || []);
+    if (!hasJobFilter) return false;
+    for (const j of jobGroup) if (ts.has(j) || p.job === j) return true;
+    return false;
+  }).length;
+
+  document.getElementById('m-match').innerHTML = `${top.length}<span class="unit">명</span>`;
+  document.getElementById('m-period').innerHTML = periodTop ? prettyPeriod(periodTop[0]) : '—';
+  document.getElementById('m-job').innerHTML = `${jobMatchedCount}<span class="unit">명</span>`;
+  document.getElementById('m-instr').textContent = topInstr ? topInstr[0] : '—';
+
+  // 분석 텍스트
+  document.getElementById('rpt-analysis').innerHTML =
+    `<strong>당신과 비슷한 합격생 ${top.length}분</strong>의 합격수기를 분석했습니다. ` +
+    `이분들이 가장 많이 머문 준비 기간은 <strong>${periodTop ? prettyPeriod(periodTop[0]) : '—'}</strong>이었고, ` +
+    `<strong>${topInstr ? topInstr[0] : ''}</strong> 강사를 가장 많이 함께하셨습니다. ` +
+    `이 리포트에서 그분들의 실제 워딩과 학습 패턴을 확인하실 수 있습니다.`;
+
+  // ─── Section A: 같은 조합 ───
+  const comboParts = [getLabel(0), getLabel(3), getMultiLabel(6).join('+')].filter(Boolean);
+  document.getElementById('sa-combo').innerHTML =
+    comboParts.map((p,i) => i ? `<span class="sep">×</span> ${p}` : p).join(' ') + ` &nbsp;→&nbsp; <strong>${top.length}명</strong>`;
+
+  document.getElementById('sa-match').innerHTML = `${top.length}<span class="small-unit">명</span>`;
+  document.getElementById('sa-period').textContent = periodTop ? prettyPeriod(periodTop[0]) : '—';
+
+  // 최다 학습법 (Q7 그룹 중에 가장 많이 등장한 것)
+  const studyMethods = ['인강병행','기출반복','회독반복','독학위주','노량진현강','스터디병행','단권화','오답노트','문제풀이중심','기본서회독','동형모의고사'];
+  const methodCount = {};
+  top.forEach(p => (p.tags||[]).forEach(t => {
+    if (studyMethods.includes(t)) methodCount[t] = (methodCount[t]||0) + 1;
+  }));
+  const topMethod = Object.entries(methodCount).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById('sa-method').textContent = topMethod ? topMethod[0] : '—';
+
+  // 최다 학습 패턴 (시간대/태도)
+  const stylePatterns = ['아침형','저녁형','새벽공부','규칙적루틴','선택과집중','복습중심','암기중심','이해중심학습','매일전과목','꾸준함'];
+  const styleCount = {};
+  top.forEach(p => (p.tags||[]).forEach(t => {
+    if (stylePatterns.includes(t)) styleCount[t] = (styleCount[t]||0) + 1;
+  }));
+  const topStyle = Object.entries(styleCount).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById('sa-style').textContent = topStyle ? topStyle[0] : '—';
+
+  // 패턴 박스 — 가장 자주 등장한 일반 키워드
+  const generalTags = ['선택과집중','단권화','오답노트','자투리시간활용','이동시간암기','새벽공부','체력관리','규칙적루틴','주1일휴식','복습중심','약점공략','한국사약자','영어단어매일암기','전략적시험운영'];
+  const tagCount = {};
+  top.forEach(p => (p.tags||[]).forEach(t => {
+    if (generalTags.includes(t)) tagCount[t] = (tagCount[t]||0) + 1;
+  }));
+  const topPats = Object.entries(tagCount).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('sa-pat1').textContent = topPats[0] ? `${topPats[0][0]} (${topPats[0][1]}분)` : '—';
+  document.getElementById('sa-pat2').textContent = topPats[1] ? `${topPats[1][0]} (${topPats[1][1]}분)` : '—';
+
+  // ─── Section B: 분포 ───
+  const PERIOD_BUCKETS = [
+    {label:'~6개월',   tags:['6개월미만'],            isMine: (Q5==='1년이내')},
+    {label:'6~12개월', tags:['6개월~1년'],            isMine: (Q5==='1년이내')},
+    {label:'12~18개월',tags:['1년~1년6개월'],         isMine: (Q5==='1년이상')},
+    {label:'18~24개월',tags:['1년6개월~2년'],         isMine: (Q5==='1년이상')},
+    {label:'24개월~',  tags:['2년~3년','3년이상'],    isMine: (Q5==='1년이상')},
+  ];
+  const periodEl = document.getElementById('dist-period');
+  const periodCounts = PERIOD_BUCKETS.map(b => {
+    let c = 0;
+    top.forEach(p => {
+      const ts = new Set(p.tags||[]);
+      if (b.tags.some(t => ts.has(t))) c++;
+    });
+    return c;
+  });
+  const periodMax = Math.max(...periodCounts, 1);
+  PERIOD_BUCKETS.forEach((b, i) => {
+    const pct = Math.round(periodCounts[i] / Math.max(1, top.length) * 100);
+    const w = Math.round(periodCounts[i] / periodMax * 100);
+    const isMaxBucket = periodCounts[i] === periodMax && periodMax > 0;
+    const div = document.createElement('div');
+    div.className = 'dist-bar-row';
+    div.innerHTML = `
+      <div class="dist-bar-label">${b.label}</div>
+      <div class="dist-bar-track"><div class="dist-bar-fill ${isMaxBucket ? 'highlight' : (b.isMine ? 'mine' : '')}" style="width: ${w}%;"></div></div>
+      <div class="dist-bar-pct">${periodCounts[i]}분</div>`;
+    periodEl.appendChild(div);
+  });
+  document.getElementById('my-period-marker').textContent =
+    `▸ 나의 목표: ${getLabel(4)} — 같은 기간 합격생 ${countByGroup(top, [...periodGroup])}분`;
+
+  const HOUR_BUCKETS = [
+    {label:'10시간 미만', tag:'하루10시간미만', isMine: Q6==='하루10시간미만'},
+    {label:'10시간 이상', tag:'하루10시간이상', isMine: Q6==='하루10시간이상'},
+  ];
+  const hoursEl = document.getElementById('dist-hours');
+  const hoursCounts = HOUR_BUCKETS.map(b =>
+    top.filter(p => (p.tags||[]).includes(b.tag)).length
+  );
+  const hoursMax = Math.max(...hoursCounts, 1);
+  HOUR_BUCKETS.forEach((b, i) => {
+    const w = Math.round(hoursCounts[i] / hoursMax * 100);
+    const isMaxBucket = hoursCounts[i] === hoursMax && hoursMax > 0;
+    const div = document.createElement('div');
+    div.className = 'dist-bar-row';
+    div.innerHTML = `
+      <div class="dist-bar-label">${b.label}</div>
+      <div class="dist-bar-track"><div class="dist-bar-fill ${isMaxBucket ? 'highlight' : (b.isMine ? 'mine' : '')}" style="width: ${w}%;"></div></div>
+      <div class="dist-bar-pct">${hoursCounts[i]}분</div>`;
+    hoursEl.appendChild(div);
+  });
+  document.getElementById('my-hours-marker').textContent =
+    `▸ 나의 시간: ${getLabel(5)} — 같은 시간대 합격생 ${(top.filter(p => (p.tags||[]).includes(Q6)).length)}분`;
+
+  // 판정
+  const myPeriodCount = countByGroup(top, [...periodGroup]);
+  const myHoursCount = top.filter(p => (p.tags||[]).includes(Q6)).length;
+  document.getElementById('vdt-text').innerHTML = '충분히 가능한<br>목표입니다';
+  document.getElementById('vdt-detail').innerHTML =
+    `<strong>${getLabel(4)}</strong>를 목표로 한 합격생이 <strong>${myPeriodCount}분</strong>, ` +
+    `<strong>${getLabel(5)}</strong>로 공부한 합격생이 <strong>${myHoursCount}분</strong> 계셨습니다. ` +
+    `같은 길을 먼저 걸어간 분들의 실제 기록입니다.`;
+
+  // ─── PAGE 2: 스토리 카드 ───
+  const storiesEl = document.getElementById('stories');
+  const userTagSet = new Set([Q1, Q2, Q3, Q4, Q6, Q8, ...Q7].filter(Boolean));
+  // 인용구 있는 합격생 중 점수 상위 3명
+  const withQuotes = scored.filter(x => x.p.quotes && x.p.quotes.length > 0).slice(0, 3);
+  withQuotes.forEach(({p}, idx) => {
+    const matchedTags = (p.tags||[]).filter(t => userTagSet.has(t)).slice(0, 6);
+    const otherTags = (p.tags||[]).filter(t => !userTagSet.has(t)).slice(0, 2);
+    const matchTotal = matchedTags.length + otherTags.length;
+    const profile = [
+      pickFromTags(p.tags, ['전업수험생','직장병행','재학수험생','육아병행','퇴직수험생','아르바이트병행']),
+      p.job || pickFromTags(p.tags, ['행정직','세무직','교육직','공안직','기술직','간호보건직']),
+      pickFromTags(p.tags, ['노베이스','수능베이스','전공자','토익베이스']),
+      formatPeriod(pickFromTags(p.tags, ['6개월미만','6개월~1년','1년~1년6개월','1년6개월~2년','2년~3년','3년이상'])),
+    ].filter(Boolean).join(' · ');
+
+    const quote = p.quotes[0];
+    const card = document.createElement('div');
+    card.className = 'story-card';
+    card.innerHTML = `
+      <div class="story-match">● ${matchedTags.length}개 태그 일치</div>
+      <div class="story-profile">${profile} · 합격</div>
+      <div class="story-quote"><p>${quote}</p></div>
+      <div class="story-tags">
+        ${matchedTags.map(t => `<span class="story-tag matched">#${t}</span>`).join('')}
+        ${otherTags.map(t => `<span class="story-tag">#${t}</span>`).join('')}
+      </div>`;
+    storiesEl.appendChild(card);
+  });
+
+  // ─── 합격자가 가장 많이 강조한 것 (top tags 중에서) ───
+  const strategyEl = document.getElementById('strategy-list');
+  const strategyTags = topPats.slice(0, 2);
+  strategyTags.forEach(([tag, cnt]) => {
+    const div = document.createElement('div');
+    div.className = 'strategy-item';
+    div.innerHTML = `
+      <div class="strategy-stat">${cnt}분이 함께 적음</div>
+      <div class="strategy-text"><strong>${TAG_DESC[tag] || tag}</strong></div>
+      ${TAG_TIP[tag] ? `<div class="strategy-tip">${TAG_TIP[tag]}</div>` : ''}`;
+    strategyEl.appendChild(div);
+  });
+  if (strategyTags.length === 0) {
+    strategyEl.innerHTML = '<div class="strategy-text" style="color:var(--text-muted);">충분한 데이터가 모이면 표시됩니다.</div>';
+  }
+
+  // ─── 합격생이 가장 많이 들은 강사 (top 4) ───
+  const instrEl = document.getElementById('instr-list');
+  const instrPairs = top.flatMap(p => (p.inst||[]).map(x => x.join('|')));
+  const topInsts = topCount(instrPairs, 4);
+  topInsts.forEach(([pair, cnt], i) => {
+    const [subj, name] = pair.split('|');
+    const div = document.createElement('div');
+    div.className = 'fm-item';
+    div.innerHTML = `
+      <div class="fm-number">${i+1}</div>
+      <div class="fm-content">
+        <strong>${name}</strong> <span style="color:var(--text-muted);">(${subj})</span><br>
+        <span class="fm-pct">합격생 ${cnt}분이 함께함</span>
+      </div>`;
+    instrEl.appendChild(div);
+  });
+  if (topInsts.length === 0) {
+    instrEl.innerHTML = '<div style="color:var(--text-muted); font-size:11px;">매칭된 합격생의 강사 정보가 부족합니다.</div>';
+  }
+
+  // ─── 가장 많이 시간 투자한 과목 (강사 추천 빈도로 추정) ───
+  const subjEl = document.getElementById('focus-bars');
+  const subjects = top.flatMap(p => (p.inst||[]).map(x => x[0]));
+  const subjTop = topCount(subjects, 5);
+  const subjMax = subjTop[0]?.[1] || 1;
+  subjTop.forEach(([s, c], i) => {
+    const w = Math.round(c / subjMax * 100);
+    const div = document.createElement('div');
+    div.className = 'subject-row';
+    div.innerHTML = `
+      <div class="subject-name">${s}</div>
+      <div class="subject-bar-track"><div class="subject-bar-fill ${i===0 ? 'top' : ''}" style="width: ${w}%;"></div></div>
+      <div class="subject-pct">${c}분</div>`;
+    subjEl.appendChild(div);
+  });
+  if (subjTop[0]) {
+    document.getElementById('focus-tip').innerHTML =
+      `💡 같은 길을 걸은 합격생 중 <strong>${subjTop[0][1]}분</strong>이 <strong>${subjTop[0][0]}</strong>에 시간을 가장 많이 쓰셨습니다.`;
+  }
+
+  // ─── CTA 인용구 (가장 점수 높은 매칭 합격생의 인용구) ───
+  if (withQuotes[0]) {
+    document.getElementById('cta-quote').textContent = `"${withQuotes[0].p.quotes[0]}"`;
+    const profileShort = pickFromTags(withQuotes[0].p.tags, ['전업수험생','직장병행','재학수험생','육아병행','퇴직수험생','아르바이트병행']) || '합격생';
+    const periodShort = formatPeriod(pickFromTags(withQuotes[0].p.tags, ['6개월미만','6개월~1년','1년~1년6개월','1년6개월~2년','2년~3년','3년이상'])) || '';
+    document.getElementById('cta-source').textContent = `— ${profileShort}${periodShort ? ' · ' + periodShort : ''} 합격수기 중`;
+  }
+
+  // 인쇄용 다짐란
+  const today = new Date();
+  document.querySelector('.print-goal-line .blank[style*="120px"]').textContent =
+    `${today.getFullYear()}. ${String(today.getMonth()+1).padStart(2,'0')}. ${String(today.getDate()).padStart(2,'0')}`;
+
+  // 로딩 끝
+  document.getElementById('loading').classList.add('hidden');
+}
+
+// ─────────────────── 보조 함수 ───────────────────
+function countByGroup(passnotes, tagList) {
+  return passnotes.filter(p => {
+    const ts = new Set(p.tags||[]);
+    return tagList.some(t => ts.has(t));
+  }).length;
+}
+
+function pickFromTags(tags, candidates) {
+  const ts = new Set(tags||[]);
+  for (const c of candidates) if (ts.has(c)) return c;
+  return null;
+}
+
+function prettyPeriod(t) {
+  return ({
+    '6개월미만':'6개월 미만',
+    '6개월~1년':'6~12개월',
+    '1년~1년6개월':'1~1.5년',
+    '1년6개월~2년':'1.5~2년',
+    '2년~3년':'2~3년',
+    '3년이상':'3년 이상',
+  })[t] || t;
+}
+
+function formatPeriod(t) { return prettyPeriod(t); }
+
+const SUCCESS_LABEL = {
+  '멘탈관리': '멘탈 관리',
+  '슬럼프극복': '리프레시 루틴',
+  '영어약자': '영어 보완',
+  '효율중심': '시간 효율',
+  '이해중심학습': '이해 중심 학습',
+  '커리큘럼중심': '커리큘럼 정착',
+};
+
+const TAG_DESC = {
+  '선택과집중': '"선택과 집중" — 중요한 단원에만 시간을 몰아주는 전략',
+  '단권화': '"단권화" — 여러 자료를 한 권으로 모으는 마무리 노트',
+  '오답노트': '"오답노트" — 틀린 문제만 모아 회독하는 정리법',
+  '자투리시간활용': '"자투리 시간 활용" — 이동·식사 중 짧은 학습',
+  '이동시간암기': '"이동시간 암기" — 출퇴근·등하원 중 단어·판례 암기',
+  '새벽공부': '"새벽 공부" — 가장 조용한 시간대를 사수',
+  '체력관리': '"체력 관리" — 후반전 집중력의 토대',
+  '규칙적루틴': '"규칙적 루틴" — 매일 같은 시간 같은 자리',
+  '주1일휴식': '"주 1일 휴식" — 다음 주 집중력은 이번 주 휴식이 만든다',
+  '복습중심': '"복습 중심" — 새 진도보다 어제 본 것 다시 보기',
+  '약점공략': '"약점 공략" — 가장 시간 많이 들이는 단원에 집중',
+  '영어단어매일암기': '"영어 단어 매일 암기" — 빈도가 곧 실력',
+  '전략적시험운영': '"전략적 시험 운영" — 시험장에서의 시간 분배',
+};
+const TAG_TIP = {
+  '선택과집중': '<strong>합격생 추천:</strong> 자주 출제되는 단원부터 회독, 빈출 외 범위는 후순위',
+  '단권화': '<strong>합격생 추천:</strong> 한 권으로 압축하면 시험 직전 그 한 권만 보면 됩니다',
+  '오답노트': '<strong>합격생 추천:</strong> 틀린 이유 한 줄 메모, 같은 실수 반복 차단',
+  '자투리시간활용': '<strong>합격생 추천:</strong> 이동 중 모바일 단어 앱, 하루 1시간 추가 확보 가능',
+  '이동시간암기': '<strong>합격생 추천:</strong> 출퇴근 시간을 암기 시간으로 — 누적 효과',
+  '새벽공부': '<strong>합격생 추천:</strong> 새벽 1~2시간이 가장 밀도 높은 시간',
+  '체력관리': '<strong>합격생 추천:</strong> 주 2회 30분 걷기 — 후반 집중력의 토대',
+  '규칙적루틴': '<strong>합격생 추천:</strong> 매일 같은 시간 같은 자리 — 루틴이 곧 실력',
+  '주1일휴식': '<strong>합격생 추천:</strong> 일요일은 완전 휴식 — 다음 주가 다릅니다',
+  '복습중심': '<strong>합격생 추천:</strong> 어제 본 것 30분, 새 진도 30분 — 비율을 맞추세요',
+  '약점공략': '<strong>합격생 추천:</strong> 가장 시간 많이 드는 단원이 가장 큰 점수원',
+  '영어단어매일암기': '<strong>합격생 추천:</strong> 매일 30분 고정 — 3개월이면 평균 과목으로 안착',
+  '전략적시험운영': '<strong>합격생 추천:</strong> 모의고사에서 시간 배분 연습부터',
+};
+</script>
+
+</body>
+</html>

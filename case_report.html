@@ -1,0 +1,1819 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>동일상황 화이팅멘트 케이스 보고서</title>
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        h1 { margin: 0; font-size: 2.5em; letter-spacing: -1px; }
+        header p { margin-top: 10px; opacity: 0.9; font-weight: 300; }
+        
+        .summary {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+        .summary-item { flex: 1; border-right: 1px solid #eee; }
+        .summary-item:last-child { border-right: none; }
+        .summary-value { font-size: 2.2em; font-weight: 800; color: #764ba2; margin-bottom: 5px; }
+        .summary-label { font-size: 0.9em; color: #868e96; font-weight: 600; }
+        
+        .section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 40px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.03);
+        }
+        .section-title {
+            font-size: 1.8em;
+            border-left: 6px solid #764ba2;
+            padding-left: 15px;
+            margin-bottom: 25px;
+            color: #2d3436;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .section-stats {
+            font-size: 0.5em;
+            background: #f1f3f5;
+            padding: 5px 12px;
+            border-radius: 20px;
+            color: #495057;
+            font-weight: normal;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 10px;
+        }
+        th {
+            background-color: #f8f9fa;
+            color: #495057;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 0.5px;
+            padding: 15px;
+            border-bottom: 2px solid #dee2e6;
+            text-align: left;
+        }
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #f1f3f5;
+            vertical-align: middle;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background-color: #fcfcfc; }
+        
+        .count-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.9em;
+            min-width: 40px;
+            text-align: center;
+        }
+        .count-high { background-color: #d3f9d8; color: #2b8a3e; box-shadow: 0 2px 5px rgba(43,138,62,0.1); }
+        .count-medium { background-color: #fff3bf; color: #f08c00; box-shadow: 0 2px 5px rgba(240,140,0,0.1); }
+        .count-low { background-color: #ffe3e3; color: #e03131; box-shadow: 0 2px 5px rgba(224,49,49,0.1); }
+        .count-zero { background-color: #f1f3f5; color: #adb5bd; opacity: 0.6; }
+        
+        .job-tag {
+            font-weight: 700;
+            color: #4c6ef5;
+            background: #edf2ff;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.95em;
+        }
+        
+        .base-text {
+            color: #495057;
+            font-weight: 500;
+        }
+        
+        footer {
+            margin-top: 60px;
+            padding: 40px;
+            border-top: 1px solid #dee2e6;
+            text-align: center;
+            color: #adb5bd;
+        }
+        
+        @media (max-width: 768px) {
+            .summary { flex-direction: column; gap: 20px; }
+            .summary-item { border-right: none; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+            .summary-item:last-child { border-bottom: none; }
+            th, td { padding: 10px; font-size: 0.85em; }
+            .section { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>동일상황 화이팅멘트 케이스 보고서</h1>
+        <p>Q1(상황) × Q3(직렬) × Q4(베이스) 매칭 데이터 시각화</p>
+    </header>
+
+    <div class="summary">
+        <div class="summary-item">
+            <div class="summary-value">6</div>
+            <div class="summary-label">주요 상황 카테고리</div>
+        </div>
+        <div class="summary-item">
+            <div class="summary-value">192</div>
+            <div class="summary-label">전체 조합 케이스</div>
+        </div>
+        <div class="summary-item">
+            <div class="summary-value">928</div>
+            <div class="summary-label">매칭 완료 후기 수</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">
+            전업 수험생
+            <span class="section-stats">총 462개 후기 매칭됨</span>
+        </h2>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 25%;">직렬 (Q3)</th>
+                    <th style="width: 55%;">베이스 (Q4)</th>
+                    <th style="width: 20%; text-align: center;">매칭 후기 수</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                <tr>
+                    <td><span class="job-tag">일반행정직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-high">87</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">일반행정직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-high">29</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">일반행정직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">15</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">일반행정직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-high">52</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">세무/관세직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-high">39</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">세무/관세직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">19</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">세무/관세직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-high">23</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">세무/관세직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">19</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">공안직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-high">31</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">공안직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-high">21</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">공안직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">3</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">공안직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">11</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">교육행정직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-high">24</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">교육행정직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">9</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">교육행정직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">4</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">교육행정직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">6</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기술직 계열</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기술직 계열</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기술직 계열</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">1</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기술직 계열</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">1</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">간호/보건직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">13</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">간호/보건직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">3</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">간호/보건직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">13</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">간호/보건직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">11</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">사회복지직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">14</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">사회복지직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">2</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">사회복지직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">10</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">사회복지직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">2</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기타 직렬</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기타 직렬</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기타 직렬</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기타 직렬</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">
+            직장 다니면서
+            <span class="section-stats">총 127개 후기 매칭됨</span>
+        </h2>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 25%;">직렬 (Q3)</th>
+                    <th style="width: 55%;">베이스 (Q4)</th>
+                    <th style="width: 20%; text-align: center;">매칭 후기 수</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                <tr>
+                    <td><span class="job-tag">일반행정직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-high">22</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">일반행정직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">10</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">일반행정직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">5</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">일반행정직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">11</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">세무/관세직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">6</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">세무/관세직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">2</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">세무/관세직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">3</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">세무/관세직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">3</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">공안직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">8</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">공안직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">4</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">공안직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">공안직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">2</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">교육행정직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">8</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">교육행정직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">4</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">교육행정직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">3</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">교육행정직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">7</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기술직 계열</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기술직 계열</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기술직 계열</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기술직 계열</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">간호/보건직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">11</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">간호/보건직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">간호/보건직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">6</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">간호/보건직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">3</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">사회복지직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">5</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">사회복지직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">사회복지직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">2</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">사회복지직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">2</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기타 직렬</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기타 직렬</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기타 직렬</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기타 직렬</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">
+            학교 다니면서
+            <span class="section-stats">총 135개 후기 매칭됨</span>
+        </h2>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 25%;">직렬 (Q3)</th>
+                    <th style="width: 55%;">베이스 (Q4)</th>
+                    <th style="width: 20%; text-align: center;">매칭 후기 수</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                <tr>
+                    <td><span class="job-tag">일반행정직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">17</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">일반행정직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">14</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">일반행정직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">11</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">일반행정직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">11</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">세무/관세직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">5</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">세무/관세직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">1</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">세무/관세직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">4</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">세무/관세직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">2</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">공안직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">3</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">공안직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">8</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">공안직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">7</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">공안직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">6</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">교육행정직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">9</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">교육행정직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">7</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">교육행정직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">2</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">교육행정직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">4</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기술직 계열</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기술직 계열</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기술직 계열</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">1</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기술직 계열</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">간호/보건직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">3</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">간호/보건직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">1</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">간호/보건직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">1</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">간호/보건직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">2</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">사회복지직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">3</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">사회복지직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">5</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">사회복지직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">8</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">사회복지직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기타 직렬</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기타 직렬</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기타 직렬</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기타 직렬</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">
+            육아하면서
+            <span class="section-stats">총 48개 후기 매칭됨</span>
+        </h2>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 25%;">직렬 (Q3)</th>
+                    <th style="width: 55%;">베이스 (Q4)</th>
+                    <th style="width: 20%; text-align: center;">매칭 후기 수</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                <tr>
+                    <td><span class="job-tag">일반행정직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">13</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">일반행정직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">1</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">일반행정직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">2</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">일반행정직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">3</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">세무/관세직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">1</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">세무/관세직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">세무/관세직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">세무/관세직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">공안직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">1</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">공안직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">공안직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">공안직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">교육행정직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">8</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">교육행정직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">1</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">교육행정직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">2</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">교육행정직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">2</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기술직 계열</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기술직 계열</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기술직 계열</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기술직 계열</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">간호/보건직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">1</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">간호/보건직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">간호/보건직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">3</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">간호/보건직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">1</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">사회복지직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">9</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">사회복지직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">사회복지직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">사회복지직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기타 직렬</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기타 직렬</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기타 직렬</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기타 직렬</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">
+            퇴직 후
+            <span class="section-stats">총 99개 후기 매칭됨</span>
+        </h2>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 25%;">직렬 (Q3)</th>
+                    <th style="width: 55%;">베이스 (Q4)</th>
+                    <th style="width: 20%; text-align: center;">매칭 후기 수</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                <tr>
+                    <td><span class="job-tag">일반행정직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-high">24</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">일반행정직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">6</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">일반행정직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">5</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">일반행정직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">10</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">세무/관세직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">2</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">세무/관세직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">세무/관세직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">세무/관세직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">4</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">공안직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">5</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">공안직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">1</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">공안직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">공안직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">교육행정직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">9</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">교육행정직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">4</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">교육행정직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">3</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">교육행정직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">4</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기술직 계열</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기술직 계열</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기술직 계열</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기술직 계열</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">1</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">간호/보건직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">8</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">간호/보건직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">간호/보건직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">4</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">간호/보건직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">2</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">사회복지직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">3</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">사회복지직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">사회복지직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">2</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">사회복지직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">2</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기타 직렬</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기타 직렬</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기타 직렬</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기타 직렬</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">
+            알바하면서
+            <span class="section-stats">총 57개 후기 매칭됨</span>
+        </h2>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 25%;">직렬 (Q3)</th>
+                    <th style="width: 55%;">베이스 (Q4)</th>
+                    <th style="width: 20%; text-align: center;">매칭 후기 수</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                <tr>
+                    <td><span class="job-tag">일반행정직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">6</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">일반행정직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-medium">6</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">일반행정직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">4</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">일반행정직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">2</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">세무/관세직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">1</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">세무/관세직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">1</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">세무/관세직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">4</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">세무/관세직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">4</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">공안직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">4</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">공안직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">3</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">공안직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">공안직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">1</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">교육행정직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">2</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">교육행정직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">2</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">교육행정직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">2</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">교육행정직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">2</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기술직 계열</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기술직 계열</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기술직 계열</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기술직 계열</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">간호/보건직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">1</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">간호/보건직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">2</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">간호/보건직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">3</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">간호/보건직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">2</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">사회복지직</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">2</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">사회복지직</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">1</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">사회복지직</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">1</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">사회복지직</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-low">1</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기타 직렬</span></td>
+                    <td class="base-text">공부는 처음이야!</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기타 직렬</span></td>
+                    <td class="base-text">수능 경험 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기타 직렬</span></td>
+                    <td class="base-text">전공자</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><span class="job-tag">기타 직렬</span></td>
+                    <td class="base-text">영어 성적 있음</td>
+                    <td style="text-align: center;">
+                        <span class="count-badge count-zero">0</span>
+                    </td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+
+    <footer>
+        <p>© 2026 동일상황 화이팅멘트 시스템 | 데이터 기반 자동 분석 보고서</p>
+        <p style="font-size: 0.8em; margin-top: 5px;">본 보고서는 Markdown 소스 파일을 바탕으로 실시간 생성되었습니다.</p>
+    </footer>
+</body>
+</html>
