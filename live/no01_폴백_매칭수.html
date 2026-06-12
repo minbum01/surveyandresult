@@ -1,0 +1,2829 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+<title>매칭 관리자 — 영역별 후기 확인</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=Noto+Serif+KR:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-primary: #FAFAF7;
+  --bg-card: #FFFFFF;
+  --bg-dark: #1A1A2E;
+  --bg-accent: #F0EDE6;
+  --text-primary: #1A1A2E;
+  --text-secondary: #5A5A6E;
+  --text-muted: #8E8E9E;
+  --accent-gold: #C8A84E;
+  --accent-blue: #3A5BA0;
+  --accent-warm: #D4734A;
+  --border-light: #E8E6DF;
+  --shadow-md: 0 4px 12px rgba(26,26,46,0.08);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  padding: 24px;
+  line-height: 1.5;
+}
+.container { max-width: 1200px; margin: 0 auto; }
+
+h1 {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+.subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+
+.summary {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+.stat { font-size: 12px; color: var(--text-muted); }
+.stat strong {
+  display: block;
+  font-size: 20px;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+h2 {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 17px;
+  font-weight: 700;
+  margin: 32px 0 12px;
+  padding-left: 10px;
+  border-left: 3px solid var(--accent-gold);
+}
+
+table.matrix {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--bg-card);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+table.matrix th, table.matrix td {
+  padding: 10px 12px;
+  text-align: center;
+  border: 1px solid var(--border-light);
+}
+table.matrix thead th {
+  background: var(--bg-accent);
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+table.matrix tbody th {
+  background: #F8F7F2;
+  font-weight: 600;
+  text-align: left;
+  width: 110px;
+}
+table.matrix .cell {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--accent-blue);
+  transition: background 0.12s;
+  user-select: none;
+}
+table.matrix .cell:hover {
+  background: #FFF8E7;
+  color: var(--accent-gold);
+}
+table.matrix .cell.zero {
+  cursor: default;
+  color: var(--text-muted);
+  font-weight: 400;
+  background: #F8F7F2;
+}
+table.matrix .cell.zero:hover { background: #F8F7F2; color: var(--text-muted); }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(26,26,46,0.55);
+  display: none;
+  align-items: center; justify-content: center;
+  z-index: 100;
+  padding: 24px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg-card);
+  border-radius: 12px;
+  width: 100%; max-width: 980px;
+  max-height: 90vh;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+.modal-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border-light);
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--bg-dark);
+  color: white;
+}
+.modal-title {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 17px; font-weight: 700;
+}
+.modal-meta { font-size: 12px; color: rgba(255,255,255,0.7); }
+.modal-close {
+  background: none; border: none; color: white;
+  font-size: 22px; cursor: pointer;
+  width: 32px; height: 32px;
+  border-radius: 4px;
+}
+.modal-close:hover { background: rgba(255,255,255,0.1); }
+
+.modal-body {
+  overflow-y: auto;
+  padding: 16px 24px;
+  flex: 1;
+}
+.modal-toolbar {
+  position: sticky; top: 0;
+  background: var(--bg-card);
+  padding: 8px 0 12px;
+  border-bottom: 1px solid var(--border-light);
+  margin-bottom: 12px;
+  display: flex; gap: 12px; align-items: center;
+  font-size: 12px; color: var(--text-muted);
+}
+.modal-search {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 12px;
+}
+
+.passnote {
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  background: var(--bg-card);
+}
+.pn-header {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 12px; margin-bottom: 6px;
+}
+.pn-title {
+  font-weight: 600; font-size: 14px;
+  color: var(--text-primary);
+}
+.pn-title a { color: var(--accent-blue); text-decoration: none; }
+.pn-title a:hover { text-decoration: underline; }
+.pn-meta {
+  font-size: 11px; color: var(--text-muted);
+  white-space: nowrap;
+}
+.pn-tags {
+  display: flex; flex-wrap: wrap; gap: 4px;
+  margin: 6px 0 8px;
+}
+.pn-tag {
+  font-size: 10.5px;
+  padding: 2px 7px;
+  border-radius: 10px;
+  background: var(--bg-accent);
+  color: var(--text-secondary);
+}
+.pn-tag.matched-q1 { background: rgba(200,168,78,0.18); color: #8a7330; font-weight: 600; }
+.pn-tag.matched-q3 { background: rgba(58,91,160,0.13); color: var(--accent-blue); font-weight: 600; }
+.pn-tag.matched-q4 { background: rgba(212,115,74,0.15); color: var(--accent-warm); font-weight: 600; }
+.pn-passage {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 13px; line-height: 1.7;
+  color: var(--text-primary);
+  background: #FFFCF4;
+  padding: 10px 12px;
+  border-radius: 4px;
+  border-left: 2px solid var(--accent-gold);
+}
+.pn-passage p { margin: 0 0 6px 0; }
+.pn-passage p:last-of-type { margin-bottom: 0; }
+.pn-passage mark {
+  background: #FFF3A0;
+  color: var(--text-primary);
+  padding: 1px 3px;
+  border-radius: 2px;
+  font-weight: 700;
+}
+.pn-passage-note {
+  font-size: 10.5px;
+  color: var(--accent-blue);
+  margin-top: 8px;
+  padding-top: 6px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-weight: 600;
+  border-top: 1px dashed var(--border-light);
+}
+.pn-passage-note.fallback { color: var(--accent-warm); }
+.pn-quotes {
+  margin-top: 8px;
+  font-size: 11.5px;
+  color: var(--text-secondary);
+}
+.pn-quotes-toggle {
+  cursor: pointer; color: var(--accent-blue); font-size: 11px;
+  user-select: none;
+}
+.pn-quote-list { margin-top: 6px; }
+.pn-quote-list li {
+  list-style: none;
+  padding: 6px 10px;
+  margin-top: 4px;
+  background: var(--bg-accent);
+  border-radius: 4px;
+  font-style: italic;
+}
+
+.loading { text-align: center; padding: 40px; color: var(--text-muted); }
+.error { background: #FFE8E0; color: #B0341A; padding: 16px; border-radius: 8px; }
+
+.zero-list {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-top: 16px;
+}
+.zero-list h3 {
+  font-size: 13px; margin-bottom: 8px; color: var(--text-secondary);
+}
+.zero-list ul li {
+  list-style: disc;
+  margin-left: 20px;
+  font-size: 12.5px;
+  padding: 2px 0;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid var(--border-light);
+  position: sticky;
+  top: -24px;
+  background: var(--bg-primary);
+  padding-top: 12px;
+  z-index: 20;
+  flex-wrap: wrap;
+}
+.tab {
+  background: none; border: none;
+  padding: 10px 16px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  white-space: nowrap;
+  border-radius: 4px 4px 0 0;
+}
+.tab:hover { color: var(--text-primary); background: rgba(0,0,0,0.03); }
+.tab.active {
+  color: var(--accent-gold);
+  border-bottom-color: var(--accent-gold);
+  background: var(--bg-card);
+}
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.placeholder {
+  background: var(--bg-card);
+  border: 1px dashed var(--border-light);
+  border-radius: 8px;
+  padding: 60px 24px;
+  text-align: center;
+  color: var(--text-muted);
+}
+.placeholder strong {
+  display: block;
+  font-size: 15px;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+/* ─── UI 용어 마커 (토글) ─── */
+/* :where() 로 0-명시도 → 기존 position 규칙(fixed/sticky 등)을 덮지 않음 */
+:where([data-term]) { position: relative; }
+[data-term]::before {
+  content: attr(data-term);
+  position: absolute;
+  top: -8px;
+  left: -2px;
+  font-family: 'Courier New', monospace;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  background: #E50914;
+  color: #fff;
+  padding: 2px 7px;
+  border-radius: 3px;
+  z-index: 200;
+  pointer-events: none;
+  box-shadow: 0 1px 4px rgba(229,9,20,0.4);
+  white-space: nowrap;
+  display: none;
+}
+body.show-terms [data-term]::before { display: inline-block; }
+body.show-terms [data-term] { outline: 1px dashed rgba(229,9,20,0.4); outline-offset: 2px; }
+
+/* 모달 안 용어는 색상 다르게 (구분 위해) */
+body.show-terms .modal [data-term]::before,
+body.show-terms .modal-overlay[data-term]::before {
+  background: #C8A84E;
+  color: #1A1A2E;
+  box-shadow: 0 1px 4px rgba(200,168,78,0.5);
+}
+body.show-terms .modal [data-term],
+body.show-terms .modal-overlay[data-term] {
+  outline-color: rgba(200,168,78,0.5);
+}
+
+.pin-toolbar {
+  position: fixed;
+  bottom: 16px; right: 16px;
+  display: flex;
+  gap: 8px;
+  z-index: 1000;
+}
+.term-toggle {
+  background: var(--bg-dark);
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+.term-toggle:hover { background: #2A2A3E; }
+body.show-terms .term-toggle {
+  background: var(--accent-gold);
+  color: var(--bg-dark);
+}
+body.show-terms .term-toggle:hover { background: var(--accent-gold-light, #E8D59E); }
+
+/* ─── 모달 섹션 (대표 후기 / TOP 10 / 전체) ─── */
+.modal-section { margin-bottom: 18px; }
+.modal-section + .modal-section {
+  border-top: 1px solid var(--border-light);
+  padding-top: 16px;
+}
+.ms-title {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+  display: flex; align-items: baseline; gap: 8px;
+  flex-wrap: wrap;
+}
+.ms-sub {
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 10.5px;
+  font-weight: 400;
+  color: var(--text-muted);
+  letter-spacing: 0;
+}
+
+/* 대표 후기 강조 */
+.passnote.featured {
+  border: 2px solid var(--accent-gold);
+  box-shadow: 0 4px 14px rgba(200,168,78,0.18);
+  background: linear-gradient(180deg, #FFFCF4 0%, #FFFFFF 100%);
+}
+.pn-featured-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--bg-dark);
+  background: var(--accent-gold);
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+  letter-spacing: 0.02em;
+}
+
+/* TOP 10 표 */
+.top10-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.top10-table thead th {
+  background: var(--bg-accent);
+  padding: 8px 10px;
+  text-align: left;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.top10-table tbody td {
+  padding: 7px 10px;
+  border-top: 1px solid var(--border-light);
+  vertical-align: middle;
+}
+.top10-table tbody tr:hover { background: #FFF8E7; }
+.top10-row.featured-row {
+  background: rgba(200,168,78,0.10);
+}
+.top10-row.featured-row td:first-child::before {
+  content: '★ ';
+  color: var(--accent-gold);
+}
+.top10-table .t10-title a {
+  color: var(--accent-blue);
+  text-decoration: none;
+}
+.top10-table .t10-title a:hover { text-decoration: underline; }
+.top10-table .t10-score { font-weight: 700; color: var(--accent-gold); }
+
+/* ─── 점수 계산 내역 박스 ─── */
+.score-breakdown {
+  background: #FFFCF4;
+  border: 1px solid rgba(200,168,78,0.4);
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  font-size: 12px;
+}
+.sb-row {
+  display: grid;
+  grid-template-columns: 110px 1fr 60px;
+  gap: 12px;
+  padding: 5px 0;
+  align-items: baseline;
+}
+.sb-row + .sb-row { border-top: 1px dashed rgba(200,168,78,0.25); }
+.sb-label {
+  font-weight: 700;
+  color: var(--text-secondary);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+.sb-value {
+  color: var(--text-primary);
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+.sb-value em {
+  background: rgba(200,168,78,0.20);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-style: normal;
+  margin: 0 1px;
+  font-weight: 600;
+}
+.sb-pts {
+  text-align: right;
+  font-weight: 700;
+  color: var(--accent-gold);
+  font-family: 'Courier New', monospace;
+}
+.sb-row.sb-total {
+  border-top: 2px solid var(--accent-gold);
+  padding-top: 8px;
+  margin-top: 2px;
+}
+.sb-row.sb-total .sb-pts {
+  font-size: 16px;
+  color: var(--text-primary);
+}
+
+/* TOP 10 행 클릭 시 펼침 */
+.top10-row { cursor: pointer; }
+.top10-row td:first-child::after {
+  content: ' ▸';
+  color: var(--text-muted);
+  font-size: 10px;
+  margin-left: 4px;
+}
+.top10-row.expanded td:first-child::after {
+  content: ' ▾';
+  color: var(--accent-gold);
+}
+.top10-row.expanded {
+  background: rgba(200,168,78,0.18) !important;
+}
+.top10-detail-row td {
+  background: #fafaf7;
+  padding: 16px 18px !important;
+  border-top: 2px solid var(--accent-gold);
+}
+.top10-detail-row .passnote { margin-bottom: 0; }
+
+/* ─── 핀(우선 사용) + 제외 버튼 ─── */
+.passnote { position: relative; }
+.pn-actions {
+  position: absolute;
+  top: 12px; right: 12px;
+  display: flex;
+  gap: 4px;
+  z-index: 6;
+}
+.pn-pin, .pn-excl {
+  background: transparent;
+  border: 1px solid var(--border-light);
+  padding: 4px 9px;
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: 11px;
+  font-family: inherit;
+  color: var(--text-muted);
+  transition: all 0.12s;
+}
+.pn-pin:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
+.pn-pin.pinned {
+  background: var(--accent-gold);
+  border-color: var(--accent-gold);
+  color: var(--bg-dark);
+  font-weight: 700;
+}
+.pn-excl:hover { border-color: var(--accent-warm); color: var(--accent-warm); }
+.pn-excl.active {
+  background: var(--accent-warm);
+  border-color: var(--accent-warm);
+  color: white;
+}
+.pn-excl-global.active {
+  background: #C2410C;
+  border-color: #C2410C;
+}
+
+/* 제외된 후기 카드 (excluded-section 안에서 흐리게) */
+.passnote.excluded {
+  opacity: 0.55;
+  background: #F8F7F2;
+}
+.passnote.excluded:hover { opacity: 0.9; }
+.excluded-section .ms-title {
+  cursor: pointer;
+  user-select: none;
+}
+.excluded-section .excl-toggle {
+  margin-left: auto;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.excluded-section.collapsed .excluded-list {
+  display: none;
+}
+.excluded-section .ms-title:hover {
+  color: var(--accent-warm);
+}
+.pn-pinned-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--bg-dark);
+  background: linear-gradient(90deg, #C8A84E, #E8D59E);
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+  margin-right: 6px;
+  letter-spacing: 0.02em;
+}
+.passnote.user-pinned {
+  border-color: var(--accent-gold);
+  border-width: 2px;
+}
+
+/* TOP 10 핀 표시 */
+.t10-pin-mark {
+  display: inline-block;
+  background: var(--accent-gold);
+  color: var(--bg-dark);
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 8px;
+  margin-left: 6px;
+}
+
+/* ─── Phase 1: Q1~Q8 시나리오 selector (admin 상단) ─── */
+.scenario-bar {
+  background: var(--bg-dark);
+  color: var(--text-inverse, #FAFAF7);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  display: flex; flex-direction: column; gap: 8px;
+  font-size: 11px;
+  position: sticky;
+  top: -16px;
+  z-index: 30;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+.sb-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.sb-q { display: flex; gap: 4px; align-items: center; color: rgba(255,255,255,0.7); }
+.sb-q strong { color: var(--accent-gold); font-weight: 700; }
+.sb-q-label { color: var(--accent-gold); font-weight: 700; margin-right: 4px; }
+.sb-checks { display: flex; gap: 10px; flex-wrap: wrap; }
+.sb-checks label {
+  display: flex; gap: 3px; align-items: center;
+  color: rgba(255,255,255,0.75);
+  cursor: pointer; user-select: none;
+}
+.sb-spacer { flex: 1; min-width: 8px; }
+.sb-divider { width: 1px; height: 18px; background: rgba(255,255,255,0.15); margin: 0 4px; }
+.scenario-bar select {
+  background: rgba(255,255,255,0.1);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 4px 8px; border-radius: 4px;
+  font-family: inherit; font-size: 11px;
+  max-width: 140px;
+}
+.scenario-bar select option { background: #2a2a40; color: white; }
+.scenario-bar button {
+  background: var(--accent-gold);
+  color: var(--bg-dark);
+  border: none;
+  padding: 5px 10px; border-radius: 4px;
+  font-family: inherit; font-size: 11px;
+  font-weight: 700; cursor: pointer;
+}
+
+/* 영역 헤더 (탭 콘텐츠 상단에 — matchKeys + 조합 수 + 진행률) */
+.area-header {
+  background: linear-gradient(180deg, #FFFCF4 0%, #FFFFFF 100%);
+  border: 1px solid var(--accent-gold-light, #E8D59E);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 16px;
+  align-items: center;
+}
+.area-h-name {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 16px; font-weight: 700;
+}
+.area-h-keys {
+  font-size: 11px; color: var(--text-secondary);
+  margin-top: 2px;
+}
+.area-h-keys code {
+  background: rgba(200,168,78,0.15);
+  color: var(--accent-gold);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+}
+.area-h-stat {
+  font-size: 11px; color: var(--text-muted);
+  text-align: right;
+}
+.area-h-stat strong { display: block; font-size: 18px; color: var(--text-primary); font-weight: 700; }
+.area-h-progress {
+  font-size: 11px; color: var(--text-muted);
+  text-align: right;
+}
+.area-h-progress strong {
+  display: block; font-size: 16px;
+  color: var(--accent-green, #2D8A5E);
+  font-weight: 700;
+}
+
+/* ─── 탭 편집 / 새 영역 추가 버튼 ─── */
+.tab .tab-edit-btn {
+  margin-left: 6px;
+  font-size: 11px;
+  opacity: 0.4;
+  cursor: pointer;
+  display: inline-block;
+  padding: 0 4px;
+  border-radius: 3px;
+}
+.tab:hover .tab-edit-btn { opacity: 1; }
+.tab .tab-edit-btn:hover { background: rgba(200,168,78,0.2); color: var(--accent-gold); }
+
+.tab-add-btn {
+  background: transparent;
+  border: 1px dashed rgba(0,0,0,0.2);
+  padding: 8px 14px;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 4px;
+  margin-left: 8px;
+  margin-bottom: -2px;
+}
+.tab-add-btn:hover {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+  background: rgba(200,168,78,0.05);
+}
+
+/* ─── 영역 편집 다이얼로그 ─── */
+.area-editor-overlay {
+  position: fixed; inset: 0;
+  background: rgba(26,26,46,0.55);
+  display: none;
+  align-items: center; justify-content: center;
+  z-index: 200;
+  padding: 24px;
+}
+.area-editor-overlay.open { display: flex; }
+.area-editor {
+  background: var(--bg-card);
+  border-radius: 12px;
+  width: 100%; max-width: 540px;
+  padding: 24px 28px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+.ae-title {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 17px; font-weight: 700;
+  margin-bottom: 16px;
+}
+.ae-row { margin-bottom: 14px; }
+.ae-label {
+  display: block;
+  font-size: 11px; font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  letter-spacing: 0.04em;
+}
+.ae-input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 13px;
+}
+.ae-input:focus {
+  outline: none;
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 0 2px rgba(200,168,78,0.15);
+}
+.ae-checks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.ae-checks label {
+  display: flex; gap: 6px; align-items: flex-start;
+  font-size: 12.5px; cursor: pointer;
+  padding: 8px 10px;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  line-height: 1.4;
+}
+.ae-checks label:hover { border-color: var(--accent-gold-light, #E8D59E); }
+.ae-checks label:has(input:checked) {
+  border-color: var(--accent-gold);
+  background: rgba(200,168,78,0.1);
+}
+.ae-checks label:has(input:checked) span strong { color: var(--accent-gold); }
+.ae-checks input { margin-top: 2px; flex-shrink: 0; }
+.ae-checks .ae-q-hint {
+  display: block;
+  font-size: 10.5px;
+  color: var(--text-muted);
+  font-weight: 400;
+  margin-top: 2px;
+}
+.ae-warn {
+  font-size: 11.5px;
+  color: var(--accent-warm);
+  background: rgba(212,115,74,0.08);
+  padding: 8px 10px;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+.ae-buttons {
+  display: flex; gap: 8px; justify-content: flex-end;
+  margin-top: 18px;
+}
+.ae-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.ae-btn-save { background: var(--accent-gold); color: var(--bg-dark); }
+.ae-btn-cancel { background: var(--bg-accent); color: var(--text-secondary); }
+.ae-btn-delete { background: #E50914; color: white; margin-right: auto; }
+
+/* ─── Phase 5: 크로스 영역 핀 배지 ─── */
+.cross-area-pins {
+  display: flex; gap: 4px; flex-wrap: wrap;
+  margin: 4px 0 8px;
+  align-items: center;
+}
+.cross-area-pins .cap-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-right: 2px;
+}
+.cross-pin {
+  display: inline-flex; gap: 3px; align-items: center;
+  font-size: 10.5px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(200,168,78,0.12);
+  color: var(--text-secondary);
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+}
+.cross-pin.current {
+  background: var(--accent-gold);
+  color: var(--bg-dark);
+}
+.cross-pin .cp-name {
+  font-family: 'Noto Sans KR', sans-serif;
+  font-weight: 500;
+  font-size: 10px;
+  margin-left: 2px;
+}
+
+/* ─── 핀 일람 탭 (전체 핀 그리드) ─── */
+.tab.tab-special {
+  background: rgba(200,168,78,0.08);
+  border-radius: 4px 4px 0 0;
+}
+.tab.tab-special.active {
+  background: rgba(200,168,78,0.15);
+}
+.pins-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 14px;
+  margin-top: 8px;
+}
+.pin-card {
+  background: #fff;
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+}
+.pin-card:hover { border-color: var(--accent-gold-light, #E8D59E); }
+.pin-card-title {
+  font-weight: 700; font-size: 12.5px;
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+.pin-card-title a { color: var(--accent-blue); text-decoration: none; }
+.pin-card-title a:hover { text-decoration: underline; }
+.pin-card-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+.pin-card-passage {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 10px;
+  background: #FFFCF4;
+  padding: 8px 10px;
+  border-radius: 4px;
+  border-left: 2px solid var(--accent-gold);
+}
+.pin-areas-list {
+  display: flex; flex-direction: column; gap: 6px;
+  margin-top: auto;
+}
+.pin-area-row {
+  background: var(--bg-accent);
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 11.5px;
+}
+.pin-area-row-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pin-area-code {
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  color: var(--accent-gold);
+  cursor: pointer;
+}
+.pin-area-code:hover { text-decoration: underline; }
+.pin-area-name {
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+.pin-area-combo {
+  font-size: 10.5px;
+  color: var(--text-muted);
+  margin-left: auto;
+  font-family: 'Courier New', monospace;
+}
+.pin-area-memo {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--text-primary);
+  font-style: italic;
+  padding-left: 6px;
+  border-left: 2px solid rgba(200,168,78,0.3);
+}
+.pins-summary {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+.pins-summary .stat strong {
+  display: block; font-size: 20px;
+  color: var(--text-primary); font-weight: 700;
+}
+.pins-summary .stat { font-size: 11.5px; color: var(--text-muted); }
+
+/* 핀 메모 입력 */
+.pn-pin-memo {
+  margin: 8px 0 10px;
+}
+.pn-pin-memo textarea {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid rgba(200,168,78,0.4);
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-family: inherit;
+  line-height: 1.45;
+  background: rgba(255,252,244,0.7);
+  resize: vertical;
+  color: var(--text-primary);
+  box-sizing: border-box;
+}
+.pn-pin-memo textarea:focus {
+  outline: none;
+  border-color: var(--accent-gold);
+  background: white;
+  box-shadow: 0 0 0 2px rgba(200,168,78,0.15);
+}
+.pn-pin-memo textarea::placeholder {
+  color: var(--text-muted);
+  font-style: italic;
+}
+.pn-pin-memo-label {
+  display: block;
+  font-size: 10.5px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  margin-bottom: 3px;
+  letter-spacing: 0.04em;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>매칭 관리자 페이지</h1>
+  <div class="subtitle">
+    result.html / persona.html 의 모든 동적 영역(no.01~)을 탭으로 묶어 매칭 합격수기를 직접 확인합니다.<br>
+    매칭 로직: <code>persona.html</code>의 <code>TAG_EXPANSION</code> 확장 매핑 (단일 출처: <code>후기태그_전체.md</code>)
+  </div>
+
+  <nav class="tabs" id="tab-nav" data-term="탭 바">
+    <button class="tab active" data-tab="no01" data-term="탭">no.01 동일경로 후기</button>
+    <button class="tab" data-tab="no02">no.02 패턴 인용구</button>
+    <button class="tab" data-tab="no03">no.03 공감 통계</button>
+    <button class="tab" data-tab="no04">no.04 4개 지표</button>
+    <button class="tab" data-tab="no05">no.05 종합 분석문</button>
+    <button class="tab" data-tab="no06">no.06 같은 출발점</button>
+    <button class="tab" data-tab="no07">no.07 다잡은 한 마디</button>
+    <button class="tab" data-tab="no08">no.08 첫 한 달 풍경</button>
+    <button class="tab" data-tab="no09">no.09 포기 직전</button>
+    <button class="tab" data-tab="no10">no.10 꾸준함 한 줄</button>
+    <button class="tab" data-tab="no11">no.11 유사 후기 카드</button>
+    <button class="tab" data-tab="no12">no.12 합격자 후회</button>
+    <button class="tab" data-tab="no13">no.13 합격자 첫 달</button>
+    <button class="tab" data-tab="no14">no.14 어려운 과목</button>
+    <button class="tab" data-tab="no15">no.15 CTA 인용구</button>
+  </nav>
+
+  <div id="tab-no01" class="tab-content active" data-term="탭 콘텐츠">
+  <div id="summary" class="summary" data-term="요약 패널">
+    <div class="loading" style="grid-column: 1/-1;">데이터 로드 중...</div>
+  </div>
+
+  <div id="matrices"></div>
+
+  <div id="zero-section"></div>
+  </div><!-- /tab-no01 -->
+
+  <div id="tab-no02" class="tab-content">
+    <div class="placeholder">
+      <strong>no.02 — 패턴 인용구</strong>
+      위치: persona.html 메인 인용구 (data-no="04")<br>
+      매칭 키: Q5 × Q7(멀티) × Q8 (7단계 폴백) → quote 1건<br>
+      <span style="opacity:.7;">미구현 — 매핑 정의되면 여기에 분석 표가 채워집니다.</span>
+    </div>
+  </div>
+  <div id="tab-no03" class="tab-content">
+    <div class="placeholder">
+      <strong>no.03 — 공감 통계</strong>
+      위치: result.html PAGE 1 좌측 (.empathy-stat)<br>
+      매칭 키: Q1 × Q3 × Q4 → "비슷한 합격자의 N%가..."<br>
+      <span style="opacity:.7;">미구현</span>
+    </div>
+  </div>
+  <div id="tab-no04" class="tab-content">
+    <div class="placeholder">
+      <strong>no.04 — 4개 지표</strong>
+      위치: result.html PAGE 1 좌측 (.metrics-grid)<br>
+      매칭 키: Q1 × Q3 × Q4 → 유사합격자 / 평균기간 / 초시율 / 평균순공<br>
+      <span style="opacity:.7;">미구현</span>
+    </div>
+  </div>
+  <div id="tab-no05" class="tab-content">
+    <div class="placeholder">
+      <strong>no.05 — 종합 분석문</strong>
+      위치: result.html PAGE 1 좌측 (.analysis-text)<br>
+      매칭 키: Q1 × Q3 × Q4 (no.04 풀어쓴 4~5문장)<br>
+      <span style="opacity:.7;">미구현</span>
+    </div>
+  </div>
+  <div id="tab-no06" class="tab-content">
+    <div class="placeholder">
+      <strong>no.06 — 같은 출발점에서 시작한 분들</strong>
+      위치: page1_right.html PAGE 1 우측 첫 번째 카드<br>
+      매칭 키: <strong>Q1 × Q4</strong> → 매칭 후기 중 분위기 좋은 후기 <strong>2장</strong> (제목 + 본문 발췌)<br>
+      점수: 격려/시작 키워드(처음/막막/시작/다행/됐/버텼/꾸준 등) + passage 길이 130~280자<br>
+      <span style="opacity:.7;">출력: 미니카드 2장 — 수치 노출 X</span>
+    </div>
+  </div>
+  <div id="tab-no07" class="tab-content">
+    <div class="placeholder">
+      <strong>no.07 — 흔들렸을 때 다잡은 한 마디</strong>
+      위치: page1_right.html PAGE 1 우측 두 번째 카드<br>
+      매칭 키: <strong>Q8</strong> → Q8 주제 키워드와 매칭되는 짧은 quote 1건<br>
+      Q8별 키워드: 멘탈관리=마음/불안/평정 / 슬럼프극복=버티/포기/극복 / 영어약자=영어/단어/문법 등<br>
+      <span style="opacity:.7;">출력: 키워드 칩 + 인용구 + 후기 제목</span>
+    </div>
+  </div>
+  <div id="tab-no08" class="tab-content">
+    <div class="placeholder">
+      <strong>no.08 — 첫 한 달 풍경</strong>
+      위치: page1_right.html PAGE 1 우측 세 번째 카드<br>
+      매칭 키: <strong>Q1 × Q3</strong> → 본문에서 "첫 달/처음에/처음 시작/초반에" 들어간 문장 추출<br>
+      문장 길이 60~150자 우선, "첫 달/첫달" 키워드 가산점<br>
+      <span style="opacity:.7;">출력: 본문 발췌 1문장 + 후기 제목</span>
+    </div>
+  </div>
+  <div id="tab-no09" class="tab-content">
+    <div class="placeholder">
+      <strong>no.09 — 포기 직전, 다시 책상 앞</strong>
+      위치: page1_right.html PAGE 1 우측 네 번째 카드<br>
+      매칭 키: <strong>Q1</strong> + 슬럼프 키워드(포기하지/버텼/그래도/다잡/마음을/놓지/한계 등) → quote 1건<br>
+      <span style="opacity:.7;">출력: 키워드 칩 + 인용구 + 후기 제목</span>
+    </div>
+  </div>
+  <div id="tab-no10" class="tab-content">
+    <div class="placeholder">
+      <strong>no.10 — 꾸준함을 말하는 한 줄</strong>
+      위치: page1_right.html PAGE 1 우측 다섯 번째 카드<br>
+      매칭 키: <strong>Q1~Q8 일치도 5점 이상 상위 60건</strong> + 꾸준 키워드(꾸준/매일/하루하루/스스로/한 발/조금씩/놓지) → quote 1건<br>
+      <span style="opacity:.7;">출력: 키워드 칩 + 인용구 + 후기 제목</span>
+    </div>
+  </div>
+  <div id="tab-no11" class="tab-content">
+    <div class="placeholder">
+      <strong>no.11 — 유사 후기 카드 (3건)</strong>
+      위치: result.html PAGE 2 상단 (.story-card × 3)<br>
+      매칭 키: Q1~Q8 전체 (일치 개수순 상위 3건)<br>
+      <span style="opacity:.7;">미구현</span>
+    </div>
+  </div>
+  <div id="tab-no12" class="tab-content">
+    <div class="placeholder">
+      <strong>no.12 — 합격자 후회</strong>
+      위치: result.html PAGE 2 (.insight-card 후회)<br>
+      매칭 키: Q3 (직렬별 후회 항목 통계)<br>
+      <span style="opacity:.7;">미구현</span>
+    </div>
+  </div>
+  <div id="tab-no13" class="tab-content">
+    <div class="placeholder">
+      <strong>no.13 — 합격자 첫 달</strong>
+      위치: result.html PAGE 2 (.insight-card 첫 달)<br>
+      매칭 키: Q1 × Q3 (상황+직렬별 첫달 액션 4개)<br>
+      <span style="opacity:.7;">미구현</span>
+    </div>
+  </div>
+  <div id="tab-no14" class="tab-content">
+    <div class="placeholder">
+      <strong>no.14 — 어려운 과목</strong>
+      위치: result.html PAGE 2 (.hard-subject)<br>
+      매칭 키: Q3 (직렬별 과목 난이도 분포 5개)<br>
+      <span style="opacity:.7;">미구현</span>
+    </div>
+  </div>
+  <div id="tab-no15" class="tab-content">
+    <div class="placeholder">
+      <strong>no.15 — CTA 인용구</strong>
+      위치: result.html PAGE 2 (.cta-closing-quote)<br>
+      매칭 키: Q1~Q8 → 닫는 quote 1건<br>
+      <span style="opacity:.7;">미구현</span>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay" data-term="딤 오버레이">
+  <div class="modal" data-term="모달">
+    <div class="modal-header" data-term="모달 헤더">
+      <div>
+        <div class="modal-title" id="modal-title" data-term="조합 라벨">—</div>
+        <div class="modal-meta" id="modal-meta" data-term="건수 라벨">—</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-toolbar" data-term="모달 툴바">
+        <span id="modal-count">0건</span>
+        <input class="modal-search" id="modal-search" data-term="후기 검색창" placeholder="제목/태그/본문 검색..." />
+      </div>
+      <div id="modal-list" data-term="후기 목록"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 영역 편집 다이얼로그 -->
+<div class="area-editor-overlay" id="area-editor-overlay">
+  <div class="area-editor">
+    <div class="ae-title" id="ae-title">영역 편집</div>
+    <div class="ae-row">
+      <label class="ae-label">이름 (한글 OK)</label>
+      <input class="ae-input" id="ae-name" placeholder="예: 같은 출발점에서 시작한 분들" />
+    </div>
+    <div class="ae-row">
+      <label class="ae-label">의도 (intent) — 한 줄 설명</label>
+      <input class="ae-input" id="ae-intent" placeholder="예: 같은 처지 수험생에게 주는 응원 메시지 (50~120자, 따뜻한 톤)" />
+      <div class="ae-warn" style="background:rgba(58,91,160,0.08);color:var(--accent-blue);">
+        💡 CLI(claude-code) 가 이 영역에 어울리는 후기를 자동 추천할 때 참고합니다. 톤·길이·내용을 명시하면 정확도↑
+      </div>
+    </div>
+    <div class="ae-row">
+      <label class="ae-label">매칭에 쓸 Q들 (matchKeys)</label>
+      <div class="ae-checks" id="ae-matchkeys"></div>
+      <div class="ae-warn" id="ae-warn">⚠ matchKeys 변경 시 이 영역의 핀이 모두 사라집니다.</div>
+    </div>
+    <div class="ae-buttons">
+      <button class="ae-btn ae-btn-delete" id="ae-btn-delete">🗑 삭제</button>
+      <button class="ae-btn ae-btn-cancel" id="ae-btn-cancel">취소</button>
+      <button class="ae-btn ae-btn-save" id="ae-btn-save">저장</button>
+    </div>
+  </div>
+</div>
+
+<div class="pin-toolbar">
+  <button class="term-toggle" onclick="exportPins()" title="현재 핀+메모를 JSON 파일로 내려받기">📥 핀 내보내기</button>
+  <button class="term-toggle" onclick="document.getElementById('pin-import-input').click()" title="JSON 파일 불러와서 핀 복원/병합">📤 핀 가져오기</button>
+  <button class="term-toggle" id="term-toggle" onclick="toggleTerms()">UI 용어 표시</button>
+  <input type="file" id="pin-import-input" accept=".json,application/json" style="display:none;" onchange="importPins(this.files[0])">
+</div>
+
+<script>
+// ─────────── TAG_EXPANSION (persona.html 과 동일) ───────────
+const TAG_EXPANSION = {
+  '전업수험생': ['20대초반','군복무수험생','재시생','전업수험생','전역수험생','전직렬전환','초시생'],
+  '직장병행': ['고졸수험생','재직수험생','직장병행'],
+  '재학수험생': ['복학수험생','서울4년제','재학수험생','지거국','지방4년제','통학수험생','학업병행','휴학수험생'],
+  '육아병행': ['40대','결혼준비','기혼','맘시생','워킹맘','육아병행','임신수험생','출산직후면접'],
+  '퇴직수험생': ['50대','경력단절','경력직','계약직경력','물류경력','사업경험','생산직경력','서비스직경력','주6일직장','콜센터경력','퇴직수험생'],
+  '아르바이트병행': ['N잡러','교대근무','아르바이트병행','주4일알바'],
+  '행정직': ['우정행정직','행정직'],
+  '세무직': ['관세직','세무직'],
+  '공안직': ['검찰직','교정직','보호직','철도경찰직','출입국관리직'],
+  '교육직': ['교육직'],
+  '기술직': ['건축직','공업직','군수직','기계일반','기계직','기술직','농업직','방송통신직','시설직','임업직','전기직','전산직','토목직','환경직'],
+  '간호보건직': ['간호보건직','보건직'],
+  '사회복지직': ['사회복지직'],
+  '기타직렬': ['감사직','계리직','고용노동직','국회직8급','국회직9급','기상직','기체직','도시계획직','방재안전직','법원직9급','소수직렬','식품위생직','외무영사직','운전직','조경직','지적직','직업상담직','차량직','통계직','회계직'],
+  '노베이스': ['노베이스'],
+  '수능베이스': ['경찰직베이스','국어베이스','수능베이스','제2외국어','한국사베이스','한능검','한능검베이스','한자자격증'],
+  '전공자': ['4년제','CPA베이스','IT경력','경영학전공','경제학전공','공학전공','관세사베이스','국시베이스','국어전공','기사자격증','무역학전공','법학전공','부전공','사범대','사회과학전공','사회복지전공','석사학위','세무사베이스','심리학전공','역사학전공','영어전공','임용베이스','재경관리사베이스','전공위주','전공자','전기기사','전산회계베이스','통계학전공','행정법베이스','행정학전공','형사소송법베이스','회계세무전공'],
+  '토익베이스': ['영어강사경력','영어베이스','지텔프','토익베이스','해외거주수험생'],
+  // ── Q2 시험 ──
+  '국가직9급': ['1차2차병행','2관왕','7급병행','PSAT병행','국가직7급','국가직9급','국가직병행'],
+  '지방직9급': ['2관왕','지방직7급','지방직8급','지방직9급','지방직병행'],
+  '서울시9급': ['서울시8급','서울시9급'],
+  // ── Q5 기간 ──
+  '1년이내': ['6개월~1년','6개월미만','단기완성','단기합격'],
+  '1년이상': ['1년6개월~2년','1년~1년6개월','2년~3년','3년이상'],
+  // ── Q6 시간 ──
+  '하루10시간미만': ['하루10시간미만'],
+  '하루10시간이상': ['하루10시간','하루10시간이상','하루13시간','하루14시간이상'],
+  // ── Q7 학습방식 ──
+  '인강병행': ['1.2배속수강','1.3배속수강','1.5배속수강','1.6배속수강','1.8배속수강','2배속수강','3배속수강','오전인강','완강중심','인강병행'],
+  '기출반복': ['5급기출활용','OX중심','기출반복','기출위주','동형모의고사','문제풀이중심','봉투모의고사','빈출위주','빈칸학습','선지분석','오답노트','최신판례중심','출제경향분석','타직렬기출','판례중심','하프모의고사'],
+  '회독반복': ['개념중심','기본서회독','단권화','단어장회독','독해위주','두문자어암기','마인드맵활용','매일전과목','문법위주','복습중심','서브노트제작','서울시7급','암기중심','약점공략','영단어매일암기','영어단어매일암기','요약본제작','유형별정리','이론중심','이미지암기','키워드암기','타이핑단권화','필기노트','회독반복'],
+  '독학위주': ['기화펜활용','독학위주','막판스퍼트','말노트활용','맵핑학습','면접독학','무한반복','백지공부법','소거법활용','스토리텔링암기','압축이론','오전암기','취침전단어암기'],
+  '노량진현강': ['노량진현강','마킹연습','현강병행'],
+  '스터디병행': ['5분발표','과목깨기','면접스터디','모의면접','블로그정리','손필기노트','스터디병행','오프라인스터디','캠스터디'],
+  // ── Q8 걱정 ──
+  '멘탈관리': ['멘탈관리','수면관리','스트레스관리','운동병행','컨디션관리'],
+  '슬럼프극복': ['건강이슈','과도한자신감','모의고사슬럼프','번아웃경험','슬럼프극복','실수관리','연애영향','운동병행','체력관리'],
+  '영어약자': ['영어노베이스','영어약자'],
+  '효율중심': ['127회독법','147회독법','8421공부법','SNS차단','고시원공부','기숙사공부','녹음활용','목차학습','선택과집중','스터디플랜','스톱워치활용','시간관리','식사중학습','엑셀활용','영어노트','오후암기','이동시간학습','이면지활용','자기객관화','자기암시','주말휴식','집공부','타자공부법','틈새시간활용','파일정리','홀수짝수회독','효율중심'],
+  '이해중심학습': ['예습복습병행','이해중심학습'],
+  '커리큘럼중심': ['기초중심','다회독','단계별학습','당일복습','도시락','무주일공부','무회독반복','완강중심','전과목','전년도강의활용','커리큘럼중심'],
+};
+
+// ─── 본문 검색용 키워드 (TAG_EXPANSION + 자연어 표현) ───
+// 모달의 수기 발췌문에서 Q1/Q3/Q4 직접 언급 문장을 추출할 때 사용
+const Q_KEYWORDS = {
+  '전업수험생': ['전업수험생','재시생','초시생','전직렬전환','전역수험생','군복무수험생','20대초반','전업','풀타임','재시','초시','공시생'],
+  '직장병행': ['직장병행','재직수험생','고졸수험생','직장 다니','직장인','회사 다니','회사원','재직','퇴근 후','직장에서','재직중','재직 중','근무하면서','일하면서','주말반','야간반'],
+  '재학수험생': ['재학수험생','복학수험생','서울4년제','지거국','지방4년제','통학수험생','학업병행','휴학수험생','재학','학교 다니','대학생','휴학','복학','통학','학업과 병행','대학생활'],
+  '육아병행': ['육아병행','맘시생','워킹맘','40대','결혼준비','기혼','임신수험생','출산직후면접','육아','아이','아기','엄마','아빠','출산','임신','아이 키우','둘째','큰애'],
+  '퇴직수험생': ['퇴직수험생','경력단절','경력직','계약직경력','물류경력','사업경험','생산직경력','서비스직경력','주6일직장','콜센터경력','50대','퇴직','퇴사','회사 그만','그만두','사직','직장 그만'],
+  '아르바이트병행': ['아르바이트병행','N잡러','교대근무','주4일알바','아르바이트','알바','파트타임','교대 근무'],
+  '행정직': ['행정직','우정행정직','일행','일반행정'],
+  '세무직': ['세무직','관세직','관세','세관'],
+  '공안직': ['공안직','검찰직','교정직','보호직','철도경찰직','출입국관리직','검찰','교정','보호','출입국','철도경찰'],
+  '교육직': ['교육직','교육행정직','교행','교육 행정'],
+  '기술직': ['기술직','공업직','건축직','군수직','기계직','기계일반','농업직','방송통신직','시설직','임업직','전기직','전산직','토목직','환경직'],
+  '간호보건직': ['간호보건직','보건직','간호직','간호'],
+  '사회복지직': ['사회복지직','사회복지','복지직'],
+  '기타직렬': ['감사직','계리직','고용노동직','국회직8급','국회직9급','기상직','기체직','도시계획직','방재안전직','법원직9급','소수직렬','식품위생직','외무영사직','운전직','조경직','지적직','직업상담직','차량직','통계직','회계직','국회직','법원직'],
+  '노베이스': ['노베이스','노베','처음 시작','처음 도전','처음으로','아무것도 모르','백지 상태','비전공','비전공자','문과 출신','이과 출신','문외한','아예 모르'],
+  '수능베이스': ['수능베이스','경찰직베이스','국어베이스','제2외국어','한국사베이스','한능검','한능검베이스','한자자격증','수능','한국사능력'],
+  '전공자': ['전공자','4년제','경영학전공','경제학전공','공학전공','관세사베이스','국시베이스','국어전공','기사자격증','무역학전공','법학전공','부전공','사범대','사회과학전공','사회복지전공','석사학위','세무사베이스','심리학전공','역사학전공','영어전공','임용베이스','재경관리사베이스','전공위주','전기기사','전산회계베이스','통계학전공','행정법베이스','행정학전공','형사소송법베이스','회계세무전공','CPA베이스','IT경력','전공','학사','대학 졸업','학과','학부'],
+  '토익베이스': ['토익베이스','영어강사경력','영어베이스','지텔프','해외거주수험생','토익','영어 점수','토익 점수'],
+};
+
+const Q1_OPTS = ['전업수험생','직장병행','재학수험생','육아병행','퇴직수험생','아르바이트병행'];
+const Q2_OPTS = ['국가직9급','지방직9급','서울시9급'];
+const Q3_OPTS = ['행정직','세무직','공안직','교육직','기술직','간호보건직','사회복지직','기타직렬'];
+const Q4_OPTS = ['노베이스','수능베이스','전공자','토익베이스'];
+const Q5_OPTS = ['1년이내','1년이상'];
+const Q6_OPTS = ['하루10시간미만','하루10시간이상'];
+const Q7_OPTS = ['인강병행','기출반복','회독반복','독학위주','노량진현강','스터디병행'];
+const Q8_OPTS = ['멘탈관리','슬럼프극복','영어약자','효율중심','이해중심학습','커리큘럼중심'];
+const Q_OPTS_ALL = { Q1:Q1_OPTS, Q2:Q2_OPTS, Q3:Q3_OPTS, Q4:Q4_OPTS, Q5:Q5_OPTS, Q6:Q6_OPTS, Q7:Q7_OPTS, Q8:Q8_OPTS };
+
+let INDEX = [];          // [{p, q1set, q3set, q4set}, ...]
+let COMBO_MAP = new Map(); // "q1|q3|q4" → [passnote, ...]
+
+// ─────────── 데이터 로드 ───────────
+fetch('reviews_data.json')
+  .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+  .then(data => init(data))
+  .catch(e => {
+    document.getElementById('summary').innerHTML =
+      `<div class="error" style="grid-column: 1/-1;">로드 실패: ${e.message}<br><small>로컬 서버에서 열어야 합니다 (file:// 안 됨)</small></div>`;
+  });
+
+function init(data) {
+  // 영역 메타 로드 (storage v3) — 없으면 default 채워서 저장
+  AREAS = loadAreas();
+  const eligible = data.passnotes.filter(p => p.passage);
+  INDEX = eligible.map(p => {
+    const ts = new Set(p.tags || []);
+    const job = p.job || '';
+    // Q1 충돌 회피: 후기에 다른 Q1 직접 태그가 있으면 그 q 매칭 안 함
+    // (예: 후기에 '재학수험생' 태그 있으면 '전업수험생'으로 매칭 안 됨)
+    // Q3 우선순위: 행정직 + 교육직 둘 다 있으면 무조건 교육직 (행정직 매칭 차단)
+    const matchOpts = (opts, useJob, isQ1 = false) => new Set(opts.filter(q => {
+      if (isQ1) {
+        for (const o of Q1_OPTS) {
+          if (o !== q && ts.has(o)) return false;
+        }
+      }
+      if (q === '행정직' && ts.has('교육직')) return false;
+      const exp = TAG_EXPANSION[q] || [q];
+      return exp.some(t => ts.has(t) || (useJob && job === t));
+    }));
+    return {
+      p,
+      q1set: matchOpts(Q1_OPTS, false, true),
+      q2set: matchOpts(Q2_OPTS, false),
+      q3set: matchOpts(Q3_OPTS, true),
+      q4set: matchOpts(Q4_OPTS, false),
+      q5set: matchOpts(Q5_OPTS, false),
+      q6set: matchOpts(Q6_OPTS, false),
+      q7set: matchOpts(Q7_OPTS, false),
+      q8set: matchOpts(Q8_OPTS, false),
+    };
+  });
+
+  // 192 조합별 인덱스
+  for (const e of INDEX) {
+    for (const q1 of e.q1set) for (const q3 of e.q3set) for (const q4 of e.q4set) {
+      const key = `${q1}|${q3}|${q4}`;
+      if (!COMBO_MAP.has(key)) COMBO_MAP.set(key, []);
+      COMBO_MAP.get(key).push(e.p);
+    }
+  }
+
+  renderSummary(eligible.length, data.passnotes.length);
+  renderMatrices();
+  renderZeroList();
+
+  // 활성 탭이 no.01 외 영역이면 매트릭스 재렌더 (데이터 로드 후 0 → 실제값)
+  const activeBtn = document.querySelector('#tab-nav .tab.active');
+  if (activeBtn) {
+    const code = activeBtn.dataset.area;
+    if (code && code !== 'no.01' && AREAS[code]) renderAreaMatrix(code);
+  }
+}
+
+function renderSummary(eligibleN, totalN) {
+  const counts = [];
+  for (const q1 of Q1_OPTS) for (const q3 of Q3_OPTS) for (const q4 of Q4_OPTS) {
+    counts.push((COMBO_MAP.get(`${q1}|${q3}|${q4}`) || []).length);
+  }
+  const nonzero = counts.filter(c => c > 0).length;
+  const zero = counts.length - nonzero;
+  const total = counts.reduce((a,b)=>a+b, 0);
+  const max = Math.max(...counts);
+  document.getElementById('summary').innerHTML = `
+    <div class="stat" data-term="통계 카드"><strong>${eligibleN.toLocaleString()}</strong>passage 보유 후기 (전체 ${totalN.toLocaleString()})</div>
+    <div class="stat"><strong>192</strong>조합 (Q1·6 × Q3·8 × Q4·4)</div>
+    <div class="stat"><strong>${nonzero}</strong>1건 이상 매칭 (${(nonzero/192*100).toFixed(1)}%)</div>
+    <div class="stat"><strong>${zero}</strong>0건 (폴백 필요)</div>
+    <div class="stat"><strong>${(total/192).toFixed(1)}</strong>조합당 평균</div>
+    <div class="stat"><strong>${max}</strong>최대 매칭</div>
+  `;
+}
+
+function renderMatrices() {
+  const container = document.getElementById('matrices');
+  let html = '';
+  let firstQ1 = true;
+  let firstColHead = true, firstRowHead = true;
+  let firstCell = true, firstZero = true;
+  for (const q1 of Q1_OPTS) {
+    const h2T = firstQ1 ? ' data-term="Q1 섹션 헤더"' : '';
+    const tableT = firstQ1 ? ' data-term="조합 매트릭스"' : '';
+    html += `<h2${h2T}>Q1 = ${q1}</h2><table class="matrix"${tableT}><thead><tr><th>Q3 \\ Q4</th>`;
+    for (const q4 of Q4_OPTS) {
+      const t = (firstQ1 && firstColHead) ? ' data-term="열 머리"' : '';
+      if (firstQ1 && firstColHead) firstColHead = false;
+      html += `<th${t}>${q4}</th>`;
+    }
+    html += `</tr></thead><tbody>`;
+    for (const q3 of Q3_OPTS) {
+      const rowT = (firstQ1 && firstRowHead) ? ' data-term="행 머리"' : '';
+      if (firstQ1 && firstRowHead) firstRowHead = false;
+      html += `<tr><th${rowT}>${q3}</th>`;
+      for (const q4 of Q4_OPTS) {
+        const cnt = (COMBO_MAP.get(`${q1}|${q3}|${q4}`) || []).length;
+        const cls = cnt === 0 ? 'cell zero' : 'cell';
+        const data = cnt === 0 ? '' : ` data-q1="${q1}" data-q3="${q3}" data-q4="${q4}"`;
+        let term = '';
+        if (cnt > 0 && firstCell) { term = ' data-term="조합 셀"'; firstCell = false; }
+        else if (cnt === 0 && firstZero) { term = ' data-term="0건 셀"'; firstZero = false; }
+        html += `<td class="${cls}"${data}${term}>${cnt}</td>`;
+      }
+      html += `</tr>`;
+    }
+    html += `</tbody></table>`;
+    firstQ1 = false;
+  }
+  container.innerHTML = html;
+
+  // 클릭 핸들러
+  container.querySelectorAll('.cell:not(.zero)').forEach(td => {
+    td.addEventListener('click', () => {
+      openModal(td.dataset.q1, td.dataset.q3, td.dataset.q4);
+    });
+  });
+}
+
+function renderZeroList() {
+  const zeros = [];
+  for (const q1 of Q1_OPTS) for (const q3 of Q3_OPTS) for (const q4 of Q4_OPTS) {
+    if (!(COMBO_MAP.get(`${q1}|${q3}|${q4}`) || []).length) {
+      zeros.push([q1, q3, q4]);
+    }
+  }
+  if (zeros.length === 0) return;
+  const html = `
+    <div class="zero-list" data-term="0건 리스트">
+      <h3>0건 조합 (폴백 필요) — 총 ${zeros.length}개</h3>
+      <ul>
+        ${zeros.map(([a,b,c]) => `<li>${a} × ${b} × ${c}</li>`).join('')}
+      </ul>
+    </div>
+  `;
+  document.getElementById('zero-section').innerHTML = html;
+}
+
+// ─────────── 모달 ───────────
+let CURRENT_LIST = [];
+let CURRENT_TOP10 = [];
+let CURRENT_FEATURED = null;
+let CURRENT_FILTERED = null;
+let CURRENT_Q = [];                // legacy [Q1, Q3, Q4] — 기존 코드 호환용
+let CURRENT_AREA = 'no.01';        // Phase 4: 현재 모달이 다루는 영역
+let CURRENT_COMBO = {};             // Phase 4: 현재 모달의 조합 {Q1:'...', Q3:'...', ...}
+let CURRENT_PIN_RANK = new Map();
+let CURRENT_PIN_NOTES = new Map();
+let CURRENT_ENRICHED_MAP = new Map();
+let CURRENT_EXCLUDED = []; // Phase 6: 현재 (영역, 조합)에서 제외된 후기들 (또는 전역 제외)
+
+// 페르소나 선정과 동일한 passage 점수 키워드 (persona.html pickPassage 기준)
+const PASSAGE_KW = ['처음에','막막','걱정','불안','그래도','결국','해냈','됐','됩니다','버텼','꾸준','놓지','포기하지','다잡','마음','다짐','용기','희망','확신','다행','감사','조금씩','버티','버텨','한 발'];
+
+// ─────────── Phase 1: 영역(AREAS) — 사용자 편집 가능 ───────────
+// 기본 영역 (관리자가 수정/삭제 가능, 새 영역 추가 가능)
+// 각 영역: { name, matchKeys, location?(설명용) }
+const AREAS_DEFAULT = {
+  'no.01': { name: '동일경로 후기',     matchKeys: ['Q1','Q3','Q4'], location: 'persona passage' },
+  'no.02': { name: '패턴 인용구',       matchKeys: ['Q5','Q7','Q8'], location: 'persona hero-quote' },
+  'no.06': { name: '같은 출발점',       matchKeys: ['Q1','Q4'],      location: 'right-panel sec06' },
+  'no.07': { name: '다잡은 한 마디',    matchKeys: ['Q8'],           location: 'right-panel sec07' },
+  'no.08': { name: '첫 한 달 풍경',     matchKeys: ['Q1','Q3'],      location: 'right-panel sec08' },
+  'no.09': { name: '포기 직전',         matchKeys: ['Q1'],           location: 'right-panel sec09' },
+  'no.10': { name: '꾸준함 한 줄',      matchKeys: ['Q1','Q2','Q3','Q4','Q5','Q6','Q7','Q8'], location: 'right-panel sec10' },
+};
+// AREAS 는 storage 에서 로드 (없으면 default)
+function loadAreas() {
+  const s = getStore();
+  if (!s.areas || Object.keys(s.areas).length === 0) {
+    s.areas = JSON.parse(JSON.stringify(AREAS_DEFAULT));
+    setStore(s);
+  }
+  return s.areas;
+}
+function saveAreas(areas) {
+  const s = getStore();
+  s.areas = areas;
+  setStore(s);
+}
+// 새 영역 코드 자동 생성 (no.11, no.12, ...)
+function nextAreaCode(areas) {
+  const used = new Set(Object.keys(areas));
+  let n = 1;
+  while (used.has('no.' + String(n).padStart(2,'0'))) n++;
+  return 'no.' + String(n).padStart(2,'0');
+}
+let AREAS = {}; // init() 시 loadAreas() 로 채움
+
+// ─────────── Phase 1: 시나리오 상태(SC) ───────────
+// SC = 현재 admin selector의 8문항 답변 (핀 저장 시 함께 기록)
+const SC_DEMOS = [
+  {Q1:'직장병행',Q2:'국가직9급',Q3:'행정직',Q4:'노베이스',Q5:'1년이내',Q6:'하루10시간미만',Q7:['인강병행','기출반복'],Q8:'멘탈관리'},
+  {Q1:'전업수험생',Q2:'국가직9급',Q3:'세무직',Q4:'전공자',Q5:'1년이내',Q6:'하루10시간이상',Q7:['기출반복','독학위주'],Q8:'효율중심'},
+  {Q1:'육아병행',Q2:'지방직9급',Q3:'교육직',Q4:'노베이스',Q5:'1년이상',Q6:'하루10시간미만',Q7:['인강병행','회독반복'],Q8:'슬럼프극복'},
+  {Q1:'재학수험생',Q2:'서울시9급',Q3:'행정직',Q4:'수능베이스',Q5:'1년이내',Q6:'하루10시간이상',Q7:['인강병행','스터디병행'],Q8:'커리큘럼중심'},
+  {Q1:'퇴직수험생',Q2:'국가직9급',Q3:'공안직',Q4:'토익베이스',Q5:'1년이상',Q6:'하루10시간이상',Q7:['기출반복','회독반복'],Q8:'이해중심학습'},
+];
+let SC = JSON.parse(JSON.stringify(SC_DEMOS[0]));
+
+const SC_OPTIONS = {
+  Q1: [['전업수험생','전업'],['직장병행','직장'],['재학수험생','재학'],['육아병행','육아'],['퇴직수험생','퇴직'],['아르바이트병행','알바']],
+  Q2: [['국가직9급','국가직'],['지방직9급','지방직'],['서울시9급','서울시']],
+  Q3: [['행정직','행정'],['세무직','세무'],['공안직','공안'],['교육직','교육'],['기술직','기술'],['간호보건직','간호'],['사회복지직','복지'],['기타직렬','기타']],
+  Q4: [['노베이스','노베'],['수능베이스','수능'],['전공자','전공'],['토익베이스','토익']],
+  Q5: [['1년이내','1년내'],['1년이상','1년이상']],
+  Q6: [['하루10시간미만','10h미만'],['하루10시간이상','10h이상']],
+  Q7: [['인강병행','인강'],['기출반복','기출'],['회독반복','회독'],['독학위주','독학'],['노량진현강','노량진'],['스터디병행','스터디']],
+  Q8: [['멘탈관리','멘탈'],['슬럼프극복','슬럼프'],['영어약자','영어약'],['효율중심','효율'],['이해중심학습','이해'],['커리큘럼중심','커리']],
+};
+
+function comboKeyForArea(area, sc = SC) {
+  // 해당 영역의 matchKeys 만 사용해서 조합 키 생성
+  const keys = AREAS[area]?.matchKeys || [];
+  return keys.map(k => {
+    const v = sc[k];
+    return Array.isArray(v) ? v.join(',') : (v || '');
+  }).join('|');
+}
+
+function buildScenarioSelectors() {
+  for (const qk of ['Q1','Q2','Q3','Q4','Q5','Q6','Q8']) {
+    const sel = document.getElementById('sc-' + qk.toLowerCase());
+    if (!sel) continue;
+    sel.innerHTML = SC_OPTIONS[qk].map(([id, lbl]) => `<option value="${id}">${lbl}</option>`).join('');
+    sel.addEventListener('change', applyScenario);
+  }
+  const q7c = document.getElementById('sc-q7-checks');
+  if (q7c) {
+    q7c.innerHTML = SC_OPTIONS.Q7.map(([id, lbl]) =>
+      `<label><input type="checkbox" data-q7="${id}"> ${lbl}</label>`
+    ).join('');
+    q7c.querySelectorAll('input').forEach(cb => cb.addEventListener('change', applyScenario));
+  }
+}
+function applyScenario() {
+  const newSC = {};
+  for (const qk of ['Q1','Q2','Q3','Q4','Q5','Q6','Q8']) {
+    const sel = document.getElementById('sc-' + qk.toLowerCase());
+    newSC[qk] = sel.value;
+  }
+  newSC.Q7 = [...document.querySelectorAll('#sc-q7-checks input:checked')].map(cb => cb.dataset.q7);
+  SC = newSC;
+  // 모달 열려있으면 영역 헤더 진행률 등 재렌더
+  if (CURRENT_Q && CURRENT_Q.length) renderModalList();
+  // 탭 헤더 진행률 갱신 (탭 활성 시)
+  refreshAllAreaHeaders();
+}
+function syncScenarioFromSC() {
+  for (const qk of ['Q1','Q2','Q3','Q4','Q5','Q6','Q8']) {
+    const sel = document.getElementById('sc-' + qk.toLowerCase());
+    if (sel && SC[qk] != null) sel.value = SC[qk];
+  }
+  const q7set = new Set(SC.Q7 || []);
+  document.querySelectorAll('#sc-q7-checks input').forEach(cb => { cb.checked = q7set.has(cb.dataset.q7); });
+}
+
+// ─────────── Phase 1: 핀 저장 v2 + 마이그레이션 ───────────
+// v2 구조:
+//  {
+//    version: 2,
+//    pins: { "no.XX": [ {id, memo, answers, matchKeys, textChoice, pinnedAt} ] },
+//    excludesCombo: { "no.XX": { "<combo_key>": [id, ...] } },
+//    excludesGlobal: [id, ...],
+//    reviewed: { "no.XX": { "<combo_key>": true } }
+//  }
+const PIN_KEY = 'admin_pinned_passnotes_v1'; // legacy v1 key (마이그레이션 시 읽기)
+const STORE_KEY = 'admin_curation_v2';        // 신규 저장소
+
+function _migrate_v1_to_v3() {
+  const curRaw = localStorage.getItem(STORE_KEY);
+  if (curRaw) {
+    // 이미 store 있음 — v2 → v3 보강 (areas 없으면 default 추가)
+    try {
+      const cur = JSON.parse(curRaw);
+      if (cur.version >= 2 && !cur.areas) {
+        cur.areas = JSON.parse(JSON.stringify(AREAS_DEFAULT));
+        cur.version = 3;
+        localStorage.setItem(STORE_KEY, JSON.stringify(cur));
+      }
+    } catch {}
+    return;
+  }
+  // 신규 store 생성
+  const v1raw = localStorage.getItem(PIN_KEY);
+  const v3 = {
+    version: 3,
+    areas: JSON.parse(JSON.stringify(AREAS_DEFAULT)),
+    pins: {},
+    excludesCombo: {},
+    excludesGlobal: [],
+    reviewed: {},
+  };
+  if (v1raw) {
+    try {
+      const v1 = JSON.parse(v1raw);
+      if (typeof v1 === 'object' && !Array.isArray(v1)) {
+        const arr = [];
+        for (const [combo, list] of Object.entries(v1)) {
+          const [q1, q3, q4] = combo.split('|');
+          for (const x of (list || [])) {
+            const id   = typeof x === 'number' ? x : x.id;
+            const memo = typeof x === 'number' ? '' : (x.note || x.memo || '');
+            arr.push({
+              id, memo,
+              answers: { Q1: q1||'', Q3: q3||'', Q4: q4||'' },
+              matchKeys: ['Q1','Q3','Q4'],
+              pinnedAt: '',
+            });
+          }
+        }
+        if (arr.length) v3.pins['no.01'] = arr;
+      }
+    } catch {}
+  }
+  localStorage.setItem(STORE_KEY, JSON.stringify(v3));
+}
+_migrate_v1_to_v3();
+
+function getStore() {
+  try { return JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); }
+  catch { return { version: 2, pins: {}, excludesCombo: {}, excludesGlobal: [], reviewed: {} }; }
+}
+function setStore(obj) {
+  obj.version = 2;
+  if (!obj.pins) obj.pins = {};
+  if (!obj.excludesCombo) obj.excludesCombo = {};
+  if (!obj.excludesGlobal) obj.excludesGlobal = [];
+  if (!obj.reviewed) obj.reviewed = {};
+  localStorage.setItem(STORE_KEY, JSON.stringify(obj));
+}
+
+// 특정 (영역, 조합)에 핀된 후기 리스트 — Phase 4
+function getPinsForAreaAndCombo(area, combo) {
+  const def = AREAS[area];
+  if (!def) return [];
+  const matchKeys = def.matchKeys || [];
+  const all = getStore().pins[area] || [];
+  return all.filter(p => matchKeys.every(k => p.answers?.[k] === combo[k]))
+            .map(p => ({ id: p.id, note: p.memo || '' }));
+}
+
+// 특정 영역에 후기 ID 가 핀돼있는지 (현재 모달 조합 기준)
+function isPinnedInArea(passnoteId, area, combo) {
+  return getPinsForAreaAndCombo(area, combo).some(p => p.id === passnoteId);
+}
+
+// ── 레거시 호환 함수 (기존 호출처 안 깨지게) ──
+function getPinsForCombo(q1, q3, q4) {
+  return getPinsForAreaAndCombo('no.01', { Q1:q1, Q3:q3, Q4:q4 });
+}
+
+// ─────────── Phase 6: 제외 기능 ───────────
+function comboKeyOfArea(area, combo) {
+  const def = AREAS[area]; if (!def) return '';
+  return (def.matchKeys || []).map(k => combo[k] || '').join('|');
+}
+function getExcludesCombo(area, combo) {
+  const m = (getStore().excludesCombo || {})[area] || {};
+  return new Set(m[comboKeyOfArea(area, combo)] || []);
+}
+function getExcludesGlobal() {
+  return new Set(getStore().excludesGlobal || []);
+}
+function isExcludedLocal(id, area, combo) { return getExcludesCombo(area, combo).has(id); }
+function isExcludedGlobal(id) { return getExcludesGlobal().has(id); }
+function isExcluded(id, area, combo) { return isExcludedLocal(id, area, combo) || isExcludedGlobal(id); }
+
+function toggleLocalExclude(passnoteId) {
+  const area = CURRENT_AREA, combo = CURRENT_COMBO;
+  if (!area) return;
+  const def = AREAS[area]; if (!def) return;
+  const matchKeys = def.matchKeys || [];
+  const ck = comboKeyOfArea(area, combo);
+  const store = getStore();
+  if (!store.excludesCombo[area]) store.excludesCombo[area] = {};
+  if (!store.excludesCombo[area][ck]) store.excludesCombo[area][ck] = [];
+  const list = store.excludesCombo[area][ck];
+  const idx = list.indexOf(passnoteId);
+  if (idx >= 0) {
+    list.splice(idx, 1);
+  } else {
+    list.push(passnoteId);
+    // 배타성: 같은 (area, combo) 의 핀 자동 해제
+    const pl = store.pins[area] || [];
+    const pIdx = pl.findIndex(p => p.id === passnoteId && matchKeys.every(k => p.answers?.[k] === combo[k]));
+    if (pIdx >= 0) pl.splice(pIdx, 1);
+  }
+  setStore(store);
+  rebuildModalState();
+  renderModalList();
+}
+
+function toggleGlobalExclude(passnoteId) {
+  const store = getStore();
+  if (!store.excludesGlobal) store.excludesGlobal = [];
+  const idx = store.excludesGlobal.indexOf(passnoteId);
+  if (idx >= 0) {
+    store.excludesGlobal.splice(idx, 1);
+  } else {
+    store.excludesGlobal.push(passnoteId);
+    // 배타성: 모든 영역의 핀 자동 해제
+    for (const area of Object.keys(store.pins || {})) {
+      store.pins[area] = (store.pins[area] || []).filter(p => p.id !== passnoteId);
+    }
+  }
+  setStore(store);
+  rebuildModalState();
+  renderModalList();
+}
+
+// Phase 5: 후기 ID 가 핀된 모든 (영역, 조합, 메모) 반환
+function getAreasPinnedFor(passnoteId) {
+  const out = [];
+  const store = getStore();
+  for (const [area, list] of Object.entries(store.pins || {})) {
+    for (const p of list) {
+      if (p.id === passnoteId) {
+        out.push({ area, memo: p.memo || '', combo: p.answers || {}, matchKeys: p.matchKeys || [] });
+      }
+    }
+  }
+  return out;
+}
+function getPinsRaw() {
+  // 레거시 어댑터: v2의 no.01 핀들을 기존 v1 형식처럼 반환
+  const out = {};
+  const list = getStore().pins['no.01'] || [];
+  for (const p of list) {
+    const k = `${p.answers?.Q1||''}|${p.answers?.Q3||''}|${p.answers?.Q4||''}`;
+    if (!out[k]) out[k] = [];
+    out[k].push({ id: p.id, note: p.memo || '' });
+  }
+  return out;
+}
+function setPinsRaw(_obj) { /* deprecated; togglePin/setPinNote 가 직접 v2 store 갱신 */ }
+function normalizePinList(list) {
+  return (list || []).map(x => typeof x === 'number' ? { id: x, note: '' } : { id: x.id, note: x.note || '' });
+}
+
+// 탭 헤더 (영역 정보) 갱신 — 각 탭에 영역명·matchKeys·조합수·진행률 표시
+function refreshAllAreaHeaders() {
+  for (const area of Object.keys(AREAS)) {
+    const headerEl = document.getElementById('area-h-' + area.replace('.','_'));
+    if (!headerEl) continue;
+    const def = AREAS[area];
+    const reviewed = Object.keys((getStore().reviewed[area]) || {}).length;
+    headerEl.querySelector('.area-h-progress strong').textContent = reviewed;
+  }
+}
+
+// ── 점수 계산 내역 박스 ──
+function buildScoreBreakdown(e) {
+  const matched = e.matchedKw;
+  const matchedHtml = matched.length
+    ? matched.map(k => `<em>${escapeHtml(k)}</em>`).join(', ')
+    : '(매칭 없음)';
+  return `
+    <div class="score-breakdown">
+      <div class="sb-row">
+        <span class="sb-label">격려 키워드</span>
+        <span class="sb-value">${matched.length}개 매칭${matched.length ? ': ' + matchedHtml : ''}</span>
+        <span class="sb-pts">+${matched.length}</span>
+      </div>
+      <div class="sb-row">
+        <span class="sb-label">길이 보너스</span>
+        <span class="sb-value">passage ${e.psgLen}자 ${e.lengthBonus ? '(180~350 범위 ✓)' : '(180~350 범위 밖)'}</span>
+        <span class="sb-pts">${e.lengthBonus ? '+3' : '+0'}</span>
+      </div>
+      <div class="sb-row sb-total">
+        <span class="sb-label">총점</span>
+        <span class="sb-value"></span>
+        <span class="sb-pts">${e.pscore}</span>
+      </div>
+    </div>
+  `;
+}
+
+// ── 모달 상태 재계산 (핀 변경 시 재호출) ──
+function rebuildModalState() {
+  // Phase 4: INDEX 기반 동적 매칭 (CURRENT_COMBO 사용, 영역 무관)
+  const fullList = listMatchedPassnotes(CURRENT_COMBO).filter(p => p.passage);
+  // Phase 6: 제외 분리 (로컬 + 전역)
+  const exclLocal = getExcludesCombo(CURRENT_AREA, CURRENT_COMBO);
+  const exclGlob = getExcludesGlobal();
+  const baseList = fullList.filter(p => !exclLocal.has(p.id) && !exclGlob.has(p.id));
+  CURRENT_EXCLUDED = fullList.filter(p => exclLocal.has(p.id) || exclGlob.has(p.id));
+  const uniqKW = [...new Set(
+    Object.values(CURRENT_COMBO).flatMap(v => Q_KEYWORDS[v] || [])
+  )];
+  const pinned = getPinsForAreaAndCombo(CURRENT_AREA, CURRENT_COMBO);
+  CURRENT_PIN_RANK = new Map(pinned.map((x, i) => [x.id, i + 1]));
+  CURRENT_PIN_NOTES = new Map(pinned.map(x => [x.id, x.note || '']));
+
+  const enriched = baseList.map(p => {
+    const c = p.content || '';
+    let kwHits = 0;
+    for (const k of uniqKW) if (c.includes(k)) kwHits++;
+    const psg = p.passage || '';
+    const matchedKw = PASSAGE_KW.filter(k => psg.includes(k));
+    const psgLen = psg.length;
+    const lengthBonus = (psgLen >= 180 && psgLen <= 350) ? 3 : 0;
+    const pscore = matchedKw.length + lengthBonus;
+    const ym = String(p.year || '').match(/(\d{4})/);
+    return { p, kwHits, year: ym ? parseInt(ym[1]) : 0, pscore, matchedKw, lengthBonus, psgLen };
+  });
+
+  CURRENT_ENRICHED_MAP = new Map(enriched.map(e => [e.p.id, e]));
+
+  // 전체: 핀 순서(1,2,...) → 최신 → 본문매칭많은
+  CURRENT_LIST = [...enriched].sort((a, b) => {
+    const ar = CURRENT_PIN_RANK.get(a.p.id) || 9999;
+    const br = CURRENT_PIN_RANK.get(b.p.id) || 9999;
+    if (ar !== br) return ar - br;
+    return (b.year - a.year) || (b.kwHits - a.kwHits);
+  }).map(x => x.p);
+
+  // TOP 10: passage 점수 desc → 최신 → 본문매칭
+  CURRENT_TOP10 = [...enriched].sort((a, b) =>
+    (b.pscore - a.pscore) || (b.year - a.year) || (b.kwHits - a.kwHits)
+  ).slice(0, 10);
+
+  // 대표 후기: 첫 핀 > auto top1
+  if (pinned.length > 0) {
+    const firstId = pinned[0].id;
+    const firstPinned = enriched.find(e => e.p.id === firstId);
+    CURRENT_FEATURED = firstPinned || CURRENT_TOP10[0] || null;
+  } else {
+    CURRENT_FEATURED = CURRENT_TOP10[0] || null;
+  }
+}
+
+// Phase 4: openModal(area, combo) 시그니처
+//   레거시 openModal(q1, q3, q4) 호출도 지원 (자동으로 area='no.01' 처리)
+function openModal(areaOrQ1, comboOrQ3, q4) {
+  let area, combo;
+  if (typeof areaOrQ1 === 'string' && areaOrQ1.startsWith('no.')) {
+    area = areaOrQ1;
+    combo = comboOrQ3 || {};
+  } else {
+    // 레거시: openModal(q1, q3, q4)
+    area = 'no.01';
+    combo = { Q1: areaOrQ1, Q3: comboOrQ3, Q4: q4 };
+  }
+  CURRENT_AREA = area;
+  CURRENT_COMBO = combo;
+  CURRENT_Q = [combo.Q1 || '', combo.Q3 || '', combo.Q4 || ''];
+  CURRENT_FILTERED = null;
+  rebuildModalState();
+
+  const def = AREAS[area] || { matchKeys: [], name: '' };
+  const comboLabel = (def.matchKeys || []).map(k => combo[k]).filter(Boolean).join(' × ')
+                   || Object.values(combo).filter(Boolean).join(' × ');
+  document.getElementById('modal-title').textContent = `${area} · ${comboLabel}`;
+  document.getElementById('modal-meta').textContent =
+    `${def.name || ''} · ${CURRENT_LIST.length}건의 합격수기 · 사용자 핀 + 대표 후기 + TOP 10 + 전체`;
+  document.getElementById('modal-count').textContent = `${CURRENT_LIST.length}건`;
+  document.getElementById('modal-search').value = '';
+  renderModalList();
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+// 핀 토글 — Phase 4: 현재 (CURRENT_AREA, CURRENT_COMBO) 에 저장
+function togglePin(passnoteId) {
+  const area = CURRENT_AREA;
+  const combo = CURRENT_COMBO;
+  if (!area || !combo) return;
+  const def = AREAS[area];
+  if (!def) return;
+  const matchKeys = def.matchKeys || [];
+  const store = getStore();
+  if (!store.pins[area]) store.pins[area] = [];
+  const list = store.pins[area];
+  const idx = list.findIndex(p => p.id === passnoteId && matchKeys.every(k => p.answers?.[k] === combo[k]));
+  if (idx >= 0) {
+    list.splice(idx, 1);
+  } else {
+    const answers = {};
+    for (const k of matchKeys) answers[k] = combo[k];
+    list.push({
+      id: passnoteId,
+      memo: '',
+      answers,
+      matchKeys: [...matchKeys],
+      pinnedAt: new Date().toISOString(),
+    });
+    // 배타성: 핀 추가 시 같은 (영역, 조합)의 로컬 제외 + 전역 제외 자동 해제
+    const ck = comboKeyOfArea(area, combo);
+    if (store.excludesCombo[area]?.[ck]) {
+      store.excludesCombo[area][ck] = store.excludesCombo[area][ck].filter(id => id !== passnoteId);
+    }
+    store.excludesGlobal = (store.excludesGlobal || []).filter(id => id !== passnoteId);
+  }
+  setStore(store);
+  rebuildModalState();
+  renderModalList();
+}
+
+// 핀 메모 저장 — 재렌더 없이 store 만 갱신
+function setPinNote(passnoteId, note) {
+  const area = CURRENT_AREA;
+  const combo = CURRENT_COMBO;
+  if (!area || !combo) return;
+  const def = AREAS[area];
+  if (!def) return;
+  const matchKeys = def.matchKeys || [];
+  const store = getStore();
+  const list = store.pins[area] || [];
+  const item = list.find(p => p.id === passnoteId && matchKeys.every(k => p.answers?.[k] === combo[k]));
+  if (!item) return;
+  item.memo = String(note || '');
+  setStore(store);
+  if (typeof CURRENT_PIN_NOTES !== 'undefined' && CURRENT_PIN_NOTES) {
+    CURRENT_PIN_NOTES.set(passnoteId, item.memo);
+  }
+}
+
+// TOP 10 행 클릭 시 상세 펼침
+function toggleTop10Detail(pid) {
+  const row = document.getElementById('t10-detail-' + pid);
+  if (!row) return;
+  const open = row.style.display !== 'none';
+  row.style.display = open ? 'none' : 'table-row';
+  const trigger = document.querySelector('tr[data-detail-id="' + pid + '"]');
+  if (trigger) trigger.classList.toggle('expanded', !open);
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('modal-overlay').addEventListener('click', (e) => {
+  if (e.target.id === 'modal-overlay') closeModal();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeModal();
+});
+
+document.getElementById('modal-search').addEventListener('input', (e) => {
+  const q = e.target.value.trim().toLowerCase();
+  if (!q) {
+    CURRENT_FILTERED = null;
+    document.getElementById('modal-count').textContent = `${CURRENT_LIST.length}건`;
+  } else {
+    CURRENT_FILTERED = CURRENT_LIST.filter(p => {
+      const hay = (p.title || '') + ' ' + (p.tags || []).join(' ') + ' ' + (p.passage || '') + ' ' + (p.content || '');
+      return hay.toLowerCase().includes(q);
+    });
+    document.getElementById('modal-count').textContent = `${CURRENT_FILTERED.length}건 / 전체 ${CURRENT_LIST.length}건`;
+  }
+  renderModalList();
+});
+
+// 단일 후기 카드 HTML 생성 (대표 후기 / 전체 리스트 공통)
+function buildPassnoteHtml(p, idx, opts = {}) {
+  const [q1, q3, q4] = CURRENT_Q;
+  const expQ1 = new Set(TAG_EXPANSION[q1]);
+  const expQ3 = new Set(TAG_EXPANSION[q3]);
+  const expQ4 = new Set(TAG_EXPANSION[q4]);
+  const allKW = [
+    ...(Q_KEYWORDS[q1] || []),
+    ...(Q_KEYWORDS[q3] || []),
+    ...(Q_KEYWORDS[q4] || []),
+  ];
+  const isFirst = opts.isFirst === true;
+  const isFeatured = opts.isFeatured === true;
+  const passageScore = opts.passageScore;
+  const pinRank = CURRENT_PIN_RANK.get(p.id);
+  const isPinned = pinRank !== undefined;
+
+  const meta = [p.year, p.exam, p.grade, p.region, p.job, p.period].filter(Boolean).join(' · ');
+  let firstMatchedSeen = false, firstPlainSeen = false;
+  const tagsHtml = (p.tags || []).map(t => {
+    let cls = 'pn-tag';
+    if (expQ1.has(t)) cls += ' matched-q1';
+    else if (expQ3.has(t) || p.job === t) cls += ' matched-q3';
+    else if (expQ4.has(t)) cls += ' matched-q4';
+    let term = '';
+    if (isFirst) {
+      const isMatched = cls.includes('matched');
+      if (isMatched && !firstMatchedSeen) { firstMatchedSeen = true; term = ' data-term="매칭 태그"'; }
+      else if (!isMatched && !firstPlainSeen) { firstPlainSeen = true; term = ' data-term="일반 태그"'; }
+    }
+    return `<span class="${cls}"${term}>${escapeHtml(t)}</span>`;
+  }).join('');
+
+  const excerpt = pickContextExcerpt(p.content || '', allKW);
+  const passageHtml = excerpt
+    ? `<p>${highlight(escapeHtml(excerpt.text), allKW)}</p>`
+      + `<div class="pn-passage-note">💡 본문 전체 매칭 <strong>${excerpt.totalContentHits}개</strong> · 이 문단 ${excerpt.hits}개 · 매칭 문단 ${excerpt.matchedCount}/${excerpt.totalParagraphs}</div>`
+    : `<p>${escapeHtml(p.passage || '')}</p>`
+      + `<div class="pn-passage-note fallback">⚠ 본문에 Q1/Q3/Q4 키워드 매칭 0개 — 기본 발췌문</div>`;
+
+  const titleEl = p.url
+    ? `<a href="${p.url}" target="_blank" rel="noopener">${escapeHtml(p.title || '')}</a>`
+    : escapeHtml(p.title || '');
+  const quotesHtml = (p.quotes && p.quotes.length)
+    ? `<div class="pn-quotes">
+         <span class="pn-quotes-toggle"${isFirst ? ' data-term="인용구 토글"' : ''} onclick="toggleQuotes(this)">▸ 인용구 ${p.quotes.length}개 보기</span>
+         <ul class="pn-quote-list"${isFirst ? ' data-term="인용구 리스트"' : ''} style="display:none;">
+           ${p.quotes.map((q, qi) => `<li${isFirst && qi===0 ? ' data-term="인용구 항목"' : ''}>${escapeHtml(q)}</li>`).join('')}
+         </ul>
+       </div>`
+    : '';
+
+  // 크로스 영역 핀 배지 — 이 후기가 핀된 모든 영역
+  const crossPins = getAreasPinnedFor(p.id);
+  const crossPinsHtml = crossPins.length > 0
+    ? `<div class="cross-area-pins">
+        <span class="cap-label">📌 핀:</span>
+        ${crossPins.map(x => {
+          const isCurrent = x.area === CURRENT_AREA &&
+            (AREAS[x.area]?.matchKeys || []).every(k => x.combo[k] === CURRENT_COMBO[k]);
+          const aName = AREAS[x.area]?.name || '';
+          return `<span class="cross-pin${isCurrent ? ' current' : ''}" title="${escapeHtml(aName)}${x.memo ? ' · 메모: ' + escapeHtml(x.memo) : ''}">${x.area}<span class="cp-name">${escapeHtml(aName)}</span></span>`;
+        }).join('')}
+      </div>`
+    : '';
+
+  const pinnedBadge = isPinned
+    ? `<div class="pn-pinned-badge">📌 사용자 선정 #${pinRank}${isFeatured ? ' · 대표 후기로 사용' : ''}</div>`
+    : '';
+  const featBadge = (isFeatured && !isPinned)
+    ? `<div class="pn-featured-badge">★ 대표 후기${passageScore != null ? ` · passage 점수 ${passageScore}` : ''}</div>`
+    : '';
+  const exclLocal = isExcludedLocal(p.id, CURRENT_AREA, CURRENT_COMBO);
+  const exclGlob  = isExcludedGlobal(p.id);
+  const actionsBar = `<div class="pn-actions">
+    <button class="pn-pin${isPinned ? ' pinned' : ''}" onclick="event.stopPropagation(); togglePin(${p.id})" title="${isPinned ? '핀 해제' : '우선 사용 지정'}">${isPinned ? `📌 #${pinRank}` : '📌'}</button>
+    <button class="pn-excl pn-excl-local${exclLocal ? ' active' : ''}" onclick="event.stopPropagation(); toggleLocalExclude(${p.id})" title="${exclLocal ? '이 조합 제외 해제' : '이 조합에서만 제외'}">🚫</button>
+    <button class="pn-excl pn-excl-global${exclGlob ? ' active' : ''}" onclick="event.stopPropagation(); toggleGlobalExclude(${p.id})" title="${exclGlob ? '전역 제외 해제' : '전역 제외 (모든 영역에서)'}">🌐</button>
+  </div>`;
+  const pinMemo = isPinned ? `
+      <div class="pn-pin-memo">
+        <label class="pn-pin-memo-label">📝 메모</label>
+        <textarea
+          placeholder="이 후기에 대한 메모 (왜 선정했는지, 어떻게 쓸지 등)…"
+          onclick="event.stopPropagation()"
+          oninput="setPinNote(${p.id}, this.value)"
+          onblur="setPinNote(${p.id}, this.value)">${escapeHtml(CURRENT_PIN_NOTES.get(p.id) || '')}</textarea>
+      </div>` : '';
+  const cardClass = `passnote${isFeatured ? ' featured' : ''}${isPinned ? ' user-pinned' : ''}${(exclLocal || exclGlob) ? ' excluded' : ''}`;
+  const idxLabel = idx != null ? `[${idx + 1}] ` : '';
+
+  return `
+    <div class="${cardClass}"${isFirst ? ' data-term="후기 카드"' : ''}>
+      ${actionsBar}
+      ${pinnedBadge}${featBadge}
+      ${crossPinsHtml}
+      ${pinMemo}
+      <div class="pn-header"${isFirst ? ' data-term="카드 헤더"' : ''}>
+        <div class="pn-title"${isFirst ? ' data-term="카드 제목"' : ''}>${idxLabel}${titleEl}</div>
+        <div class="pn-meta">조회 ${p.views || 0}</div>
+      </div>
+      <div class="pn-meta"${isFirst ? ' data-term="메타 라인"' : ''}>${meta}</div>
+      <div class="pn-tags"${isFirst ? ' data-term="태그 칩 묶음"' : ''}>${tagsHtml}</div>
+      <div class="pn-passage"${isFirst ? ' data-term="수기 발췌문"' : ''}>${passageHtml}</div>
+      ${quotesHtml}
+    </div>
+  `;
+}
+
+// 모달 본문 = 대표 후기 + TOP 10 + 전체 리스트
+function renderModalList() {
+  const [q1, q3, q4] = CURRENT_Q;
+  const listToRender = CURRENT_FILTERED || CURRENT_LIST;
+  let html = '';
+
+  // 1) 대표 후기 (passage 점수 1위 또는 첫 핀)
+  if (CURRENT_FEATURED) {
+    const isPinFeatured = CURRENT_PIN_RANK.has(CURRENT_FEATURED.p.id);
+    const subText = isPinFeatured
+      ? '사용자 핀 #1 — 페르소나에 표시 (auto 점수 1위 덮어씀)'
+      : 'passage 점수 1위 — 페르소나에 실제 표시되는 후기';
+    html += `
+      <div class="modal-section">
+        <div class="ms-title">★ 대표 후기 <span class="ms-sub">${subText}</span></div>
+        ${buildScoreBreakdown(CURRENT_FEATURED)}
+        ${buildPassnoteHtml(CURRENT_FEATURED.p, null, { isFirst: true, isFeatured: true, passageScore: CURRENT_FEATURED.pscore })}
+      </div>
+    `;
+  }
+
+  // 2) TOP 10 (점수 기준) — 행 클릭 시 상세 펼침
+  if (CURRENT_TOP10.length > 0) {
+    html += `
+      <div class="modal-section">
+        <div class="ms-title">점수 TOP 10 <span class="ms-sub">격려 키워드(${PASSAGE_KW.length}개) + 길이 180~350자(+3) · 행 클릭 시 펼침</span></div>
+        <table class="top10-table">
+          <thead><tr><th style="width:50px;">#</th><th style="width:50px;">점수</th><th>제목</th><th style="width:54px;">연도</th><th style="width:80px;">본문매칭</th></tr></thead>
+          <tbody>
+            ${CURRENT_TOP10.map((e, i) => {
+              const pid = e.p.id;
+              const pinRank = CURRENT_PIN_RANK.get(pid);
+              const pinMark = pinRank !== undefined ? `<span class="t10-pin-mark">📌 #${pinRank}</span>` : '';
+              const titleSafe = escapeHtml((e.p.title||'').slice(0, 60));
+              return `
+                <tr class="top10-row${i === 0 ? ' featured-row' : ''}" data-detail-id="${pid}" onclick="toggleTop10Detail(${pid})">
+                  <td>${i + 1}</td>
+                  <td class="t10-score">${e.pscore}</td>
+                  <td class="t10-title"><span style="cursor:pointer;">${titleSafe}</span>${pinMark}</td>
+                  <td>${e.year || '?'}</td>
+                  <td>${e.kwHits}</td>
+                </tr>
+                <tr class="top10-detail-row" id="t10-detail-${pid}" style="display:none;">
+                  <td colspan="5">
+                    ${buildScoreBreakdown(e)}
+                    ${buildPassnoteHtml(e.p, null, { isFirst: false, isFeatured: false })}
+                  </td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  // 3) 전체 후기 리스트
+  const filteredNote = CURRENT_FILTERED ? ` · 필터 ${listToRender.length}/${CURRENT_LIST.length}건` : '';
+  html += `
+    <div class="modal-section">
+      <div class="ms-title">전체 후기 <span class="ms-sub">${listToRender.length}건${filteredNote} · 최신순 → 본문매칭순</span></div>
+      ${listToRender.length > 0
+        ? listToRender.map((p, i) => buildPassnoteHtml(p, i, { isFirst: false })).join('')
+        : '<div class="loading">검색 결과 없음</div>'}
+    </div>
+  `;
+
+  // Phase 6: 제외된 후기 섹션 (하단, 접힘)
+  if (CURRENT_EXCLUDED && CURRENT_EXCLUDED.length > 0) {
+    html += `
+      <div class="modal-section excluded-section collapsed">
+        <div class="ms-title" onclick="this.parentElement.classList.toggle('collapsed'); const tg=this.querySelector('.excl-toggle'); if(tg) tg.textContent = this.parentElement.classList.contains('collapsed')?'▸':'▾';">
+          🚫 제외된 후기 <span class="ms-sub">${CURRENT_EXCLUDED.length}건 · 클릭해서 펼치기</span>
+          <span class="excl-toggle">▸</span>
+        </div>
+        <div class="excluded-list">
+          ${CURRENT_EXCLUDED.map(p => buildPassnoteHtml(p, null, { isFirst: false })).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  document.getElementById('modal-list').innerHTML = html;
+}
+
+function toggleQuotes(el) {
+  const ul = el.nextElementSibling;
+  const open = ul.style.display !== 'none';
+  ul.style.display = open ? 'none' : 'block';
+  el.textContent = (open ? '▸' : '▾') + el.textContent.slice(1);
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ─────────── 문단 추출 + 하이라이트 ───────────
+// 문장 단위가 아니라 "문단" 단위로 뽑아 맥락 보존.
+// Q-키워드가 들어간 문단 중 가장 적합한 1개를 선택 (키워드 수 + 길이 sweet spot)
+function splitParagraphs(text) {
+  if (!text) return [];
+  let parts = text.split(/\n\n+/).map(p => p.trim()).filter(p => p.length >= 30);
+  if (parts.length < 3) {
+    parts = text.split(/\n+/).map(p => p.trim()).filter(p => p.length >= 30);
+  }
+  return parts;
+}
+function pickContextExcerpt(content, keywords) {
+  if (!content) return null;
+  const kws = [...new Set(keywords)].filter(k => k.length > 0);
+  if (kws.length === 0) return null;
+  // 본문 전체 distinct 키워드 매칭 수 (모달 리스트 정렬 기준과 일치)
+  const totalContentHits = kws.filter(k => content.includes(k)).length;
+  const paragraphs = splitParagraphs(content);
+  const matched = paragraphs.map((text, idx) => {
+    const hits = kws.filter(k => text.includes(k));
+    return { text, idx, hits: hits.length };
+  }).filter(p => p.hits > 0);
+  if (matched.length === 0) return null;
+  // 점수: 키워드 수 + 길이 sweet spot (100~350자 보너스)
+  matched.forEach(m => {
+    let score = m.hits * 3;
+    const len = m.text.length;
+    if (len >= 100 && len <= 350) score += 4;
+    else if (len >= 60 && len <= 500) score += 2;
+    else if (len > 700) score -= 2;
+    m.score = score;
+  });
+  matched.sort((a, b) => b.score - a.score);
+  let best = matched[0].text;
+  // 너무 길면 첫 키워드 주변 윈도우만
+  if (best.length > 500) {
+    const positions = kws.map(k => best.indexOf(k)).filter(i => i >= 0);
+    if (positions.length) {
+      const firstHit = Math.min(...positions);
+      const start = Math.max(0, firstHit - 80);
+      const end = Math.min(best.length, firstHit + 350);
+      best = (start > 0 ? '… ' : '') + best.slice(start, end) + (end < best.length ? ' …' : '');
+    }
+  }
+  return { text: best, hits: matched[0].hits, totalParagraphs: paragraphs.length, matchedCount: matched.length, totalContentHits };
+}
+function highlight(text, keywords) {
+  const kws = [...new Set(keywords)].filter(k => k.length > 0)
+    .sort((a, b) => b.length - a.length); // 긴 키워드 먼저
+  if (kws.length === 0) return text;
+  const escaped = kws.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const re = new RegExp(`(${escaped.join('|')})`, 'g');
+  return text.replace(re, '<mark>$1</mark>');
+}
+
+// ─────────── Tabs (event delegation — 동적 nav 호환) ───────────
+function tabIdOf(code) { return 'tab-' + code.replace('.', ''); }
+
+document.getElementById('tab-nav').addEventListener('click', (e) => {
+  // 편집 버튼 클릭
+  if (e.target.classList.contains('tab-edit-btn')) {
+    e.stopPropagation();
+    const btn = e.target.closest('.tab');
+    if (btn) openAreaEditor(btn.dataset.area || ('no.' + (btn.dataset.tab||'').replace(/^no/,'')));
+    return;
+  }
+  // 새 영역 추가 버튼
+  if (e.target.classList.contains('tab-add-btn')) {
+    openAreaEditor(null);
+    return;
+  }
+  const btn = e.target.closest('.tab');
+  if (!btn) return;
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  const code = btn.dataset.area || ('no.' + (btn.dataset.tab||'').replace(/^no/,''));
+  // Phase 5: 핀 일람 특수 탭
+  if (code === 'all-pins') {
+    let content = document.getElementById('tab-all-pins');
+    if (!content) {
+      content = document.createElement('div');
+      content.id = 'tab-all-pins';
+      content.className = 'tab-content';
+      document.querySelector('.container').appendChild(content);
+    }
+    renderAllPinsTab();
+    content.classList.add('active');
+    return;
+  }
+  let content = document.getElementById(tabIdOf(code));
+  if (!content) content = createTabContent(code);
+  if (content) content.classList.add('active');
+});
+
+// 동적 탭 nav 빌드 — AREAS 변경 시 호출
+function refreshTabNav() {
+  const navEl = document.getElementById('tab-nav');
+  if (!navEl) return;
+  const areas = loadAreas();
+  // 현재 활성 탭 보존
+  const activeArea = navEl.querySelector('.tab.active')?.dataset.area;
+  let html = '';
+  let firstCode = null;
+  for (const [code, def] of Object.entries(areas)) {
+    if (firstCode == null) firstCode = code;
+    const dataTab = code.replace('.', '');
+    const isActive = code === activeArea;
+    const termAttr = (firstCode === code) ? ' data-term="탭"' : '';
+    html += `<button class="tab${isActive ? ' active' : ''}" data-tab="${dataTab}" data-area="${code}"${termAttr}>
+      ${code} ${escapeHtml(def.name || '')}
+      <span class="tab-edit-btn" title="이 영역 편집">✏</span>
+    </button>`;
+  }
+  html += `<button class="tab-add-btn" title="새 영역 추가">+ 새 영역</button>`;
+  // Phase 5: 핀 일람 special tab (AREAS 와 별개)
+  html += `<button class="tab tab-special" data-tab="all-pins" data-area="all-pins" title="모든 영역의 핀 한눈에">📌 핀 일람</button>`;
+  navEl.innerHTML = html;
+
+  // 활성 탭 콘텐츠 표시
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  const activeBtn = navEl.querySelector('.tab.active') || navEl.querySelector('.tab');
+  if (activeBtn) {
+    if (!activeBtn.classList.contains('active')) activeBtn.classList.add('active');
+    const code = activeBtn.dataset.area;
+    let content = document.getElementById(tabIdOf(code));
+    if (!content) content = createTabContent(code);
+    if (content) content.classList.add('active');
+  }
+}
+
+// 탭 콘텐츠 div 가 없으면 placeholder 로 생성
+function createTabContent(code) {
+  const tabId = tabIdOf(code);
+  let div = document.getElementById(tabId);
+  if (div) return div;
+  const def = loadAreas()[code] || {};
+  div = document.createElement('div');
+  div.id = tabId;
+  div.className = 'tab-content';
+  div.innerHTML = `
+    <div class="placeholder">
+      <strong>${code} — ${escapeHtml(def.name || '(이름 없음)')}</strong>
+      매칭 키: ${(def.matchKeys || []).join(' × ') || '(미지정)'}<br>
+      ${def.intent ? `<span style="display:inline-block;margin-top:8px;font-size:11px;color:var(--accent-blue);">💡 ${escapeHtml(def.intent)}</span><br>` : ''}
+      <span style="opacity:.7;">셀 클릭 → 모달에서 후기 검수.</span>
+    </div>
+  `;
+  document.querySelector('.container').appendChild(div);
+  return div;
+}
+
+// ─────────── 영역 편집 다이얼로그 ───────────
+function openAreaEditor(code) {
+  const isNew = !code;
+  const areas = loadAreas();
+  const def = isNew ? { name: '', matchKeys: [] } : (areas[code] || { name: '', matchKeys: [] });
+  const targetCode = isNew ? nextAreaCode(areas) : code;
+
+  document.getElementById('ae-title').textContent = isNew ? `새 영역 추가 (${targetCode})` : `${code} 편집`;
+  document.getElementById('ae-name').value = def.name || '';
+  document.getElementById('ae-intent').value = def.intent || '';
+  const Q_DESC = {
+    Q1: { title: '상황',     opts: '전업·직장·재학·육아·퇴직·알바' },
+    Q2: { title: '시험',     opts: '국가직·지방직·서울시 (9급)' },
+    Q3: { title: '직렬',     opts: '행정·세무·공안·교육·기술·간호·복지·기타' },
+    Q4: { title: '베이스',   opts: '노베·수능·전공자·토익' },
+    Q5: { title: '기간',     opts: '1년이내 / 1년이상' },
+    Q6: { title: '하루공부량', opts: '10시간 미만 / 이상' },
+    Q7: { title: '학습방식 (복수)', opts: '인강·기출·회독·독학·노량진·스터디' },
+    Q8: { title: '걱정',     opts: '멘탈·슬럼프·영어·효율·이해·커리큘럼' },
+  };
+  const checksEl = document.getElementById('ae-matchkeys');
+  checksEl.innerHTML = ['Q1','Q2','Q3','Q4','Q5','Q6','Q7','Q8'].map(q => {
+    const checked = (def.matchKeys || []).includes(q) ? 'checked' : '';
+    const d = Q_DESC[q];
+    return `<label title="${d.opts}">
+      <input type="checkbox" name="ae-q" value="${q}" ${checked}>
+      <span><strong>${q}</strong> · ${d.title} <span class="ae-q-hint">(${d.opts})</span></span>
+    </label>`;
+  }).join('');
+  const delBtn = document.getElementById('ae-btn-delete');
+  delBtn.style.display = isNew ? 'none' : 'inline-block';
+
+  const pinCount = (getStore().pins[targetCode] || []).length;
+  const warnEl = document.getElementById('ae-warn');
+  warnEl.innerHTML = pinCount > 0
+    ? `⚠ matchKeys 변경 시 이 영역의 기존 핀 <strong>${pinCount}건</strong>이 모두 사라집니다.`
+    : `⚠ matchKeys 변경 시 이 영역의 핀이 모두 사라집니다.`;
+
+  document.getElementById('ae-btn-save').onclick = () => saveAreaFromForm(code, isNew, targetCode);
+  delBtn.onclick = () => deleteArea(code);
+  document.getElementById('ae-btn-cancel').onclick = closeAreaEditor;
+
+  document.getElementById('area-editor-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('ae-name').focus(), 30);
+}
+function closeAreaEditor() {
+  document.getElementById('area-editor-overlay').classList.remove('open');
+}
+document.getElementById('area-editor-overlay').addEventListener('click', (e) => {
+  if (e.target.id === 'area-editor-overlay') closeAreaEditor();
+});
+
+function saveAreaFromForm(code, isNew, targetCode) {
+  const name = document.getElementById('ae-name').value.trim();
+  if (!name) { alert('이름을 입력하세요'); return; }
+  const intent = document.getElementById('ae-intent').value.trim();
+  const matchKeys = [...document.querySelectorAll('input[name="ae-q"]:checked')].map(cb => cb.value);
+  if (matchKeys.length === 0) { alert('matchKeys 최소 1개 이상 선택'); return; }
+
+  const areas = loadAreas();
+  const oldDef = areas[targetCode];
+  const oldKeys = oldDef ? [...(oldDef.matchKeys || [])].sort().join(',') : '';
+  const newKeys = [...matchKeys].sort().join(',');
+  if (oldDef && oldKeys !== newKeys) {
+    const store = getStore();
+    const pinCount = (store.pins[targetCode] || []).length;
+    if (pinCount > 0) {
+      const ok = confirm(`${targetCode}의 matchKeys 변경하면 기존 핀 ${pinCount}건이 사라집니다.\n진행할까요?`);
+      if (!ok) return;
+      store.pins[targetCode] = [];
+      delete store.excludesCombo[targetCode];
+      delete store.reviewed[targetCode];
+      setStore(store);
+    }
+  }
+  areas[targetCode] = { ...(oldDef || {}), name, intent, matchKeys };
+  saveAreas(areas);
+  AREAS = areas;
+
+  // 활성 탭을 새/편집된 탭으로 전환
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  closeAreaEditor();
+  refreshTabNav();
+  // 새 활성 탭 강제로 targetCode
+  const navEl = document.getElementById('tab-nav');
+  navEl.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  const target = navEl.querySelector(`.tab[data-area="${targetCode}"]`);
+  if (target) target.classList.add('active');
+  let content = document.getElementById(tabIdOf(targetCode));
+  if (!content) content = createTabContent(targetCode);
+  if (content) {
+    // 변경된 정의 반영해서 placeholder 갱신
+    const def = AREAS[targetCode];
+    content.innerHTML = `
+      <div class="placeholder">
+        <strong>${targetCode} — ${escapeHtml(def.name)}</strong>
+        매칭 키: ${(def.matchKeys || []).join(' × ')}<br>
+        <span style="opacity:.7;">매트릭스 표시는 다음 단계에서 구현됩니다.</span>
+      </div>`;
+    content.classList.add('active');
+  }
+}
+
+function deleteArea(code) {
+  if (!code) return;
+  const ok = confirm(`${code} 영역을 삭제하시겠습니까?\n이 영역의 핀과 메모도 같이 사라집니다.`);
+  if (!ok) return;
+  const areas = loadAreas();
+  delete areas[code];
+  saveAreas(areas);
+  AREAS = areas;
+  const store = getStore();
+  delete store.pins[code];
+  delete store.excludesCombo[code];
+  delete store.reviewed[code];
+  setStore(store);
+  const div = document.getElementById(tabIdOf(code));
+  if (div) div.remove();
+  closeAreaEditor();
+  refreshTabNav();
+}
+
+// 페이지 로드 시점에 탭 nav 동적 빌드 (AREAS storage 기반)
+refreshTabNav();
+
+// ─────────── Phase 3: 제네릭 매트릭스 렌더러 ───────────
+function countCombo(combo) {
+  if (!INDEX || !INDEX.length) return 0;
+  return INDEX.filter(e => Object.entries(combo).every(([k, v]) => {
+    const setKey = k.toLowerCase() + 'set';
+    return e[setKey] && e[setKey].has(v);
+  })).length;
+}
+function listMatchedPassnotes(combo) {
+  if (!INDEX || !INDEX.length) return [];
+  return INDEX.filter(e => Object.entries(combo).every(([k, v]) => {
+    const setKey = k.toLowerCase() + 'set';
+    return e[setKey] && e[setKey].has(v);
+  })).map(e => e.p);
+}
+
+function renderAreaMatrix(area) {
+  // no.01 은 기존 renderMatrices() 가 처리 — 건드리지 않음
+  if (area === 'no.01') return;
+  const def = AREAS[area];
+  if (!def) return;
+  let tabDiv = document.getElementById(tabIdOf(area));
+  if (!tabDiv) tabDiv = createTabContent(area);
+
+  // INDEX 가 아직 비어있으면 (데이터 로드 전) 안내만 출력
+  if (!INDEX || !INDEX.length) {
+    tabDiv.innerHTML = '<div class="placeholder">데이터 로드 중...<br><span style="font-size:11px;opacity:.7;">로드 완료되면 자동으로 매트릭스가 표시됩니다.</span></div>';
+    return;
+  }
+
+  const mk = def.matchKeys || [];
+  const dim = mk.length;
+
+  // 영역 헤더
+  const totalCombos = mk.reduce((acc, k) => acc * (Q_OPTS_ALL[k]?.length || 1), 1);
+  let header = `
+    <div class="area-header">
+      <div>
+        <div class="area-h-name">${escapeHtml(def.name)} <span style="font-size:11px;color:var(--text-muted);font-weight:400;">(${area})</span></div>
+        <div class="area-h-keys">매칭 키: ${mk.length ? mk.map(k => `<code>${k}</code>`).join(' × ') : '<em>미지정</em>'}</div>
+        ${def.intent ? `<div style="font-size:11.5px;color:var(--accent-blue);margin-top:4px;">💡 ${escapeHtml(def.intent)}</div>` : ''}
+      </div>
+      <div class="area-h-stat"><strong>${dim>0 ? totalCombos : '?'}</strong>총 조합</div>
+      <div class="area-h-progress"><strong>0</strong>검수</div>
+    </div>`;
+
+  let body = '';
+  if (dim === 0) {
+    body = '<div class="placeholder"><strong>matchKeys 미지정</strong>탭 옆 ✏ 클릭해서 Q들을 선택하세요</div>';
+  } else if (dim > 3) {
+    body = `<div class="placeholder"><strong>${dim}차원 (조합 ${totalCombos}개)</strong>매트릭스 표시 X — 점수 상위 후기 리스트는 다음 단계에서 구현</div>`;
+  } else if (dim === 1) {
+    body = renderMatrix1D(area, mk[0]);
+  } else if (dim === 2) {
+    body = renderMatrix2D(area, mk[0], mk[1]);
+  } else if (dim === 3) {
+    body = renderMatrix3D(area, mk[0], mk[1], mk[2]);
+  }
+
+  tabDiv.innerHTML = header + body;
+  bindMatrixCellClicks(tabDiv, area);
+}
+
+function renderMatrix1D(area, k) {
+  const opts = Q_OPTS_ALL[k] || [];
+  let html = `<table class="matrix"><thead><tr>`;
+  opts.forEach(o => html += `<th>${escapeHtml(o)}</th>`);
+  html += `</tr></thead><tbody><tr>`;
+  for (const o of opts) {
+    const combo = { [k]: o };
+    const cnt = countCombo(combo);
+    const cls = cnt === 0 ? 'cell zero' : 'cell';
+    const data = cnt > 0 ? ` data-combo='${escapeHtml(JSON.stringify(combo))}'` : '';
+    html += `<td class="${cls}"${data}>${cnt}</td>`;
+  }
+  html += `</tr></tbody></table>`;
+  return html;
+}
+
+function renderMatrix2D(area, k1, k2) {
+  const opts1 = Q_OPTS_ALL[k1] || [], opts2 = Q_OPTS_ALL[k2] || [];
+  let html = `<table class="matrix"><thead><tr><th>${k1} \\ ${k2}</th>`;
+  opts2.forEach(c => html += `<th>${escapeHtml(c)}</th>`);
+  html += `</tr></thead><tbody>`;
+  for (const r of opts1) {
+    html += `<tr><th>${escapeHtml(r)}</th>`;
+    for (const c of opts2) {
+      const combo = { [k1]: r, [k2]: c };
+      const cnt = countCombo(combo);
+      const cls = cnt === 0 ? 'cell zero' : 'cell';
+      const data = cnt > 0 ? ` data-combo='${escapeHtml(JSON.stringify(combo))}'` : '';
+      html += `<td class="${cls}"${data}>${cnt}</td>`;
+    }
+    html += `</tr>`;
+  }
+  html += `</tbody></table>`;
+  return html;
+}
+
+function renderMatrix3D(area, k1, k2, k3) {
+  let html = '';
+  const opts1 = Q_OPTS_ALL[k1] || [];
+  const opts2 = Q_OPTS_ALL[k2] || [];
+  const opts3 = Q_OPTS_ALL[k3] || [];
+  for (const v1 of opts1) {
+    html += `<h2>${k1} = ${escapeHtml(v1)}</h2>`;
+    html += `<table class="matrix"><thead><tr><th>${k2} \\ ${k3}</th>`;
+    opts3.forEach(c => html += `<th>${escapeHtml(c)}</th>`);
+    html += `</tr></thead><tbody>`;
+    for (const r of opts2) {
+      html += `<tr><th>${escapeHtml(r)}</th>`;
+      for (const c of opts3) {
+        const combo = { [k1]: v1, [k2]: r, [k3]: c };
+        const cnt = countCombo(combo);
+        const cls = cnt === 0 ? 'cell zero' : 'cell';
+        const data = cnt > 0 ? ` data-combo='${escapeHtml(JSON.stringify(combo))}'` : '';
+        html += `<td class="${cls}"${data}>${cnt}</td>`;
+      }
+      html += `</tr>`;
+    }
+    html += `</tbody></table>`;
+  }
+  return html;
+}
+
+function bindMatrixCellClicks(tabDiv, area) {
+  tabDiv.querySelectorAll('.cell:not(.zero)').forEach(td => {
+    td.addEventListener('click', () => {
+      try {
+        const combo = JSON.parse(td.dataset.combo.replace(/&quot;/g, '"').replace(/&#39;/g, "'"));
+        openAreaModal(area, combo);
+      } catch (e) {
+        console.error(e);
+      }
+    });
+  });
+}
+
+// Phase 4: 정식 모달 호출 (핀/메모/제외 모두 동작)
+function openAreaModal(area, combo) {
+  openModal(area, combo);
+}
+
+// Phase 5: 핀 일람 탭 렌더 — 후기별 그룹 + 영역 칩 + 메모
+function renderAllPinsTab() {
+  const tab = document.getElementById('tab-all-pins');
+  if (!tab) return;
+  if (!INDEX || !INDEX.length) {
+    tab.innerHTML = '<div class="placeholder">데이터 로드 중...</div>';
+    return;
+  }
+  const store = getStore();
+  const passById = new Map(INDEX.map(e => [e.p.id, e.p]));
+  // 후기 ID 별로 핀 모으기
+  const byId = new Map();
+  let totalPins = 0;
+  for (const [area, list] of Object.entries(store.pins || {})) {
+    for (const p of list) {
+      totalPins++;
+      if (!byId.has(p.id)) byId.set(p.id, []);
+      byId.get(p.id).push({ area, memo: p.memo || '', combo: p.answers || {}, matchKeys: p.matchKeys || [] });
+    }
+  }
+  const uniquePassnotes = byId.size;
+  const totalAreas = new Set(Object.entries(store.pins || {}).filter(([_, l]) => l && l.length).map(([a]) => a)).size;
+  const multiArea = [...byId.values()].filter(l => new Set(l.map(x=>x.area)).size > 1).length;
+
+  let html = `
+    <div class="pins-summary">
+      <div class="stat"><strong>${uniquePassnotes}</strong>핀된 후기 (고유)</div>
+      <div class="stat"><strong>${totalPins}</strong>총 핀 수 (영역 × 조합)</div>
+      <div class="stat"><strong>${totalAreas}</strong>핀이 있는 영역</div>
+      <div class="stat"><strong>${multiArea}</strong>여러 영역에 핀된 후기</div>
+    </div>
+  `;
+
+  if (uniquePassnotes === 0) {
+    html += '<div class="placeholder">아직 핀된 후기가 없습니다.<br><span style="opacity:.7;font-size:11px;">no.01 등 매트릭스에서 셀 클릭 → 후기 카드의 📌 버튼으로 핀하세요.</span></div>';
+    tab.innerHTML = html;
+    return;
+  }
+
+  // 정렬: 핀 수 많은 후기부터, 그 다음 ID 순
+  const sorted = [...byId.entries()].sort((a, b) => b[1].length - a[1].length);
+
+  html += '<div class="pins-grid">';
+  for (const [id, pins] of sorted) {
+    const p = passById.get(id);
+    if (!p) continue;
+    const titleEl = p.url
+      ? `<a href="${p.url}" target="_blank" rel="noopener">${escapeHtml(p.title || '')}</a>`
+      : escapeHtml(p.title || '');
+    const meta = [p.year, p.exam, p.grade, p.region, p.job, p.period].filter(Boolean).join(' · ');
+    const psg = (p.passage || '').slice(0, 140);
+
+    const areaRows = pins.map(x => {
+      const aName = AREAS[x.area]?.name || '';
+      const comboLabel = (x.matchKeys || []).map(k => x.combo[k]).filter(Boolean).join(' × ');
+      return `
+        <div class="pin-area-row">
+          <div class="pin-area-row-head">
+            <span class="pin-area-code" onclick="jumpToAreaCombo('${x.area}', ${JSON.stringify(x.combo).replace(/"/g, '&quot;')})">${x.area}</span>
+            <span class="pin-area-name">${escapeHtml(aName)}</span>
+            <span class="pin-area-combo">${escapeHtml(comboLabel)}</span>
+          </div>
+          ${x.memo ? `<div class="pin-area-memo">📝 ${escapeHtml(x.memo)}</div>` : ''}
+        </div>`;
+    }).join('');
+
+    html += `
+      <div class="pin-card">
+        <div class="pin-card-title">${titleEl}</div>
+        <div class="pin-card-meta">${meta}</div>
+        ${psg ? `<div class="pin-card-passage">${escapeHtml(psg)}…</div>` : ''}
+        <div class="pin-areas-list">${areaRows}</div>
+      </div>`;
+  }
+  html += '</div>';
+  tab.innerHTML = html;
+}
+
+// 핀 일람에서 영역 코드 클릭 시 해당 (영역, 조합) 모달로 점프
+function jumpToAreaCombo(area, combo) {
+  // 영역 탭으로 이동
+  const navEl = document.getElementById('tab-nav');
+  const targetBtn = navEl.querySelector(`.tab[data-area="${area}"]`);
+  if (targetBtn) targetBtn.click();
+  setTimeout(() => openModal(area, combo), 50);
+}
+
+// 탭 활성 시 — 비-no.01 영역의 매트릭스 자동 렌더
+const _origNavClick = document.getElementById('tab-nav');
+_origNavClick.addEventListener('click', (e) => {
+  // 약간의 지연 후 활성 탭 확인 (기존 핸들러가 .active 토글한 다음)
+  setTimeout(() => {
+    const activeBtn = document.querySelector('#tab-nav .tab.active');
+    if (!activeBtn) return;
+    const code = activeBtn.dataset.area;
+    if (code && code !== 'no.01' && AREAS[code]) {
+      renderAreaMatrix(code);
+    }
+  }, 0);
+});
+
+// ─────────── Phase 1: 시나리오 selector 초기화 ───────────
+buildScenarioSelectors();
+syncScenarioFromSC();
+const scPreset = document.getElementById('sc-preset');
+if (scPreset) {
+  scPreset.addEventListener('change', (e) => {
+    if (!e.target.value) return;
+    SC = JSON.parse(JSON.stringify(SC_DEMOS[parseInt(e.target.value, 10)]));
+    syncScenarioFromSC();
+    if (CURRENT_Q && CURRENT_Q.length) renderModalList();
+    refreshAllAreaHeaders();
+  });
+}
+
+// ─────────── UI 용어 토글 ───────────
+function toggleTerms() {
+  document.body.classList.toggle('show-terms');
+  const on = document.body.classList.contains('show-terms');
+  document.getElementById('term-toggle').textContent = on ? 'UI 용어 끄기' : 'UI 용어 표시';
+}
+
+// ─────────── 핀 내보내기 / 가져오기 (v2 store 통째) ───────────
+function exportPins() {
+  const store = getStore();
+  const totalAreas = Object.keys(store.pins).length;
+  const totalPins = Object.values(store.pins).reduce((s, arr) => s + arr.length, 0);
+  const totalExcGlobal = (store.excludesGlobal || []).length;
+  const totalExcCombo = Object.values(store.excludesCombo || {}).reduce((s, m) => s + Object.values(m || {}).reduce((a,b)=>a+(b?.length||0),0), 0);
+  const payload = {
+    version: 2,
+    exportedAt: new Date().toISOString(),
+    totalAreas, totalPins, totalExcGlobal, totalExcCombo,
+    store,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  a.href = url;
+  a.download = `curation_${ts}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  alert(`내보내기 완료\n영역 ${totalAreas}개 / 핀 ${totalPins}건 / 전역제외 ${totalExcGlobal}건 / 조합제외 ${totalExcCombo}건\n파일: ${a.download}`);
+}
+
+function importPins(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      let incomingStore;
+      if (data.version === 2 && data.store) {
+        incomingStore = data.store;
+      } else if (data.pins && (data.version === 1 || typeof data.pins === 'object')) {
+        // v1 포맷 import — no.01 영역으로 마이그레이션
+        incomingStore = { version: 2, pins: { 'no.01': [] }, excludesCombo: {}, excludesGlobal: [], reviewed: {} };
+        for (const [combo, list] of Object.entries(data.pins || {})) {
+          const [q1, q3, q4] = combo.split('|');
+          for (const x of (list || [])) {
+            const id = typeof x === 'number' ? x : x.id;
+            const memo = typeof x === 'number' ? '' : (x.note || x.memo || '');
+            incomingStore.pins['no.01'].push({
+              id, memo,
+              answers: { Q1:q1||'', Q2:'', Q3:q3||'', Q4:q4||'', Q5:'', Q6:'', Q7:[], Q8:'' },
+              matchKeys: ['Q1','Q3','Q4'],
+              textChoice: { kind: 'auto' },
+              pinnedAt: '',
+            });
+          }
+        }
+      } else {
+        throw new Error('알 수 없는 형식');
+      }
+      const choice = confirm(
+        '가져오기 방식:\n\n확인 = 병합 (기존 + 새 파일)\n취소 = 덮어쓰기 (기존 다 지우고 파일대로)'
+      );
+      let merged;
+      if (choice) {
+        const cur = getStore();
+        merged = JSON.parse(JSON.stringify(cur));
+        // pins 병합 (영역별, ID 기준)
+        for (const [area, arr] of Object.entries(incomingStore.pins || {})) {
+          if (!merged.pins[area]) merged.pins[area] = [];
+          const existKeys = new Set(merged.pins[area].map(p => `${p.id}|${(p.matchKeys||[]).map(k => p.answers?.[k]||'').join('|')}`));
+          for (const p of arr) {
+            const k = `${p.id}|${(p.matchKeys||[]).map(kk => p.answers?.[kk]||'').join('|')}`;
+            if (!existKeys.has(k)) merged.pins[area].push(p);
+          }
+        }
+        // excludes 병합
+        merged.excludesGlobal = [...new Set([...(merged.excludesGlobal||[]), ...(incomingStore.excludesGlobal||[])])];
+        for (const [area, m] of Object.entries(incomingStore.excludesCombo || {})) {
+          if (!merged.excludesCombo[area]) merged.excludesCombo[area] = {};
+          for (const [ck, ids] of Object.entries(m)) {
+            const cur = new Set(merged.excludesCombo[area][ck] || []);
+            ids.forEach(i => cur.add(i));
+            merged.excludesCombo[area][ck] = [...cur];
+          }
+        }
+        // reviewed 병합
+        for (const [area, m] of Object.entries(incomingStore.reviewed || {})) {
+          if (!merged.reviewed[area]) merged.reviewed[area] = {};
+          Object.assign(merged.reviewed[area], m);
+        }
+      } else {
+        merged = incomingStore;
+      }
+      setStore(merged);
+      const tp = Object.values(merged.pins||{}).reduce((s, arr) => s + arr.length, 0);
+      alert(`가져오기 완료 (${choice ? '병합' : '덮어쓰기'})\n총 핀 ${tp}건`);
+      if (CURRENT_Q && CURRENT_Q.length) { rebuildModalState(); renderModalList(); }
+      refreshAllAreaHeaders();
+    } catch (err) {
+      alert('가져오기 실패: ' + err.message);
+    }
+  };
+  reader.readAsText(file, 'utf-8');
+  document.getElementById('pin-import-input').value = '';
+}
+</script>
+</body>
+</html>

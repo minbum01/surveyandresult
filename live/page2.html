@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+<title>합격 리포트 — PAGE 2 영역</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&family=Noto+Serif+KR:wght@400;600;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-primary: #FAFAF7;
+  --bg-card: #FFFFFF;
+  --bg-dark: #1A1A2E;
+  --bg-accent: #F0EDE6;
+  --bg-highlight: #FFF8E7;
+  --text-primary: #1A1A2E;
+  --text-secondary: #5A5A6E;
+  --text-muted: #8E8E9E;
+  --text-inverse: #FAFAF7;
+  --accent-gold: #C8A84E;
+  --accent-gold-light: #E8D59E;
+  --accent-blue: #3A5BA0;
+  --accent-blue-light: #E8EEF8;
+  --accent-green: #2D8A5E;
+  --accent-green-light: #E6F5ED;
+  --accent-warm: #D4734A;
+  --accent-warm-light: #FFF0EB;
+  --border-light: #E8E6DF;
+  --border-medium: #D0CEC7;
+  --shadow-sm: 0 1px 3px rgba(26,26,46,0.06);
+  --shadow-md: 0 4px 12px rgba(26,26,46,0.08);
+  --shadow-lg: 0 8px 30px rgba(26,26,46,0.12);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  padding: 16px;
+  padding-bottom: 140px; /* dev-toolbar 자리 */
+}
+
+/* ─── PAGE 2 컨테이너 ─── */
+.page {
+  width: 1280px;
+  height: 720px;
+  margin: 0 auto 24px;
+  background: var(--bg-primary);
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+}
+.page-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr auto;
+  padding: 28px 32px 20px;
+}
+.page2-header {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.page2-title {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 18px;
+  font-weight: 700;
+}
+.page-indicator {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Stories */
+.stories-section {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.story-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+.story-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+}
+.story-card:nth-child(1)::before { background: var(--accent-gold); }
+.story-card:nth-child(2)::before { background: var(--accent-blue); }
+.story-card:nth-child(3)::before { background: var(--accent-green); }
+
+.story-match { font-size: 10px; font-weight: 600; color: var(--accent-gold); margin-bottom: 6px; }
+.story-profile { font-size: 11.5px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; line-height: 1.4; }
+.story-quote {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 12px; color: var(--text-secondary);
+  line-height: 1.7; font-style: italic; flex: 1;
+  padding: 10px 0;
+  border-top: 1px solid var(--border-light);
+  position: relative;
+}
+.story-quote::before {
+  content: '"'; font-family: 'Playfair Display', serif;
+  font-size: 36px; color: var(--accent-gold-light);
+  position: absolute; top: 2px; left: 0; line-height: 1;
+}
+.story-quote p { padding-left: 22px; }
+.story-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+.story-tag {
+  font-size: 9px; padding: 2px 7px;
+  background: var(--bg-accent); border-radius: 10px; color: var(--text-muted);
+}
+.story-tag.matched { background: var(--accent-gold); color: white; }
+
+/* Bottom Grid */
+.bottom-grid {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr 280px;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.insight-card, .hard-subject {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: var(--shadow-sm);
+}
+.hard-subject { display: flex; flex-direction: column; }
+
+.insight-header { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+.insight-icon { font-size: 14px; }
+.insight-title { font-size: 12.5px; font-weight: 700; color: var(--text-primary); }
+
+.regret-item { margin-bottom: 10px; }
+.regret-stat { font-size: 10.5px; color: var(--accent-warm); font-weight: 600; margin-bottom: 4px; }
+.regret-text { font-size: 11.5px; color: var(--text-secondary); line-height: 1.6; }
+.regret-tip {
+  font-size: 11px;
+  background: var(--accent-warm-light);
+  padding: 8px 10px;
+  border-radius: 6px;
+  color: var(--text-primary);
+  line-height: 1.5;
+  margin-top: 6px;
+}
+.regret-tip strong { font-weight: 600; }
+
+.first-month-list { display: flex; flex-direction: column; gap: 8px; }
+.fm-item { display: flex; align-items: flex-start; gap: 8px; }
+.fm-number {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--accent-blue);
+  color: white;
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.fm-content { font-size: 11.5px; color: var(--text-secondary); line-height: 1.5; }
+.fm-content strong { color: var(--text-primary); font-weight: 600; }
+.fm-pct { font-size: 10px; color: var(--accent-blue); font-weight: 600; }
+
+.subject-bars { display: flex; flex-direction: column; gap: 7px; flex: 1; }
+.subject-row { display: flex; align-items: center; gap: 8px; }
+.subject-name {
+  font-size: 11px; width: 50px; text-align: right;
+  color: var(--text-secondary); flex-shrink: 0; font-weight: 500;
+}
+.subject-bar-track {
+  flex: 1; height: 14px;
+  background: var(--bg-accent);
+  border-radius: 3px; overflow: hidden;
+}
+.subject-bar-fill { height: 100%; border-radius: 3px; background: var(--accent-warm); opacity: 0.7; }
+.subject-bar-fill.top { opacity: 1; }
+.subject-pct { font-size: 10px; color: var(--text-muted); width: 28px; flex-shrink: 0; }
+.subject-tip {
+  margin-top: 10px; padding-top: 10px;
+  border-top: 1px solid var(--border-light);
+  font-size: 10.5px; color: var(--text-secondary); line-height: 1.5;
+}
+
+/* CTA */
+.cta-footer {
+  grid-column: 1 / -1;
+  display: flex; align-items: center; gap: 20px;
+  background: var(--bg-dark);
+  border-radius: 12px;
+  padding: 18px 28px;
+  position: relative; overflow: hidden;
+}
+.cta-footer::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(200,168,78,0.08) 0%, transparent 60%);
+}
+.cta-message { flex: 1; position: relative; z-index: 1; }
+.cta-closing-quote {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 13px; color: rgba(250,250,247,0.7);
+  font-style: italic; line-height: 1.6; margin-bottom: 4px;
+}
+.cta-closing-source { font-size: 10px; color: rgba(250,250,247,0.4); }
+.cta-buttons { display: flex; gap: 10px; position: relative; z-index: 1; }
+.btn-primary, .btn-secondary {
+  border: none; padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+}
+.btn-primary { background: var(--accent-gold); color: var(--bg-dark); font-weight: 700; padding: 12px 28px; }
+.btn-secondary { background: transparent; color: rgba(250,250,247,0.7); border: 1px solid rgba(250,250,247,0.2); font-weight: 500; }
+
+/* ─── 동적 영역 마커 ─── */
+.dyn { position: relative; }
+.dyn::before {
+  content: '[선택지]';
+  position: absolute;
+  top: -7px; right: -4px;
+  font-family: 'Courier New', monospace;
+  font-size: 8.5px; font-weight: 700;
+  letter-spacing: 0.4px;
+  background: #E50914; color: #fff;
+  padding: 2px 6px; border-radius: 3px;
+  z-index: 10; pointer-events: none;
+  box-shadow: 0 1px 4px rgba(229,9,20,0.4);
+  white-space: nowrap;
+}
+.dyn[data-q]::before { content: '[' attr(data-q) ']'; }
+.dyn[data-q][data-no]::before { content: '[no.' attr(data-no) ' · ' attr(data-q) ']'; }
+.dyn.from-review::before {
+  background: #C8A84E; color: #1A1A2E;
+  box-shadow: 0 1px 4px rgba(200,168,78,0.4);
+}
+.no-marker .dyn::before { display: none; }
+@media print { .dyn::before { display: none; } }
+
+/* ─── 디버그 패널 (PAGE 2 아래) ─── */
+.debug-panel {
+  width: 1280px;
+  margin: 0 auto;
+  background: #fff;
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 18px 24px;
+  font-size: 12px;
+}
+.debug-h {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 14px; font-weight: 700;
+  margin-bottom: 8px; padding-left: 10px;
+  border-left: 3px solid var(--accent-gold);
+}
+.debug-section {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--border-light);
+}
+.debug-section:last-child { border-bottom: none; }
+.debug-section-title {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.debug-grid {
+  display: grid;
+  grid-template-columns: 50px 1fr;
+  gap: 4px 10px;
+  font-size: 11.5px;
+}
+.debug-grid .qid { font-family: 'Courier New', monospace; color: var(--accent-blue); font-weight: 700; }
+.debug-grid .val { color: var(--text-primary); font-weight: 600; }
+
+.debug-area-row {
+  display: grid;
+  grid-template-columns: 90px 1fr 1fr;
+  gap: 12px;
+  font-size: 11.5px;
+  padding: 4px 0;
+}
+.debug-area-row .area-code {
+  font-weight: 700; color: var(--accent-gold);
+  font-family: 'Courier New', monospace;
+}
+.debug-area-row .area-name { font-weight: 600; }
+.debug-area-row .area-info { color: var(--text-secondary); font-size: 11px; }
+
+/* ─── 답변 빌더 (페르소나와 동일 톤) ─── */
+.dev-toolbar {
+  position: fixed;
+  bottom: 16px; left: 16px; right: 16px;
+  background: var(--bg-dark);
+  color: var(--text-inverse);
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 11px;
+  display: flex; flex-direction: column; gap: 8px;
+  z-index: 100;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+.dt-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.dt-q { display: flex; gap: 4px; align-items: center; font-size: 11px; color: rgba(255,255,255,0.7); }
+.dt-q strong { color: var(--accent-gold); font-weight: 700; }
+.dt-q-label { color: var(--accent-gold); font-weight: 700; margin-right: 4px; font-size: 11px; }
+.dt-checks { display: flex; gap: 10px; flex-wrap: wrap; }
+.dt-checks label {
+  display: flex; gap: 3px; align-items: center;
+  font-size: 11px; color: rgba(255,255,255,0.75);
+  cursor: pointer; user-select: none;
+}
+.dt-spacer { flex: 1; min-width: 8px; }
+.dt-divider { width: 1px; height: 18px; background: rgba(255,255,255,0.15); margin: 0 4px; }
+.dev-toolbar button {
+  background: var(--accent-gold);
+  color: var(--bg-dark);
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 11px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+}
+.dev-toolbar select {
+  background: rgba(255,255,255,0.1);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 4px 8px; border-radius: 4px;
+  font-size: 11px; font-family: inherit;
+  max-width: 140px;
+}
+.dev-toolbar select option { background: #2a2a40; color: white; }
+
+.loading {
+  position: absolute; inset: 0;
+  background: rgba(26,26,46,0.85);
+  color: rgba(250,250,247,0.7);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; z-index: 50;
+  border-radius: 8px;
+}
+.loading.hidden { display: none; }
+</style>
+</head>
+<body>
+
+<!-- ════════════ PAGE 2 ════════════ -->
+<div class="page page-2">
+  <div id="loading" class="loading">합격수기 매칭 중...</div>
+
+  <div class="page2-header">
+    <div class="page2-title">합격자가 남긴 전략</div>
+    <div class="page-indicator">Page 2 of 2</div>
+  </div>
+
+  <!-- no.11 — 유사 후기 카드 (Q1~Q8 일치도순 상위 3건) -->
+  <div class="stories-section dyn from-review" data-no="11" data-q="Q1~Q8 일치도순" id="stories-section">
+    <!-- JS에서 채움 -->
+  </div>
+
+  <!-- Bottom Grid -->
+  <div class="bottom-grid">
+    <!-- no.12 — 합격자 후회 (Q3 직렬별) -->
+    <div class="insight-card dyn from-review" data-no="12" data-q="Q3" id="regret-card">
+      <div class="insight-header">
+        <span class="insight-icon">💬</span>
+        <span class="insight-title">합격자가 가장 후회한 것</span>
+      </div>
+      <div id="regret-body">— 로딩 중 —</div>
+    </div>
+
+    <!-- no.13 — 합격자의 첫 달 (Q1×Q3) -->
+    <div class="insight-card dyn from-review" data-no="13" data-q="Q1×Q3" id="firstmonth-card">
+      <div class="insight-header">
+        <span class="insight-icon">🚀</span>
+        <span class="insight-title">합격자의 첫 달</span>
+      </div>
+      <div class="first-month-list" id="firstmonth-body">
+        <div style="color:var(--text-muted); font-size:11px;">— 로딩 중 —</div>
+      </div>
+    </div>
+
+    <!-- no.14 — 어려운 과목 (Q3 직렬별) -->
+    <div class="hard-subject dyn from-review" data-no="14" data-q="Q3" id="hardsubject-card">
+      <div class="insight-header">
+        <span class="insight-icon">📚</span>
+        <span class="insight-title" id="hardsubject-title">합격자가 어려워한 과목</span>
+      </div>
+      <div class="subject-bars" id="hardsubject-body">
+        <div style="color:var(--text-muted); font-size:11px;">— 로딩 중 —</div>
+      </div>
+      <div class="subject-tip" id="hardsubject-tip"></div>
+    </div>
+  </div>
+
+  <!-- no.15 — CTA 닫는 인용구 (Q1~Q8 → quote) -->
+  <div class="cta-footer dyn from-review" data-no="15" data-q="Q1~Q8 quote">
+    <div class="cta-message">
+      <div class="cta-closing-quote" id="cta-quote">— 로딩 중 —</div>
+      <div class="cta-closing-source" id="cta-source">—</div>
+    </div>
+    <div class="cta-buttons">
+      <button class="btn-secondary" onclick="window.print()">📄 리포트 출력</button>
+      <button class="btn-primary">무료 학습 상담 신청</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ 디버그 패널 ════════════ -->
+<div class="debug-panel">
+  <div class="debug-h">PAGE 2 매칭 디버그</div>
+
+  <div class="debug-section">
+    <div class="debug-section-title">입력 답변</div>
+    <div class="debug-grid" id="dbg-answers"></div>
+  </div>
+
+  <div class="debug-section">
+    <div class="debug-section-title">영역별 매칭 상태</div>
+    <div id="dbg-areas"></div>
+  </div>
+</div>
+
+<!-- ════════════ 답변 빌더 ════════════ -->
+<div class="dev-toolbar">
+  <div class="dt-row">
+    <label class="dt-q"><strong>Q1</strong><select id="sel-q1"></select></label>
+    <label class="dt-q"><strong>Q2</strong><select id="sel-q2"></select></label>
+    <label class="dt-q"><strong>Q3</strong><select id="sel-q3"></select></label>
+    <label class="dt-q"><strong>Q4</strong><select id="sel-q4"></select></label>
+    <label class="dt-q"><strong>Q5</strong><select id="sel-q5"></select></label>
+    <label class="dt-q"><strong>Q6</strong><select id="sel-q6"></select></label>
+    <label class="dt-q"><strong>Q8</strong><select id="sel-q8"></select></label>
+  </div>
+  <div class="dt-row">
+    <span class="dt-q-label">Q7 (복수)</span>
+    <div class="dt-checks" id="q7-checks"></div>
+    <div class="dt-spacer"></div>
+    <select id="demo-select">
+      <option value="">— 프리셋 —</option>
+      <option value="0">직장+행정+노베</option>
+      <option value="1">전업+세무+전공자</option>
+      <option value="2">육아+교육+노베</option>
+      <option value="3">재학+행정+수능</option>
+      <option value="4">퇴직+공안+토익</option>
+    </select>
+    <span class="dt-divider"></span>
+    <button onclick="document.body.classList.toggle('no-marker')">선택지 마커 ON/OFF</button>
+  </div>
+</div>
+
+<script>
+// ─────────────── 매핑 (persona.html 과 동일) ───────────────
+const TAG_EXPANSION = {
+  '전업수험생': ['20대초반','군복무수험생','재시생','전업수험생','전역수험생','전직렬전환','초시생'],
+  '직장병행': ['고졸수험생','재직수험생','직장병행'],
+  '재학수험생': ['복학수험생','서울4년제','재학수험생','지거국','지방4년제','통학수험생','학업병행','휴학수험생'],
+  '육아병행': ['40대','결혼준비','기혼','맘시생','워킹맘','육아병행','임신수험생','출산직후면접'],
+  '퇴직수험생': ['50대','경력단절','경력직','계약직경력','물류경력','사업경험','생산직경력','서비스직경력','주6일직장','콜센터경력','퇴직수험생'],
+  '아르바이트병행': ['N잡러','교대근무','아르바이트병행','주4일알바'],
+  '국가직9급': ['1차2차병행','2관왕','7급병행','PSAT병행','국가직7급','국가직9급','국가직병행'],
+  '지방직9급': ['2관왕','지방직7급','지방직8급','지방직9급','지방직병행'],
+  '서울시9급': ['서울시8급','서울시9급'],
+  '행정직': ['우정행정직','행정직'],
+  '세무직': ['관세직','세무직'],
+  '공안직': ['검찰직','교정직','보호직','철도경찰직','출입국관리직'],
+  '교육직': ['교육직'],
+  '기술직': ['건축직','공업직','군수직','기계일반','기계직','기술직','농업직','방송통신직','시설직','임업직','전기직','전산직','토목직','환경직'],
+  '간호보건직': ['간호보건직','보건직'],
+  '사회복지직': ['사회복지직'],
+  '기타직렬': ['감사직','계리직','고용노동직','국회직8급','국회직9급','기상직','기체직','도시계획직','방재안전직','법원직9급','소수직렬','식품위생직','외무영사직','운전직','조경직','지적직','직업상담직','차량직','통계직','회계직'],
+  '노베이스': ['노베이스'],
+  '수능베이스': ['경찰직베이스','국어베이스','수능베이스','제2외국어','한국사베이스','한능검','한능검베이스','한자자격증'],
+  '전공자': ['4년제','CPA베이스','IT경력','경영학전공','경제학전공','공학전공','관세사베이스','국시베이스','국어전공','기사자격증','무역학전공','법학전공','부전공','사범대','사회과학전공','사회복지전공','석사학위','세무사베이스','심리학전공','역사학전공','영어전공','임용베이스','재경관리사베이스','전공위주','전공자','전기기사','전산회계베이스','통계학전공','행정법베이스','행정학전공','형사소송법베이스','회계세무전공'],
+  '토익베이스': ['영어강사경력','영어베이스','지텔프','토익베이스','해외거주수험생'],
+  '1년이내': ['6개월~1년','6개월미만','단기완성','단기합격'],
+  '1년이상': ['1년6개월~2년','1년~1년6개월','2년~3년','3년이상'],
+  '하루10시간미만': ['하루10시간미만'],
+  '하루10시간이상': ['하루10시간','하루10시간이상','하루13시간','하루14시간이상'],
+  '인강병행': ['1.2배속수강','1.3배속수강','1.5배속수강','1.6배속수강','1.8배속수강','2배속수강','3배속수강','오전인강','완강중심','인강병행'],
+  '기출반복': ['5급기출활용','OX중심','기출반복','기출위주','동형모의고사','문제풀이중심','봉투모의고사','빈출위주','빈칸학습','선지분석','오답노트','최신판례중심','출제경향분석','타직렬기출','판례중심','하프모의고사'],
+  '회독반복': ['개념중심','기본서회독','단권화','단어장회독','독해위주','두문자어암기','마인드맵활용','매일전과목','문법위주','복습중심','서브노트제작','서울시7급','암기중심','약점공략','영단어매일암기','영어단어매일암기','요약본제작','유형별정리','이론중심','이미지암기','키워드암기','타이핑단권화','필기노트','회독반복'],
+  '독학위주': ['기화펜활용','독학위주','막판스퍼트','말노트활용','맵핑학습','면접독학','무한반복','백지공부법','소거법활용','스토리텔링암기','압축이론','오전암기','취침전단어암기'],
+  '노량진현강': ['노량진현강','마킹연습','현강병행'],
+  '스터디병행': ['5분발표','과목깨기','면접스터디','모의면접','블로그정리','손필기노트','스터디병행','오프라인스터디','캠스터디'],
+  '멘탈관리': ['멘탈관리','수면관리','스트레스관리','운동병행','컨디션관리'],
+  '슬럼프극복': ['건강이슈','과도한자신감','모의고사슬럼프','번아웃경험','슬럼프극복','실수관리','연애영향','운동병행','체력관리'],
+  '영어약자': ['영어노베이스','영어약자'],
+  '효율중심': ['127회독법','147회독법','8421공부법','SNS차단','고시원공부','기숙사공부','녹음활용','목차학습','선택과집중','스터디플랜','스톱워치활용','시간관리','식사중학습','엑셀활용','영어노트','오후암기','이동시간학습','이면지활용','자기객관화','자기암시','주말휴식','집공부','타자공부법','틈새시간활용','파일정리','홀수짝수회독','효율중심'],
+  '이해중심학습': ['예습복습병행','이해중심학습'],
+  '커리큘럼중심': ['기초중심','다회독','단계별학습','당일복습','도시락','무주일공부','무회독반복','완강중심','전과목','전년도강의활용','커리큘럼중심'],
+};
+const Q1_DIRECT_TAGS = ['전업수험생','직장병행','재학수험생','육아병행','퇴직수험생','아르바이트병행'];
+
+function hasExpanded(ts, tagId) {
+  if (!tagId) return true;
+  if (Q1_DIRECT_TAGS.includes(tagId)) {
+    for (const o of Q1_DIRECT_TAGS) if (o !== tagId && ts.has(o)) return false;
+  }
+  if (tagId === '행정직' && ts.has('교육직')) return false;
+  const exp = TAG_EXPANSION[tagId] || [tagId];
+  for (const t of exp) if (ts.has(t)) return true;
+  return false;
+}
+
+// ─── DEMO 답변 ───
+const DEMO_SETS = [
+  [
+    [{tagId:'직장병행', label:'직장 다니면서'}],
+    [{tagId:'국가직9급', label:'국가직 공무원'}],
+    [{tagId:'행정직', label:'일반행정직'}],
+    [{tagId:'노베이스', label:'공부는 처음이야!'}],
+    [{tagId:'1년이내', label:'1년 이내'}],
+    [{tagId:'하루10시간미만', label:'5 ~ 8시간'}],
+    [{tagId:'인강병행', label:'인강 중심'}, {tagId:'기출반복', label:'기출 반복'}],
+    [{tagId:'멘탈관리', label:'멘탈 관리'}],
+  ],
+  [
+    [{tagId:'전업수험생', label:'전업 수험생'}],
+    [{tagId:'국가직9급', label:'국가직 공무원'}],
+    [{tagId:'세무직', label:'세무/관세직'}],
+    [{tagId:'전공자', label:'전공자'}],
+    [{tagId:'1년이내', label:'1년 이내'}],
+    [{tagId:'하루10시간이상', label:'10시간 이상'}],
+    [{tagId:'기출반복', label:'기출 반복'}, {tagId:'독학위주', label:'독학 위주'}],
+    [{tagId:'효율중심', label:'시간이 부족하다'}],
+  ],
+  [
+    [{tagId:'육아병행', label:'육아하면서'}],
+    [{tagId:'지방직9급', label:'지방직 공무원'}],
+    [{tagId:'교육직', label:'교육행정직'}],
+    [{tagId:'노베이스', label:'공부는 처음이야!'}],
+    [{tagId:'1년이상', label:'1년 이상'}],
+    [{tagId:'하루10시간미만', label:'5시간 미만'}],
+    [{tagId:'인강병행', label:'인강 중심'}, {tagId:'회독반복', label:'회독 반복'}],
+    [{tagId:'슬럼프극복', label:'슬럼프'}],
+  ],
+  [
+    [{tagId:'재학수험생', label:'학교 다니면서'}],
+    [{tagId:'서울시9급', label:'서울시 공무원'}],
+    [{tagId:'행정직', label:'일반행정직'}],
+    [{tagId:'수능베이스', label:'수능 경험 있음'}],
+    [{tagId:'1년이내', label:'1년 이내'}],
+    [{tagId:'하루10시간이상', label:'8 ~ 10시간'}],
+    [{tagId:'인강병행', label:'인강 중심'}, {tagId:'스터디병행', label:'스터디 그룹'}],
+    [{tagId:'커리큘럼중심', label:'커리큘럼을 못 잡겠다'}],
+  ],
+  [
+    [{tagId:'퇴직수험생', label:'은퇴·퇴직 후'}],
+    [{tagId:'국가직9급', label:'국가직 공무원'}],
+    [{tagId:'공안직', label:'공안직'}],
+    [{tagId:'토익베이스', label:'영어 성적 있음'}],
+    [{tagId:'1년이상', label:'1년 이상'}],
+    [{tagId:'하루10시간이상', label:'10시간 이상'}],
+    [{tagId:'기출반복', label:'기출 반복'}, {tagId:'회독반복', label:'회독 반복'}],
+    [{tagId:'이해중심학습', label:'공부법을 모르겠다'}],
+  ],
+];
+
+let A;
+try {
+  const raw = sessionStorage.getItem('passNoteAnswers');
+  A = raw ? JSON.parse(raw) : DEMO_SETS[0];
+  if (!Array.isArray(A) || A.length < 8) A = DEMO_SETS[0];
+} catch(e) { A = DEMO_SETS[0]; }
+
+const get = (i) => A[i]?.[0]?.tagId || null;
+const getLabel = (i) => A[i]?.[0]?.label || '';
+const getMulti = (i) => (A[i]||[]).map(x=>x.tagId);
+const getMultiLabel = (i) => (A[i]||[]).map(x=>x.label);
+
+// ─────────────── 매칭 / 점수 ───────────────
+// 단순 일치도: 후기 태그가 사용자 답변(8문항) 중 몇 개에 매칭되는지 카운트
+function matchScore(p) {
+  const ts = new Set(p.tags || []);
+  let hits = 0;
+  if (hasExpanded(ts, get(0))) hits++; // Q1
+  if (hasExpanded(ts, get(1))) hits++; // Q2
+  if (hasExpanded(ts, get(2))) hits++; // Q3
+  if (hasExpanded(ts, get(3))) hits++; // Q4
+  if (hasExpanded(ts, get(4))) hits++; // Q5
+  if (hasExpanded(ts, get(5))) hits++; // Q6
+  // Q7 멀티: 하나라도 매칭되면 +1
+  const Q7 = getMulti(6);
+  if (Q7.length === 0 || Q7.some(q => hasExpanded(ts, q))) hits++;
+  if (hasExpanded(ts, get(7))) hits++; // Q8
+  return hits;
+}
+
+// no.11 — 일치도 상위 3건
+function pickTopStories(passnotes) {
+  const scored = passnotes.map(p => ({ p, s: matchScore(p) }));
+  scored.sort((a,b) => (b.s - a.s) || ((b.p.year||'').localeCompare(a.p.year||'')));
+  return scored.slice(0, 3);
+}
+
+// no.15 — 닫는 인용구: persona의 pickQuote 와 비슷, 짧은 인용구 우선
+const PERSONA_PREFER = ['루틴','마음','스스로','처음','지나니까','됐','된다','됩니다','되었','믿','버텼','꾸준','하루하루','매일','용기','다행','다잡','놓지','선택','시작','포기하지','막막','희망','확신','확실'];
+const Q8_QUOTE_KW = {
+  '멘탈관리': ['멘탈','마음','심리','불안','걱정','평정','다잡','마인드','흔들리','안정','자신감','감정','컨디션'],
+  '슬럼프극복': ['슬럼프','번아웃','무기력','포기','위기','극복','버티','버텼','버텨','견디','한계','다잡','다시','일어서'],
+  '영어약자': ['영어','토익','지텔프','단어','문법','독해','어휘','영문','영어단어'],
+  '효율중심': ['효율','시간','단기','짧','빠르','압축','집중','핵심','선택과집중','자투리'],
+  '이해중심학습': ['이해','원리','개념','흐름','깊이','왜','본질','맥락','머리에','뜻'],
+  '커리큘럼중심': ['커리큘럼','커리','학원','인강','단계','순서','계획','로드맵','일정','강의'],
+};
+function quoteScore(quote) {
+  if (!quote) return -1;
+  let s = 0;
+  for (const kw of PERSONA_PREFER) if (quote.includes(kw)) s += 1;
+  if (quote.length >= 40 && quote.length <= 110) s += 2; // CTA용 짧은 인용
+  return s;
+}
+function pickClosingQuote(passnotes) {
+  const Q8 = get(7);
+  const q8kw = (Q8 && Q8_QUOTE_KW[Q8]) || [];
+  const scored = passnotes.map(p => ({ p, s: matchScore(p) })).filter(x => x.s >= 5).sort((a,b) => b.s - a.s);
+  const cands = [];
+  for (const x of scored.slice(0, 60)) {
+    for (const q of (x.p.quotes || [])) {
+      const qs = quoteScore(q);
+      if (qs <= 0) continue;
+      const hitQ8 = q8kw.length > 0 && q8kw.some(k => q.includes(k));
+      cands.push({ q, p: x.p, s: qs + (hitQ8 ? 5 : 0) + x.s, hitQ8 });
+    }
+  }
+  let final = cands;
+  if (q8kw.length > 0) {
+    const strict = cands.filter(c => c.hitQ8);
+    if (strict.length > 0) final = strict;
+  }
+  final.sort((a,b) => b.s - a.s);
+  return final[0] || null;
+}
+
+// no.12 / no.13 / no.14 — 정적 데모 (Q3별 통계는 후속 단계에서 집계)
+const REGRET_BY_Q3 = {
+  '행정직': [
+    { stat: '61%가 언급', text: '"초반에 너무 많은 과목을 동시에 시작한 것"', tip: '처음 2개월은 국어·영어 2과목에 집중, 나머지는 3개월 차부터' },
+    { stat: '48%가 언급', text: '"체력 관리를 너무 늦게 시작한 것"', tip: '주 2회 30분 걷기부터. 수험 후반 체력이 성적을 좌우' },
+  ],
+  '_default': [
+    { stat: '많이 언급', text: '"기출을 늦게 시작한 것"', tip: '시작 후 1개월 내 기출 한 번 훑기' },
+    { stat: '많이 언급', text: '"잠을 줄여 공부한 것"', tip: '수면 6시간 이상 사수 — 공부 효율의 기본' },
+  ],
+};
+const FIRSTMONTH_BY_Q1Q3 = {
+  '_default': [
+    { strong: '기본서 선택 + 1과목 1회독', sub: '합격자 89%가 첫 달에 완료' },
+    { strong: '하루 루틴 고정', sub: '시간 패턴 확립' },
+    { strong: '학습 기록 시작', sub: '합격자 67%가 첫 달부터 순공시간 기록' },
+    { strong: '같은 반 스터디 1명 확보', sub: '직장병행 합격자의 핵심 생존 전략' },
+  ],
+};
+const HARD_SUBJECT_BY_Q3 = {
+  '행정직':  { title: '행정직 합격자가 어려워한 과목', bars: [['행정법',62],['행정학',41],['국어',28],['영어',22],['한국사',15]], tip: '노베이스 합격자 78%가 행정법을 가장 먼저 시작' },
+  '세무직':  { title: '세무직 합격자가 어려워한 과목', bars: [['세법',68],['회계학',55],['행정법',32],['영어',25],['한국사',12]], tip: '세법은 회독 수보다 이해도가 관건' },
+  '교육직':  { title: '교육직 합격자가 어려워한 과목', bars: [['교육학',58],['행정법',45],['국어',30],['영어',24],['한국사',14]], tip: '교육학 강의를 일찍 시작해 주제별 정리' },
+  '_default': { title: '합격자가 어려워한 과목', bars: [['전공과목',60],['국어',32],['영어',28],['한국사',18],['선택과목',24]], tip: '약점 과목은 매일 30분이라도 꾸준히' },
+};
+
+// ─────────────── 렌더 ───────────────
+function loadAndRender() {
+  document.getElementById('loading').classList.remove('hidden');
+  if (location.protocol === 'file:') {
+    document.getElementById('loading').textContent = '⚠ 로컬 서버에서 열어주세요 (file:// 안 됨)';
+    return;
+  }
+  fetch('reviews_data.json')
+    .then(r => r.json())
+    .then(data => { render(data); document.getElementById('loading').classList.add('hidden'); })
+    .catch(e => { document.getElementById('loading').textContent = '데이터 로드 실패: ' + e.message; });
+}
+
+function profileShort(p) {
+  const ts = new Set(p.tags || []);
+  const SITU_LIST = ['전업수험생','직장병행','재학수험생','육아병행','퇴직수험생','아르바이트병행'];
+  const SITU_LABEL = {'전업수험생':'전업','직장병행':'직장병행','재학수험생':'재학','육아병행':'육아병행','퇴직수험생':'퇴직','아르바이트병행':'알바병행'};
+  let situ = SITU_LIST.find(x => ts.has(x));
+  const period = ['6개월미만','6개월~1년','1년~1년6개월','1년6개월~2년','2년~3년','3년이상'].find(x => ts.has(x));
+  const periodStr = ({'6개월미만':'6개월','6개월~1년':'1년이내','1년~1년6개월':'1년반','1년6개월~2년':'2년','2년~3년':'2년이상','3년이상':'3년이상'})[period] || '';
+  const base = SITU_LABEL[situ] || situ || '';
+  return `${base}${periodStr ? ' · ' + periodStr + ' 합격' : ''}`;
+}
+
+function render(data) {
+  // no.11 — 유사 후기 카드 (3건)
+  const top3 = pickTopStories(data.passnotes);
+  const stories = document.getElementById('stories-section');
+  stories.innerHTML = top3.map(({p, s}) => {
+    const ts = new Set(p.tags || []);
+    const ans = [
+      [get(0), getLabel(0)], [get(1), getLabel(1)], [get(2), getLabel(2)],
+      [get(3), getLabel(3)], [get(4), getLabel(4)], [get(5), getLabel(5)],
+      [get(7), getLabel(7)],
+    ].filter(x => x[0]);
+    // Q7 멀티
+    const q7 = (A[6] || []).map(x => [x.tagId, x.label]);
+    const allAns = ans.concat(q7);
+    const tagsHtml = allAns.map(([id, lbl]) => {
+      const matched = id && hasExpanded(ts, id);
+      return `<span class="story-tag ${matched ? 'matched' : ''}">#${lbl || id}</span>`;
+    }).join('');
+    const quote = (p.quotes && p.quotes[0]) || (p.passage || '').slice(0, 100);
+    return `
+      <div class="story-card">
+        <div class="story-match">● 8개 중 ${s}개 일치</div>
+        <div class="story-profile">${profileShort(p)}</div>
+        <div class="story-quote"><p>${escapeHtml(quote)}</p></div>
+        <div class="story-tags">${tagsHtml}</div>
+      </div>`;
+  }).join('');
+
+  // no.12 — 후회 (Q3 직렬별)
+  const q3 = get(2);
+  const regrets = REGRET_BY_Q3[q3] || REGRET_BY_Q3['_default'];
+  document.getElementById('regret-body').innerHTML = regrets.map(r => `
+    <div class="regret-item">
+      <div class="regret-stat">${r.stat}</div>
+      <div class="regret-text">${r.text}</div>
+      <div class="regret-tip"><strong>합격자 권장:</strong> ${r.tip}</div>
+    </div>`).join('');
+
+  // no.13 — 첫 달 (Q1×Q3)
+  const fm = FIRSTMONTH_BY_Q1Q3['_default'];
+  document.getElementById('firstmonth-body').innerHTML = fm.map((it, i) => `
+    <div class="fm-item">
+      <div class="fm-number">${i+1}</div>
+      <div class="fm-content"><strong>${it.strong}</strong><br><span class="fm-pct">${it.sub}</span></div>
+    </div>`).join('');
+
+  // no.14 — 어려운 과목 (Q3별)
+  const hard = HARD_SUBJECT_BY_Q3[q3] || HARD_SUBJECT_BY_Q3['_default'];
+  document.getElementById('hardsubject-title').textContent = hard.title;
+  const maxPct = Math.max(...hard.bars.map(b => b[1]));
+  document.getElementById('hardsubject-body').innerHTML = hard.bars.map(([name, pct]) => `
+    <div class="subject-row">
+      <div class="subject-name">${name}</div>
+      <div class="subject-bar-track"><div class="subject-bar-fill ${pct === maxPct ? 'top' : ''}" style="width:${pct}%;"></div></div>
+      <div class="subject-pct">${pct}%</div>
+    </div>`).join('');
+  document.getElementById('hardsubject-tip').innerHTML = `💡 ${hard.tip}`;
+
+  // no.15 — CTA 닫는 인용구
+  const cq = pickClosingQuote(data.passnotes);
+  if (cq) {
+    document.getElementById('cta-quote').textContent = `"${cq.q}"`;
+    document.getElementById('cta-source').textContent = `— ${(cq.p.title||'').trim()}`;
+  } else {
+    document.getElementById('cta-quote').textContent = '"합격하고 나니 시작한 것 자체가 반은 한 것이었어요."';
+    document.getElementById('cta-source').textContent = '— 합격수기 중';
+  }
+
+  // 디버그 패널
+  renderDebug(top3, cq);
+}
+
+function renderDebug(top3, cq) {
+  // 답변
+  const rows = [];
+  for (let i = 0; i < 8; i++) {
+    const labels = (A[i] || []).map(x => x.label).join(', ') || '—';
+    rows.push(`<div class="qid">Q${i+1}</div><div class="val">${labels}</div>`);
+  }
+  document.getElementById('dbg-answers').innerHTML = rows.join('');
+
+  // 영역별 매칭 상태
+  const areas = [
+    ['no.11', '유사 후기 카드 (Q1~Q8 일치도순)', `상위 3건 — 일치도 ${top3.map(x=>x.s).join(', ')}/8`],
+    ['no.12', '합격자 후회 (Q3)', `Q3=${get(2)||'미지정'} → ${(REGRET_BY_Q3[get(2)] || REGRET_BY_Q3._default).length}항목 (정적 데모)`],
+    ['no.13', '합격자 첫 달 (Q1×Q3)', `정적 데모 (집계 미구현)`],
+    ['no.14', '어려운 과목 (Q3)', `Q3=${get(2)||'미지정'} → ${(HARD_SUBJECT_BY_Q3[get(2)] || HARD_SUBJECT_BY_Q3._default).bars.length}과목 (정적 데모)`],
+    ['no.15', 'CTA 인용구 (Q1~Q8)', cq ? `점수 ${cq.s.toFixed(1)} / Q8 매칭 ${cq.hitQ8 ? '✓' : '✗'}` : '매칭 실패'],
+  ];
+  document.getElementById('dbg-areas').innerHTML = areas.map(([code, name, info]) =>
+    `<div class="debug-area-row"><span class="area-code">${code}</span><span class="area-name">${name}</span><span class="area-info">${info}</span></div>`
+  ).join('');
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ─────────────── 답변 빌더 ───────────────
+const Q_OPTIONS = {
+  Q1: [['전업수험생','전업 수험생'],['직장병행','직장 다니면서'],['재학수험생','학교 다니면서'],['육아병행','육아하면서'],['퇴직수험생','은퇴·퇴직 후'],['아르바이트병행','아르바이트하면서']],
+  Q2: [['국가직9급','국가직 공무원'],['지방직9급','지방직 공무원'],['서울시9급','서울시 공무원']],
+  Q3: [['행정직','일반행정직'],['세무직','세무/관세직'],['공안직','공안직'],['교육직','교육행정직'],['기술직','기술직'],['간호보건직','간호보건직'],['사회복지직','사회복지직'],['기타직렬','기타직렬']],
+  Q4: [['노베이스','공부는 처음이야'],['수능베이스','수능 경험 있음'],['전공자','전공자'],['토익베이스','영어 성적 있음']],
+  Q5: [['1년이내','1년 이내'],['1년이상','1년 이상']],
+  Q6: [['하루10시간미만','10시간 미만'],['하루10시간이상','10시간 이상']],
+  Q7: [['인강병행','인강 중심'],['기출반복','기출 반복'],['회독반복','회독 반복'],['독학위주','독학 위주'],['노량진현강','노량진 현강'],['스터디병행','스터디 그룹']],
+  Q8: [['멘탈관리','멘탈 관리'],['슬럼프극복','슬럼프'],['영어약자','영어가 약해요'],['효율중심','시간이 부족하다'],['이해중심학습','공부법을 모르겠다'],['커리큘럼중심','커리큘럼을 못 잡겠다']],
+};
+
+function buildSelectors() {
+  for (const qk of ['Q1','Q2','Q3','Q4','Q5','Q6','Q8']) {
+    const sel = document.getElementById('sel-' + qk.toLowerCase());
+    sel.innerHTML = Q_OPTIONS[qk].map(([id, lbl]) => `<option value="${id}">${lbl}</option>`).join('');
+    sel.addEventListener('change', applyCustom);
+  }
+  const q7c = document.getElementById('q7-checks');
+  q7c.innerHTML = Q_OPTIONS.Q7.map(([id, lbl]) =>
+    `<label><input type="checkbox" data-q7="${id}" data-label="${lbl}"> ${lbl}</label>`
+  ).join('');
+  q7c.querySelectorAll('input').forEach(cb => cb.addEventListener('change', applyCustom));
+}
+function applyCustom() {
+  const newA = [];
+  for (const qk of ['Q1','Q2','Q3','Q4','Q5','Q6']) {
+    const sel = document.getElementById('sel-' + qk.toLowerCase());
+    const opt = sel.options[sel.selectedIndex];
+    newA.push([{ tagId: opt.value, label: opt.text }]);
+  }
+  const q7sel = [...document.querySelectorAll('#q7-checks input:checked')]
+    .map(cb => ({ tagId: cb.dataset.q7, label: cb.dataset.label }));
+  newA.push(q7sel);
+  const q8 = document.getElementById('sel-q8');
+  const q8opt = q8.options[q8.selectedIndex];
+  newA.push([{ tagId: q8opt.value, label: q8opt.text }]);
+  A = newA;
+  loadAndRender();
+}
+function syncSelectorsFromA() {
+  for (const i of [0,1,2,3,4,5,7]) {
+    const sel = document.getElementById('sel-q' + (i+1));
+    if (sel && A[i]?.[0]?.tagId) sel.value = A[i][0].tagId;
+  }
+  const q7ids = (A[6] || []).map(x => x.tagId);
+  document.querySelectorAll('#q7-checks input').forEach(cb => {
+    cb.checked = q7ids.includes(cb.dataset.q7);
+  });
+}
+
+// 초기화
+buildSelectors();
+syncSelectorsFromA();
+document.getElementById('demo-select').addEventListener('change', (e) => {
+  if (!e.target.value) return;
+  A = DEMO_SETS[parseInt(e.target.value, 10)];
+  syncSelectorsFromA();
+  loadAndRender();
+});
+loadAndRender();
+</script>
+</body>
+</html>

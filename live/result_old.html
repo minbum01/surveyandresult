@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>합격 가능성 리포트</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&family=Noto+Serif+KR:wght@400;600;700&family=Playfair+Display:wght@700;900&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #FAFAF7;
+            --bg-card: #FFFFFF;
+            --bg-dark: #1A1A2E;
+            --bg-accent: #F0EDE6;
+            --bg-highlight: #FFF8E7;
+            --text-primary: #1A1A2E;
+            --text-secondary: #5A5A6E;
+            --text-muted: #8E8E9E;
+            --text-inverse: #FAFAF7;
+            --accent-gold: #C8A84E;
+            --accent-gold-light: #E8D59E;
+            --accent-blue: #3A5BA0;
+            --accent-blue-light: #E8EEF8;
+            --accent-green: #2D8A5E;
+            --accent-green-light: #E6F5ED;
+            --accent-warm: #D4734A;
+            --accent-warm-light: #FFF0EB;
+            --border-light: #E8E6DF;
+            --border-medium: #D0CEC7;
+            --shadow-sm: 0 1px 3px rgba(26, 26, 46, 0.06);
+            --shadow-md: 0 4px 12px rgba(26, 26, 46, 0.08);
+            --shadow-lg: 0 8px 30px rgba(26, 26, 46, 0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .page {
+            width: 1280px;
+            height: 720px;
+            margin: 20px auto;
+            background: var(--bg-primary);
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* ===== PAGE 1 ===== */
+        .page-1 {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            grid-template-rows: 1fr;
+        }
+
+        /* LEFT PANEL - Report Card */
+        .report-card {
+            background: var(--bg-dark);
+            color: var(--text-inverse);
+            padding: 36px 32px 28px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .report-card::before {
+            content: '';
+            position: absolute;
+            top: -60px;
+            right: -60px;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(200, 168, 78, 0.12) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .report-card::after {
+            content: '';
+            position: absolute;
+            bottom: -40px;
+            left: -40px;
+            width: 160px;
+            height: 160px;
+            background: radial-gradient(circle, rgba(58, 91, 160, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .report-header {
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .report-brand {
+            font-size: 10px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--accent-gold);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .report-title {
+            font-family: 'Noto Serif KR', serif;
+            font-size: 19px;
+            font-weight: 700;
+            line-height: 1.5;
+            margin-bottom: 6px;
+        }
+
+        .report-subtitle {
+            font-size: 12.5px;
+            color: rgba(250, 250, 247, 0.6);
+            line-height: 1.6;
+            font-weight: 300;
+        }
+
+        .empathy-stat {
+            background: rgba(200, 168, 78, 0.1);
+            border: 1px solid rgba(200, 168, 78, 0.2);
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .empathy-stat p {
+            font-size: 11.5px;
+            color: rgba(250, 250, 247, 0.8);
+            line-height: 1.6;
+        }
+
+        .empathy-stat strong {
+            color: var(--accent-gold-light);
+            font-weight: 600;
+        }
+
+        .tag-strip {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .tag {
+            font-size: 10.5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: rgba(250, 250, 247, 0.08);
+            border: 1px solid rgba(250, 250, 247, 0.15);
+            color: rgba(250, 250, 247, 0.75);
+            font-weight: 400;
+        }
+
+        .tag.primary {
+            background: rgba(200, 168, 78, 0.15);
+            border-color: rgba(200, 168, 78, 0.3);
+            color: var(--accent-gold-light);
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 18px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .metric-card {
+            background: rgba(250, 250, 247, 0.05);
+            border: 1px solid rgba(250, 250, 247, 0.08);
+            border-radius: 10px;
+            padding: 14px 12px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--accent-gold-light);
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .metric-value .unit {
+            font-size: 14px;
+            font-weight: 700;
+            margin-left: 1px;
+        }
+
+        .metric-label {
+            font-size: 10.5px;
+            color: rgba(250, 250, 247, 0.55);
+            font-weight: 400;
+        }
+
+        .analysis-text {
+            font-size: 12px;
+            line-height: 1.8;
+            color: rgba(250, 250, 247, 0.7);
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            font-weight: 300;
+        }
+
+        .analysis-text strong {
+            color: rgba(250, 250, 247, 0.95);
+            font-weight: 500;
+        }
+
+        /* RIGHT PANEL */
+        .right-panel {
+            padding: 28px 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow: hidden;
+        }
+
+        .page-indicator {
+            font-size: 10px;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            text-align: right;
+            font-weight: 500;
+        }
+
+        .section-block {
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            padding: 20px 22px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .section-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .section-title {
+            font-family: 'Noto Serif KR', serif;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .section-badge {
+            margin-left: auto;
+            font-size: 10.5px;
+            color: var(--text-muted);
+            background: var(--bg-accent);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        /* Section A: 이 선택으로 합격한 사람들 */
+        .combo-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--accent-blue);
+            font-weight: 600;
+            margin-bottom: 12px;
+            background: var(--accent-blue-light);
+            padding: 5px 12px;
+            border-radius: 6px;
+        }
+
+        .combo-label .sep {
+            color: var(--accent-blue);
+            opacity: 0.4;
+        }
+
+        .data-row-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .data-cell {
+            text-align: center;
+            padding: 8px 4px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+        }
+
+        .data-cell-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--text-primary);
+            line-height: 1.2;
+        }
+
+        .data-cell-value .small-unit {
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .data-cell-label {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .pattern-box {
+            display: flex;
+            gap: 10px;
+        }
+
+        .pattern-item {
+            flex: 1;
+            padding: 10px 12px;
+            background: var(--bg-highlight);
+            border-radius: 8px;
+            border-left: 3px solid var(--accent-gold);
+        }
+
+        .pattern-item-label {
+            font-size: 9.5px;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .pattern-item-value {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.4;
+        }
+
+        /* Section B: 목표 체크 */
+        .goal-check-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .distribution-chart {
+            position: relative;
+        }
+
+        .dist-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .dist-bar-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .dist-bar-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dist-bar-label {
+            font-size: 10px;
+            color: var(--text-muted);
+            width: 60px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .dist-bar-track {
+            flex: 1;
+            height: 16px;
+            background: var(--bg-accent);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .dist-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: var(--accent-blue-light);
+            transition: width 0.6s ease;
+        }
+
+        .dist-bar-fill.mine {
+            background: var(--accent-blue);
+        }
+
+        .dist-bar-fill.highlight {
+            background: var(--accent-gold);
+        }
+
+        .dist-bar-pct {
+            font-size: 9.5px;
+            color: var(--text-muted);
+            width: 32px;
+            flex-shrink: 0;
+        }
+
+        .my-marker {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            color: var(--accent-blue);
+            font-weight: 600;
+            margin-top: 8px;
+            padding: 4px 10px;
+            background: var(--accent-blue-light);
+            border-radius: 4px;
+        }
+
+        .verdict-box {
+            background: var(--accent-green-light);
+            border-radius: 10px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .verdict-label {
+            font-size: 10px;
+            color: var(--accent-green);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .verdict-text {
+            font-family: 'Noto Serif KR', serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--accent-green);
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+
+        .verdict-detail {
+            font-size: 11px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .verdict-detail strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* ===== PAGE 2 ===== */
+        .page-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto 1fr auto;
+            gap: 0;
+            padding: 28px 32px 20px;
+        }
+
+        .page2-header {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .page2-title {
+            font-family: 'Noto Serif KR', serif;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        /* 합격수기 카드 */
+        .stories-section {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .story-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .story-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+
+        .story-card:nth-child(1)::before {
+            background: var(--accent-gold);
+        }
+
+        .story-card:nth-child(2)::before {
+            background: var(--accent-blue);
+        }
+
+        .story-card:nth-child(3)::before {
+            background: var(--accent-green);
+        }
+
+        .story-match {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--accent-gold);
+            margin-bottom: 6px;
+        }
+
+        .story-profile {
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .story-quote {
+            font-family: 'Noto Serif KR', serif;
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            font-style: italic;
+            flex: 1;
+            padding: 10px 0;
+            border-top: 1px solid var(--border-light);
+            position: relative;
+        }
+
+        .story-quote::before {
+            content: '"';
+            font-family: 'Playfair Display', serif;
+            font-size: 36px;
+            color: var(--accent-gold-light);
+            position: absolute;
+            top: 2px;
+            left: 0;
+            line-height: 1;
+        }
+
+        .story-quote p {
+            padding-left: 22px;
+        }
+
+        .story-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 8px;
+        }
+
+        .story-tag {
+            font-size: 9px;
+            padding: 2px 7px;
+            background: var(--bg-accent);
+            border-radius: 10px;
+            color: var(--text-muted);
+        }
+
+        .story-tag.matched {
+            background: var(--accent-gold);
+            color: white;
+        }
+
+        /* Bottom Grid */
+        .bottom-grid {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: 1fr 1fr 280px;
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .insight-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .insight-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .insight-icon {
+            font-size: 14px;
+        }
+
+        .insight-title {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .regret-item {
+            margin-bottom: 10px;
+        }
+
+        .regret-stat {
+            font-size: 10.5px;
+            color: var(--accent-warm);
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .regret-text {
+            font-size: 11.5px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .regret-tip {
+            font-size: 11px;
+            background: var(--accent-warm-light);
+            padding: 8px 10px;
+            border-radius: 6px;
+            color: var(--text-primary);
+            line-height: 1.5;
+            margin-top: 6px;
+        }
+
+        .regret-tip strong {
+            font-weight: 600;
+        }
+
+        .first-month-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .fm-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .fm-number {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--accent-blue);
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .fm-content {
+            font-size: 11.5px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .fm-content strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .fm-pct {
+            font-size: 10px;
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        /* Hard Subject */
+        .hard-subject {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .subject-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            flex: 1;
+        }
+
+        .subject-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .subject-name {
+            font-size: 11px;
+            width: 50px;
+            text-align: right;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+            font-weight: 500;
+        }
+
+        .subject-bar-track {
+            flex: 1;
+            height: 14px;
+            background: var(--bg-accent);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .subject-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            background: var(--accent-warm);
+            opacity: 0.7;
+        }
+
+        .subject-bar-fill.top {
+            opacity: 1;
+            background: var(--accent-warm);
+        }
+
+        .subject-pct {
+            font-size: 10px;
+            color: var(--text-muted);
+            width: 28px;
+            flex-shrink: 0;
+        }
+
+        .subject-tip {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-light);
+            font-size: 10.5px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* CTA Footer */
+        .cta-footer {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: var(--bg-dark);
+            border-radius: 12px;
+            padding: 18px 28px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(200, 168, 78, 0.08) 0%, transparent 60%);
+        }
+
+        .cta-message {
+            flex: 1;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-closing-quote {
+            font-family: 'Noto Serif KR', serif;
+            font-size: 13px;
+            color: rgba(250, 250, 247, 0.7);
+            font-style: italic;
+            line-height: 1.6;
+            margin-bottom: 4px;
+        }
+
+        .cta-closing-source {
+            font-size: 10px;
+            color: rgba(250, 250, 247, 0.4);
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-primary {
+            background: var(--accent-gold);
+            color: var(--bg-dark);
+            border: none;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Noto Sans KR', sans-serif;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(200, 168, 78, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: rgba(250, 250, 247, 0.7);
+            border: 1px solid rgba(250, 250, 247, 0.2);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: 'Noto Sans KR', sans-serif;
+            transition: all 0.15s ease;
+        }
+
+        .btn-secondary:hover {
+            border-color: rgba(250, 250, 247, 0.5);
+            color: rgba(250, 250, 247, 0.95);
+        }
+
+        /* Print Goal Box */
+        .print-goal-box {
+            display: none;
+        }
+
+        /* ===== PRINT STYLES ===== */
+        @media print {
+            body {
+                background: white;
+            }
+
+            .page {
+                width: 100%;
+                height: auto;
+                margin: 0;
+                box-shadow: none;
+                border-radius: 0;
+                page-break-after: always;
+                page-break-inside: avoid;
+            }
+
+            .page-1 {
+                min-height: 100vh;
+            }
+
+            .page-2 {
+                min-height: 100vh;
+            }
+
+            .cta-footer .btn-primary,
+            .cta-footer .btn-secondary {
+                display: none;
+            }
+
+            .print-goal-box {
+                display: block !important;
+                grid-column: 1 / -1;
+                border: 2px solid var(--border-medium);
+                border-radius: 12px;
+                padding: 24px;
+                margin-top: 8px;
+            }
+
+            .print-goal-title {
+                font-size: 12px;
+                font-weight: 600;
+                color: var(--text-muted);
+                margin-bottom: 16px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+
+            .print-goal-line {
+                border-bottom: 1px solid var(--border-medium);
+                padding: 10px 0;
+                font-size: 13px;
+                color: var(--text-secondary);
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .print-goal-line .blank {
+                flex: 1;
+                border-bottom: 1px solid var(--border-medium);
+                min-width: 120px;
+            }
+
+            .print-qr-area {
+                text-align: right;
+                margin-top: 12px;
+                font-size: 10px;
+                color: var(--text-muted);
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-block,
+        .story-card,
+        .insight-card,
+        .hard-subject {
+            animation: fadeUp 0.5s ease both;
+        }
+
+        .section-block:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .section-block:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+
+        .story-card:nth-child(1) {
+            animation-delay: 0.05s;
+        }
+
+        .story-card:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+
+        .story-card:nth-child(3) {
+            animation-delay: 0.25s;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ==================== PAGE 1 ==================== -->
+    <div class="page page-1">
+        <!-- LEFT: Report Card -->
+        <div class="report-card">
+            <div class="report-header">
+                <div class="report-brand">HACKERS PASS REPORT</div>
+                <div class="report-title">
+                    직장 다니면서<br>학원으로 행정직을 준비하는 분
+                </div>
+                <div class="report-subtitle">
+                    2,112개 합격수기 중 당신과 비슷한 사람들을 찾았습니다
+                </div>
+            </div>
+
+            <div class="empathy-stat">
+                <p>비슷한 합격자의 <strong>73%</strong>가 한 번은 포기하려 했습니다.<br>그리고 그 73%가 전부 합격했습니다.</p>
+            </div>
+
+            <div class="tag-strip">
+                <span class="tag primary">#직장병행</span>
+                <span class="tag primary">#학원</span>
+                <span class="tag primary">#노베이스</span>
+                <span class="tag">#9급국가직</span>
+                <span class="tag">#행정직</span>
+                <span class="tag">#12개월목표</span>
+                <span class="tag">#하루4시간</span>
+                <span class="tag">#멘탈관리</span>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value">47<span class="unit">명</span></div>
+                    <div class="metric-label">유사 합격자</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">11.3<span class="unit">개월</span></div>
+                    <div class="metric-label">평균 준비 기간</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">58<span class="unit">%</span></div>
+                    <div class="metric-label">초시 합격률</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">4.2<span class="unit">시간</span></div>
+                    <div class="metric-label">평균 하루 순공</div>
+                </div>
+            </div>
+
+            <div class="analysis-text">
+                <strong>당신과 비슷한 조건의 합격자 47명</strong> 중 58%가 첫 시험에 합격했습니다.
+                이분들은 평균 11.3개월을 준비했으며, 하루 순공시간은 4.2시간이었습니다.
+                <strong>멘탈 관리</strong>를 고민하면서도 합격한 분이 <strong>34명</strong> 있으며,
+                이분들의 돌파 전략을 이 리포트에서 확인하실 수 있습니다.
+            </div>
+        </div>
+
+        <!-- RIGHT: Analysis Blocks -->
+        <div class="right-panel">
+            <div class="page-indicator">Page 1 of 2</div>
+
+            <!-- Section A: 이 선택으로 합격한 사람들 -->
+            <div class="section-block">
+                <div class="section-header">
+                    <div class="section-icon" style="background: var(--accent-blue-light); color: var(--accent-blue);">
+                        📊</div>
+                    <div class="section-title">이 선택으로 합격한 사람들</div>
+                    <div class="section-badge">Q1 × Q4 × Q7 매칭</div>
+                </div>
+                <div class="combo-label">
+                    직장병행 <span class="sep">×</span> 노베이스 <span class="sep">×</span> 학원
+                    &nbsp;→&nbsp; <strong>47명</strong>
+                </div>
+                <div class="data-row-grid">
+                    <div class="data-cell">
+                        <div class="data-cell-value">13.4<span class="small-unit">개월</span></div>
+                        <div class="data-cell-label">평균 준비 기간</div>
+                    </div>
+                    <div class="data-cell">
+                        <div class="data-cell-value">54<span class="small-unit">%</span></div>
+                        <div class="data-cell-label">초시 합격률</div>
+                    </div>
+                    <div class="data-cell">
+                        <div class="data-cell-value">4.8<span class="small-unit">시간</span></div>
+                        <div class="data-cell-label">평균 하루 순공</div>
+                    </div>
+                    <div class="data-cell">
+                        <div class="data-cell-value">71<span class="small-unit">%</span></div>
+                        <div class="data-cell-label">멘탈관리 언급</div>
+                    </div>
+                </div>
+                <div class="pattern-box">
+                    <div class="pattern-item">
+                        <div class="pattern-item-label">가장 많이 언급한 전략</div>
+                        <div class="pattern-item-value">토요일 전일반 몰입 + 평일 야간 복습</div>
+                    </div>
+                    <div class="pattern-item">
+                        <div class="pattern-item-label">이 방식 합격자 공통 패턴</div>
+                        <div class="pattern-item-value">주 1일 완전 휴식 유지 비율 78%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section B: 목표 기간 & 시간 투입 체크 -->
+            <div class="section-block">
+                <div class="section-header">
+                    <div class="section-icon"
+                        style="background: var(--accent-green-light); color: var(--accent-green);">⏱</div>
+                    <div class="section-title">목표 기간 & 시간 투입 체크</div>
+                </div>
+                <div class="goal-check-grid">
+                    <div class="distribution-chart">
+                        <div class="dist-title">같은 상황 합격자 준비 기간 분포</div>
+                        <div class="dist-bar-group">
+                            <div class="dist-bar-row">
+                                <div class="dist-bar-label">~6개월</div>
+                                <div class="dist-bar-track">
+                                    <div class="dist-bar-fill" style="width: 12%;"></div>
+                                </div>
+                                <div class="dist-bar-pct">12%</div>
+                            </div>
+                            <div class="dist-bar-row">
+                                <div class="dist-bar-label">6~12개월</div>
+                                <div class="dist-bar-track">
+                                    <div class="dist-bar-fill highlight" style="width: 45%;"></div>
+                                </div>
+                                <div class="dist-bar-pct">45%</div>
+                            </div>
+                            <div class="dist-bar-row">
+                                <div class="dist-bar-label">12~18개월</div>
+                                <div class="dist-bar-track">
+                                    <div class="dist-bar-fill" style="width: 33%;"></div>
+                                </div>
+                                <div class="dist-bar-pct">33%</div>
+                            </div>
+                            <div class="dist-bar-row">
+                                <div class="dist-bar-label">18개월~</div>
+                                <div class="dist-bar-track">
+                                    <div class="dist-bar-fill" style="width: 10%;"></div>
+                                </div>
+                                <div class="dist-bar-pct">10%</div>
+                            </div>
+                        </div>
+                        <div class="my-marker">▸ 나의 목표: 12개월 — 합격자 분포 중앙</div>
+
+                        <div class="dist-title" style="margin-top: 14px;">하루 순공시간 분포</div>
+                        <div class="dist-bar-group">
+                            <div class="dist-bar-row">
+                                <div class="dist-bar-label">~3시간</div>
+                                <div class="dist-bar-track">
+                                    <div class="dist-bar-fill" style="width: 18%;"></div>
+                                </div>
+                                <div class="dist-bar-pct">18%</div>
+                            </div>
+                            <div class="dist-bar-row">
+                                <div class="dist-bar-label">3~5시간</div>
+                                <div class="dist-bar-track">
+                                    <div class="dist-bar-fill mine" style="width: 42%;"></div>
+                                </div>
+                                <div class="dist-bar-pct">42%</div>
+                            </div>
+                            <div class="dist-bar-row">
+                                <div class="dist-bar-label">5~8시간</div>
+                                <div class="dist-bar-track">
+                                    <div class="dist-bar-fill" style="width: 30%;"></div>
+                                </div>
+                                <div class="dist-bar-pct">30%</div>
+                            </div>
+                            <div class="dist-bar-row">
+                                <div class="dist-bar-label">8시간~</div>
+                                <div class="dist-bar-track">
+                                    <div class="dist-bar-fill" style="width: 10%;"></div>
+                                </div>
+                                <div class="dist-bar-pct">10%</div>
+                            </div>
+                        </div>
+                        <div class="my-marker">▸ 나의 시간: 4시간 — 같은 시간대 합격자 20명</div>
+                    </div>
+
+                    <div class="verdict-box">
+                        <div class="verdict-label">판정</div>
+                        <div class="verdict-text">충분히 가능한<br>목표입니다</div>
+                        <div class="verdict-detail">
+                            12개월 목표는 같은 상황 합격자 분포의 <strong>정중앙</strong>에 위치합니다.
+                            하루 4시간은 이 그룹에서 <strong>가장 많은 합격자가 속한 구간</strong>(42%)이며,
+                            이 시간대 합격자 20명의 평균 준비 기간은 <strong>12.8개월</strong>이었습니다.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ==================== PAGE 2 ==================== -->
+    <div class="page page-2">
+        <div class="page2-header">
+            <div class="page2-title">합격자가 남긴 전략</div>
+            <div class="page-indicator">Page 2 of 2</div>
+        </div>
+
+        <!-- Stories Section -->
+        <div class="stories-section">
+            <div class="story-card">
+                <div class="story-match">● 8개 중 7개 일치</div>
+                <div class="story-profile">직장병행 · 노베이스 · 학원 · 11개월 합격</div>
+                <div class="story-quote">
+                    <p>직장 다니면서 진짜 포기하려고 한 적이 세 번은 있었는데, 지금 돌아보면 그때 안 놓은 게 전부였어요.</p>
+                </div>
+                <div class="story-tags">
+                    <span class="story-tag matched">#직장병행</span>
+                    <span class="story-tag matched">#노베이스</span>
+                    <span class="story-tag matched">#학원</span>
+                    <span class="story-tag matched">#멘탈관리</span>
+                    <span class="story-tag matched">#행정직</span>
+                    <span class="story-tag matched">#9급</span>
+                    <span class="story-tag matched">#12개월이내</span>
+                    <span class="story-tag">#야간반</span>
+                </div>
+            </div>
+
+            <div class="story-card">
+                <div class="story-match">● 8개 중 6개 일치</div>
+                <div class="story-profile">직장병행 · 비전공 · 학원 · 14개월 합격</div>
+                <div class="story-quote">
+                    <p>퇴근하고 학원 가는 게 처음엔 미친 짓 같았는데, 3개월 지나니까 루틴이 되더라고요. 루틴이 되면 이깁니다.</p>
+                </div>
+                <div class="story-tags">
+                    <span class="story-tag matched">#직장병행</span>
+                    <span class="story-tag matched">#학원</span>
+                    <span class="story-tag matched">#행정직</span>
+                    <span class="story-tag matched">#멘탈관리</span>
+                    <span class="story-tag matched">#9급</span>
+                    <span class="story-tag matched">#야간반</span>
+                    <span class="story-tag">#비전공</span>
+                    <span class="story-tag">#18개월이내</span>
+                </div>
+            </div>
+
+            <div class="story-card">
+                <div class="story-match">● 8개 중 5개 일치</div>
+                <div class="story-profile">직장병행 · 노베이스 · 인강+학원 · 10개월 합격</div>
+                <div class="story-quote">
+                    <p>평일은 인강, 주말은 학원. 이 조합이 저한테는 답이었어요. 한 가지만 고집할 필요 없습니다.</p>
+                </div>
+                <div class="story-tags">
+                    <span class="story-tag matched">#직장병행</span>
+                    <span class="story-tag matched">#노베이스</span>
+                    <span class="story-tag matched">#행정직</span>
+                    <span class="story-tag matched">#9급</span>
+                    <span class="story-tag matched">#12개월이내</span>
+                    <span class="story-tag">#인강병행</span>
+                    <span class="story-tag">#주말반</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Grid -->
+        <div class="bottom-grid">
+            <!-- 후회 -->
+            <div class="insight-card">
+                <div class="insight-header">
+                    <span class="insight-icon">💬</span>
+                    <span class="insight-title">합격자가 가장 후회한 것</span>
+                </div>
+                <div class="regret-item">
+                    <div class="regret-stat">61%가 언급</div>
+                    <div class="regret-text">"초반에 너무 많은 과목을 동시에 시작한 것"</div>
+                    <div class="regret-tip"><strong>합격자 권장:</strong> 처음 2개월은 국어·영어 2과목에 집중, 나머지는 3개월 차부터</div>
+                </div>
+                <div class="regret-item" style="margin-bottom: 0;">
+                    <div class="regret-stat">48%가 언급</div>
+                    <div class="regret-text">"체력 관리를 너무 늦게 시작한 것"</div>
+                    <div class="regret-tip"><strong>합격자 권장:</strong> 주 2회 30분 걷기부터. 수험 후반 체력이 성적을 좌우</div>
+                </div>
+            </div>
+
+            <!-- 첫 달에 한 것 -->
+            <div class="insight-card">
+                <div class="insight-header">
+                    <span class="insight-icon">🚀</span>
+                    <span class="insight-title">합격자의 첫 달</span>
+                </div>
+                <div class="first-month-list">
+                    <div class="fm-item">
+                        <div class="fm-number">1</div>
+                        <div class="fm-content">
+                            <strong>기본서 선택 + 1과목 1회독</strong><br>
+                            <span class="fm-pct">합격자 89%가 첫 달에 완료</span>
+                        </div>
+                    </div>
+                    <div class="fm-item">
+                        <div class="fm-number">2</div>
+                        <div class="fm-content">
+                            <strong>하루 루틴 고정</strong><br>
+                            <span class="fm-pct">"퇴근 → 저녁 → 학원" 시간 패턴 확립</span>
+                        </div>
+                    </div>
+                    <div class="fm-item">
+                        <div class="fm-number">3</div>
+                        <div class="fm-content">
+                            <strong>학습 기록 시작</strong><br>
+                            <span class="fm-pct">합격자 67%가 첫 달부터 순공시간 기록</span>
+                        </div>
+                    </div>
+                    <div class="fm-item">
+                        <div class="fm-number">4</div>
+                        <div class="fm-content">
+                            <strong>같은 반 스터디 1명 확보</strong><br>
+                            <span class="fm-pct">직장병행 합격자의 핵심 생존 전략</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 어려운 과목 -->
+            <div class="hard-subject">
+                <div class="insight-header">
+                    <span class="insight-icon">📚</span>
+                    <span class="insight-title">행정직 합격자가 어려워한 과목</span>
+                </div>
+                <div class="subject-bars">
+                    <div class="subject-row">
+                        <div class="subject-name">행정법</div>
+                        <div class="subject-bar-track">
+                            <div class="subject-bar-fill top" style="width: 62%;"></div>
+                        </div>
+                        <div class="subject-pct">62%</div>
+                    </div>
+                    <div class="subject-row">
+                        <div class="subject-name">행정학</div>
+                        <div class="subject-bar-track">
+                            <div class="subject-bar-fill" style="width: 41%;"></div>
+                        </div>
+                        <div class="subject-pct">41%</div>
+                    </div>
+                    <div class="subject-row">
+                        <div class="subject-name">국어</div>
+                        <div class="subject-bar-track">
+                            <div class="subject-bar-fill" style="width: 28%;"></div>
+                        </div>
+                        <div class="subject-pct">28%</div>
+                    </div>
+                    <div class="subject-row">
+                        <div class="subject-name">영어</div>
+                        <div class="subject-bar-track">
+                            <div class="subject-bar-fill" style="width: 22%;"></div>
+                        </div>
+                        <div class="subject-pct">22%</div>
+                    </div>
+                    <div class="subject-row">
+                        <div class="subject-name">한국사</div>
+                        <div class="subject-bar-track">
+                            <div class="subject-bar-fill" style="width: 15%;"></div>
+                        </div>
+                        <div class="subject-pct">15%</div>
+                    </div>
+                </div>
+                <div class="subject-tip">
+                    💡 노베이스 합격자 78%가 <strong>행정법을 가장 먼저</strong> 시작했습니다. "어려운 과목일수록 일찍 시작"이 공통 전략이었습니다.
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA Footer -->
+        <div class="cta-footer">
+            <div class="cta-message">
+                <div class="cta-closing-quote">
+                    "합격하고 나니까 그때 고민했던 것들이 다 별거 아니었어요. 시작한 것 자체가 반은 한 겁니다."
+                </div>
+                <div class="cta-closing-source">— 직장병행 11개월 합격자 수기 중</div>
+            </div>
+            <div class="cta-buttons">
+                <button class="btn-secondary" onclick="window.print()">📄 리포트 출력</button>
+                <button class="btn-primary">무료 학습 상담 신청</button>
+            </div>
+        </div>
+
+        <!-- Print Only: 목표 기입란 -->
+        <div class="print-goal-box">
+            <div class="print-goal-title">나의 합격 다짐</div>
+            <div class="print-goal-line">
+                나의 목표: <span class="blank"></span> 까지, <span class="blank"></span> 에 합격한다.
+            </div>
+            <div class="print-goal-line">
+                오늘 날짜: 2026년 &nbsp;&nbsp;&nbsp;&nbsp;월 &nbsp;&nbsp;&nbsp;&nbsp;일
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 서명: <span class="blank"
+                    style="max-width: 160px;"></span>
+            </div>
+            <div class="print-qr-area">
+                상담 신청: hackers.ac.kr/consult &nbsp;|&nbsp; ☎ 02-000-0000
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

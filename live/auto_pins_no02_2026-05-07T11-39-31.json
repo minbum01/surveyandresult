@@ -1,0 +1,25 @@
+{
+  "version": 3,
+  "exportedAt": "2026-05-07T02:39:31.613835Z",
+  "_note": "AI 추천 — no.02 (Q1×Q8) 페르소나 밑 4~5줄 후기. 강제 KW: 같은 처지/같은 걱정",
+  "totalPins": 0,
+  "store": {
+    "version": 3,
+    "areas": {
+      "no.02": {
+        "name": "페르소나 밑 4~5줄",
+        "matchKeys": [
+          "Q1",
+          "Q8"
+        ],
+        "intent": "같은 처지/같은 걱정 수험생에게 주는 따뜻한 격려 (50~200자, \"같은 처지\"/\"같은 걱정\" 1개 이상 필수)"
+      }
+    },
+    "pins": {
+      "no.02": []
+    },
+    "excludesCombo": {},
+    "excludesGlobal": [],
+    "reviewed": {}
+  }
+}
