@@ -30,7 +30,9 @@ log = logging.getLogger()
 
 # ── Claude CLI 호출 ───────────────────────────────────
 
-CLAUDE_CMD = r"C:\Users\admin\AppData\Roaming\npm\claude.cmd"
+import shutil as _shutil
+CLAUDE_CMD = (_shutil.which("claude") or _shutil.which("claude.cmd")
+             or r"C:\Users\admin\AppData\Roaming\npm\claude.cmd")
 
 def call_claude(prompt: str) -> str | None:
     try:

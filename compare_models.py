@@ -4,7 +4,9 @@
 """
 import sqlite3, subprocess, json, re, os, sys, time
 
-CLAUDE_CMD = r"C:\Users\admin\AppData\Roaming\npm\claude.cmd"
+import shutil as _shutil
+CLAUDE_CMD = (_shutil.which("claude") or _shutil.which("claude.cmd")
+             or r"C:\Users\admin\AppData\Roaming\npm\claude.cmd")
 MODEL_A = "claude-opus-4-8"
 MODEL_B = "claude-sonnet-4-6"
 
