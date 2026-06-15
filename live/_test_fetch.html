@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html><body>
+<div id='result'>대기중...</div>
+<script>
+fetch('http://localhost:8181/live/reviews_data.json')
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('result').textContent = 
+      'OK: ' + data.passnotes.length + '건';
+  })
+  .catch(e => {
+    document.getElementById('result').textContent = 'ERROR: ' + e.message;
+  });
+</script>
+</body></html>

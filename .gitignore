@@ -2,3 +2,14 @@
 *.tmp
 .DS_Store
 Thumbs.db
+
+# 임시/디버그 파일
+_tmp_check.js
+_debug_script.js
+last_tag_result.json
+build_output*.ini
+debug_output.txt
+debug2_out.txt
+debug3_out.txt
+tmp_test.txt
+test_output.txt

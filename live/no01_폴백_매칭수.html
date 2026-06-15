@@ -983,6 +983,24 @@ body.show-terms .term-toggle:hover { background: var(--accent-gold-light, #E8D59
 }
 .pins-summary .stat { font-size: 11.5px; color: var(--text-muted); }
 
+/* 데이터 소스 선택 */
+.source-bar {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 16px;
+}
+.source-bar label { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+.src-btn {
+  padding: 5px 14px; border-radius: 20px;
+  border: 1.5px solid var(--border-light);
+  background: var(--bg-card); font-family: inherit;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  color: var(--text-secondary); transition: all 0.12s;
+}
+.src-btn:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
+.src-btn.active { background: var(--accent-blue); border-color: var(--accent-blue); color: white; }
+.src-btn[data-src="경찰"].active { background: #2E6B3E; border-color: #2E6B3E; }
+.src-btn[data-src="소방"].active { background: #B03A2E; border-color: #B03A2E; }
+
 /* 핀 메모 입력 */
 .pn-pin-memo {
   margin: 8px 0 10px;
@@ -1028,6 +1046,13 @@ body.show-terms .term-toggle:hover { background: var(--accent-gold-light, #E8D59
   <div class="subtitle">
     result.html / persona.html 의 모든 동적 영역(no.01~)을 탭으로 묶어 매칭 합격수기를 직접 확인합니다.<br>
     매칭 로직: <code>persona.html</code>의 <code>TAG_EXPANSION</code> 확장 매핑 (단일 출처: <code>후기태그_전체.md</code>)
+  </div>
+
+  <div class="source-bar">
+    <label>데이터 소스</label>
+    <button class="src-btn active" data-src="공무원">공무원 <small>(2,114)</small></button>
+    <button class="src-btn" data-src="경찰">경찰 <small>(1,337)</small></button>
+    <button class="src-btn" data-src="소방">소방 <small>(396)</small></button>
   </div>
 
   <nav class="tabs" id="tab-nav" data-term="탭 바">
@@ -1302,7 +1327,7 @@ const Q_KEYWORDS = {
 
 const Q1_OPTS = ['전업수험생','직장병행','재학수험생','육아병행','퇴직수험생','아르바이트병행'];
 const Q2_OPTS = ['국가직9급','지방직9급','서울시9급'];
-const Q3_OPTS = ['행정직','세무직','공안직','교육직','기술직','간호보건직','사회복지직','기타직렬'];
+let   Q3_OPTS = ['행정직','세무직','공안직','교육직','기술직','간호보건직','사회복지직','기타직렬'];
 const Q4_OPTS = ['노베이스','수능베이스','전공자','토익베이스'];
 const Q5_OPTS = ['1년이내','1년이상'];
 const Q6_OPTS = ['하루10시간미만','하루10시간이상'];
@@ -1310,17 +1335,98 @@ const Q7_OPTS = ['인강병행','기출반복','회독반복','독학위주','�
 const Q8_OPTS = ['멘탈관리','슬럼프극복','영어약자','효율중심','이해중심학습','커리큘럼중심'];
 const Q_OPTS_ALL = { Q1:Q1_OPTS, Q2:Q2_OPTS, Q3:Q3_OPTS, Q4:Q4_OPTS, Q5:Q5_OPTS, Q6:Q6_OPTS, Q7:Q7_OPTS, Q8:Q8_OPTS };
 
+// ─────────── 데이터 소스 설정 ───────────
+// comboDims: COMBO_MAP 에 사용할 Q 키 순서 (= 매트릭스 축)
+// qOpts: 각 Q 별 옵션 목록 (기본 Q?_OPTS 를 덮어씀; 빈 배열 = 해당 Q 미사용)
+// TAG_EXP: 소스 전용 TAG_EXPANSION 추가 항목
+const SOURCES = {
+  '공무원': {
+    file: 'reviews_data.json',
+    comboDims: ['Q1', 'Q3', 'Q4'],
+    qOpts: {
+      Q3: ['행정직','세무직','공안직','교육직','기술직','간호보건직','사회복지직','기타직렬'],
+      Q4: ['노베이스','수능베이스','전공자','토익베이스'],
+    },
+    Q3_SHORT: [['행정직','행정'],['세무직','세무'],['공안직','공안'],['교육직','교육'],['기술직','기술'],['간호보건직','간호'],['사회복지직','복지'],['기타직렬','기타']],
+    TAG_EXP: {},
+  },
+  '경찰': {
+    file: '../police_reviews_data.json',
+    comboDims: ['Q1', 'Q2', 'Q3'],
+    qOpts: {
+      Q2: ['남성', '여성'],
+      Q3: ['공채', '경채'],
+      Q4: [],
+    },
+    Q3_SHORT: [['공채','공채'],['경채','경채']],
+    TAG_EXP: {
+      '남성': ['남성'],
+      '여성': ['여성'],
+      '공채': ['일반공채','일반공채(남)','일반공채(여)','101경비단'],
+      '경채': ['경행경채','경행','경찰간부','간부후보','해양경찰','해경'],
+    },
+  },
+  '소방': {
+    file: '../fire_reviews_data.json',
+    comboDims: ['Q1', 'Q2'],
+    qOpts: {
+      Q2: ['남성', '여성'],
+      Q3: [],
+      Q4: [],
+    },
+    Q3_SHORT: null,
+    TAG_EXP: {
+      '남성': ['공채남자','남성'],
+      '여성': ['공채여자','여성'],
+    },
+  },
+};
+let CURRENT_SOURCE = '공무원';
+let ACTIVE_TAG_EXPANSION = TAG_EXPANSION;  // 현재 소스의 TAG_EXPANSION
+let ACTIVE_COMBO_DIMS = ['Q1', 'Q3', 'Q4']; // loadSource() 시 갱신
+let ACTIVE_Q_OPTS = {};                      // loadSource() 시 갱신 { Q1:[…], … }
+
 let INDEX = [];          // [{p, q1set, q3set, q4set}, ...]
 let COMBO_MAP = new Map(); // "q1|q3|q4" → [passnote, ...]
 
 // ─────────── 데이터 로드 ───────────
-fetch('reviews_data.json')
-  .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-  .then(data => init(data))
-  .catch(e => {
-    document.getElementById('summary').innerHTML =
-      `<div class="error" style="grid-column: 1/-1;">로드 실패: ${e.message}<br><small>로컬 서버에서 열어야 합니다 (file:// 안 됨)</small></div>`;
+function loadSource(srcName) {
+  CURRENT_SOURCE = srcName;
+  const cfg = SOURCES[srcName];
+  // 콤보 차원 및 Q 옵션 갱신
+  ACTIVE_COMBO_DIMS = cfg.comboDims || ['Q1', 'Q3', 'Q4'];
+  const defaults = { Q1: Q1_OPTS, Q2: Q2_OPTS, Q3: Q3_OPTS, Q4: Q4_OPTS,
+                     Q5: Q5_OPTS, Q6: Q6_OPTS, Q7: Q7_OPTS, Q8: Q8_OPTS };
+  ACTIVE_Q_OPTS = Object.assign({}, defaults, cfg.qOpts || {});
+  Q3_OPTS = ACTIVE_Q_OPTS.Q3 || [];  // 레거시 호환
+  // TAG_EXPANSION 병합
+  ACTIVE_TAG_EXPANSION = Object.assign({}, TAG_EXPANSION, cfg.TAG_EXP);
+  // SC_OPTIONS Q3 갱신 (TDZ 회피)
+  try {
+    SC_OPTIONS.Q3 = cfg.Q3_SHORT || [];
+    if (typeof buildScenarioSelectors === 'function') buildScenarioSelectors();
+  } catch(_) {}
+  INDEX = [];
+  COMBO_MAP = new Map();
+  fetch(cfg.file)
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(data => init(data))
+    .catch(e => {
+      document.getElementById('summary').innerHTML =
+        `<div class="error" style="grid-column: 1/-1;">로드 실패: ${e.message}<br><small>로컬 서버에서 열어야 합니다 (file:// 안 됨)</small></div>`;
+    });
+}
+
+// 소스 탭 클릭 이벤트
+document.querySelectorAll('.src-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.src-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    loadSource(btn.dataset.src);
   });
+});
+
+loadSource('공무원');
 
 function init(data) {
   // 영역 메타 로드 (storage v3) — 없으면 default 채워서 저장
@@ -1329,40 +1435,40 @@ function init(data) {
   INDEX = eligible.map(p => {
     const ts = new Set(p.tags || []);
     const job = p.job || '';
-    // Q1 충돌 회피: 후기에 다른 Q1 직접 태그가 있으면 그 q 매칭 안 함
-    // (예: 후기에 '재학수험생' 태그 있으면 '전업수험생'으로 매칭 안 됨)
-    // Q3 우선순위: 행정직 + 교육직 둘 다 있으면 무조건 교육직 (행정직 매칭 차단)
-    const matchOpts = (opts, useJob, isQ1 = false) => new Set(opts.filter(q => {
+    const matchOpts = (opts, useJob = false, isQ1 = false) => new Set((opts || []).filter(q => {
       if (isQ1) {
-        for (const o of Q1_OPTS) {
+        for (const o of (ACTIVE_Q_OPTS.Q1 || Q1_OPTS)) {
           if (o !== q && ts.has(o)) return false;
         }
       }
       if (q === '행정직' && ts.has('교육직')) return false;
-      const exp = TAG_EXPANSION[q] || [q];
+      const exp = ACTIVE_TAG_EXPANSION[q] || [q];
       return exp.some(t => ts.has(t) || (useJob && job === t));
     }));
-    return {
-      p,
-      q1set: matchOpts(Q1_OPTS, false, true),
-      q2set: matchOpts(Q2_OPTS, false),
-      q3set: matchOpts(Q3_OPTS, true),
-      q4set: matchOpts(Q4_OPTS, false),
-      q5set: matchOpts(Q5_OPTS, false),
-      q6set: matchOpts(Q6_OPTS, false),
-      q7set: matchOpts(Q7_OPTS, false),
-      q8set: matchOpts(Q8_OPTS, false),
-    };
+    // ACTIVE_Q_OPTS 의 모든 Q에 대해 set 계산
+    const entry = { p };
+    for (const [qk, opts] of Object.entries(ACTIVE_Q_OPTS)) {
+      const useJob = qk === 'Q3' && CURRENT_SOURCE === '공무원';
+      const isQ1 = qk === 'Q1';
+      entry[qk.toLowerCase() + 'set'] = matchOpts(opts, useJob, isQ1);
+    }
+    return entry;
   });
 
-  // 192 조합별 인덱스
-  for (const e of INDEX) {
-    for (const q1 of e.q1set) for (const q3 of e.q3set) for (const q4 of e.q4set) {
-      const key = `${q1}|${q3}|${q4}`;
+  // COMBO_MAP: ACTIVE_COMBO_DIMS 기준으로 동적 생성
+  function _buildCombos(e, dimIdx, parts) {
+    if (dimIdx >= ACTIVE_COMBO_DIMS.length) {
+      const key = parts.join('|');
       if (!COMBO_MAP.has(key)) COMBO_MAP.set(key, []);
       COMBO_MAP.get(key).push(e.p);
+      return;
+    }
+    const qk = ACTIVE_COMBO_DIMS[dimIdx];
+    for (const v of (e[qk.toLowerCase() + 'set'] || [])) {
+      _buildCombos(e, dimIdx + 1, [...parts, v]);
     }
   }
+  for (const e of INDEX) _buildCombos(e, 0, []);
 
   renderSummary(eligible.length, data.passnotes.length);
   renderMatrices();
@@ -1377,81 +1483,117 @@ function init(data) {
 }
 
 function renderSummary(eligibleN, totalN) {
-  const counts = [];
-  for (const q1 of Q1_OPTS) for (const q3 of Q3_OPTS) for (const q4 of Q4_OPTS) {
-    counts.push((COMBO_MAP.get(`${q1}|${q3}|${q4}`) || []).length);
+  const allCounts = [];
+  function _iterS(dimIdx, parts) {
+    if (dimIdx >= ACTIVE_COMBO_DIMS.length) {
+      allCounts.push((COMBO_MAP.get(parts.join('|')) || []).length);
+      return;
+    }
+    for (const v of (ACTIVE_Q_OPTS[ACTIVE_COMBO_DIMS[dimIdx]] || [])) _iterS(dimIdx + 1, [...parts, v]);
   }
-  const nonzero = counts.filter(c => c > 0).length;
-  const zero = counts.length - nonzero;
-  const total = counts.reduce((a,b)=>a+b, 0);
-  const max = Math.max(...counts);
+  _iterS(0, []);
+  const nonzero = allCounts.filter(c => c > 0).length;
+  const zero = allCounts.length - nonzero;
+  const total = allCounts.reduce((a,b)=>a+b, 0);
+  const max = allCounts.length > 0 ? Math.max(...allCounts) : 0;
+  const totalCombo = allCounts.length;
+  const dimDesc = ACTIVE_COMBO_DIMS.map(qk => `${qk}·${(ACTIVE_Q_OPTS[qk]||[]).length}`).join(' × ');
   document.getElementById('summary').innerHTML = `
     <div class="stat" data-term="통계 카드"><strong>${eligibleN.toLocaleString()}</strong>passage 보유 후기 (전체 ${totalN.toLocaleString()})</div>
-    <div class="stat"><strong>192</strong>조합 (Q1·6 × Q3·8 × Q4·4)</div>
-    <div class="stat"><strong>${nonzero}</strong>1건 이상 매칭 (${(nonzero/192*100).toFixed(1)}%)</div>
+    <div class="stat"><strong>${totalCombo}</strong>조합 (${dimDesc}) [${CURRENT_SOURCE}]</div>
+    <div class="stat"><strong>${nonzero}</strong>1건 이상 매칭 (${totalCombo ? (nonzero/totalCombo*100).toFixed(1) : 0}%)</div>
     <div class="stat"><strong>${zero}</strong>0건 (폴백 필요)</div>
-    <div class="stat"><strong>${(total/192).toFixed(1)}</strong>조합당 평균</div>
+    <div class="stat"><strong>${totalCombo ? (total/totalCombo).toFixed(1) : 0}</strong>조합당 평균</div>
     <div class="stat"><strong>${max}</strong>최대 매칭</div>
   `;
 }
 
 function renderMatrices() {
   const container = document.getElementById('matrices');
+  const [dimA, dimB, dimC] = ACTIVE_COMBO_DIMS;   // A=섹션, B=행, C=열(optional)
+  const optsA = ACTIVE_Q_OPTS[dimA] || [];
+  const optsB = ACTIVE_Q_OPTS[dimB] || [];
+  const optsC = dimC ? (ACTIVE_Q_OPTS[dimC] || []) : null;
   let html = '';
-  let firstQ1 = true;
-  let firstColHead = true, firstRowHead = true;
-  let firstCell = true, firstZero = true;
-  for (const q1 of Q1_OPTS) {
-    const h2T = firstQ1 ? ' data-term="Q1 섹션 헤더"' : '';
-    const tableT = firstQ1 ? ' data-term="조합 매트릭스"' : '';
-    html += `<h2${h2T}>Q1 = ${q1}</h2><table class="matrix"${tableT}><thead><tr><th>Q3 \\ Q4</th>`;
-    for (const q4 of Q4_OPTS) {
-      const t = (firstQ1 && firstColHead) ? ' data-term="열 머리"' : '';
-      if (firstQ1 && firstColHead) firstColHead = false;
-      html += `<th${t}>${q4}</th>`;
+  let firstOuter = true, firstCell = true, firstZero = true;
+
+  for (const vA of optsA) {
+    const h2T = firstOuter ? ' data-term="Q1 섹션 헤더"' : '';
+    const tableT = firstOuter ? ' data-term="조합 매트릭스"' : '';
+    const hdrLabel = optsC ? `${dimB} \\ ${dimC}` : dimB;
+    html += `<h2${h2T}>${dimA} = ${vA}</h2><table class="matrix"${tableT}><thead><tr><th>${hdrLabel}</th>`;
+    if (optsC) {
+      for (const vC of optsC) html += `<th>${vC}</th>`;
+    } else {
+      html += '<th data-term="열 머리">건수</th>';
     }
-    html += `</tr></thead><tbody>`;
-    for (const q3 of Q3_OPTS) {
-      const rowT = (firstQ1 && firstRowHead) ? ' data-term="행 머리"' : '';
-      if (firstQ1 && firstRowHead) firstRowHead = false;
-      html += `<tr><th${rowT}>${q3}</th>`;
-      for (const q4 of Q4_OPTS) {
-        const cnt = (COMBO_MAP.get(`${q1}|${q3}|${q4}`) || []).length;
+    html += '</tr></thead><tbody>';
+
+    for (const vB of optsB) {
+      const rowT = (firstOuter && !html.includes('data-term="행 머리"')) ? ' data-term="행 머리"' : '';
+      html += `<tr><th${rowT}>${vB}</th>`;
+      if (optsC) {
+        for (const vC of optsC) {
+          const key = `${vA}|${vB}|${vC}`;
+          const cnt = (COMBO_MAP.get(key) || []).length;
+          const cls = cnt === 0 ? 'cell zero' : 'cell';
+          const attrs = cnt === 0 ? '' : ` data-${dimA.toLowerCase()}="${vA}" data-${dimB.toLowerCase()}="${vB}" data-${dimC.toLowerCase()}="${vC}"`;
+          let term = '';
+          if (cnt > 0 && firstCell) { term = ' data-term="조합 셀"'; firstCell = false; }
+          else if (cnt === 0 && firstZero) { term = ' data-term="0건 셀"'; firstZero = false; }
+          html += `<td class="${cls}"${attrs}${term}>${cnt}</td>`;
+        }
+      } else {
+        const key = `${vA}|${vB}`;
+        const cnt = (COMBO_MAP.get(key) || []).length;
         const cls = cnt === 0 ? 'cell zero' : 'cell';
-        const data = cnt === 0 ? '' : ` data-q1="${q1}" data-q3="${q3}" data-q4="${q4}"`;
+        const attrs = cnt === 0 ? '' : ` data-${dimA.toLowerCase()}="${vA}" data-${dimB.toLowerCase()}="${vB}"`;
         let term = '';
         if (cnt > 0 && firstCell) { term = ' data-term="조합 셀"'; firstCell = false; }
         else if (cnt === 0 && firstZero) { term = ' data-term="0건 셀"'; firstZero = false; }
-        html += `<td class="${cls}"${data}${term}>${cnt}</td>`;
+        html += `<td class="${cls}"${attrs}${term}>${cnt}</td>`;
       }
-      html += `</tr>`;
+      html += '</tr>';
     }
-    html += `</tbody></table>`;
-    firstQ1 = false;
+    html += '</tbody></table>';
+    firstOuter = false;
   }
   container.innerHTML = html;
 
-  // 클릭 핸들러
+  // 클릭 핸들러 — ACTIVE_COMBO_DIMS 기준으로 combo 객체 구성
   container.querySelectorAll('.cell:not(.zero)').forEach(td => {
     td.addEventListener('click', () => {
-      openModal(td.dataset.q1, td.dataset.q3, td.dataset.q4);
+      const combo = {};
+      for (const qk of ACTIVE_COMBO_DIMS) {
+        const v = td.dataset[qk.toLowerCase()];
+        if (v !== undefined) combo[qk] = v;
+      }
+      openModal('no.01', combo);
     });
   });
 }
 
 function renderZeroList() {
   const zeros = [];
-  for (const q1 of Q1_OPTS) for (const q3 of Q3_OPTS) for (const q4 of Q4_OPTS) {
-    if (!(COMBO_MAP.get(`${q1}|${q3}|${q4}`) || []).length) {
-      zeros.push([q1, q3, q4]);
+  function _iterZ(dimIdx, parts, labels) {
+    if (dimIdx >= ACTIVE_COMBO_DIMS.length) {
+      if (!(COMBO_MAP.get(parts.join('|')) || []).length) zeros.push(labels);
+      return;
+    }
+    for (const v of (ACTIVE_Q_OPTS[ACTIVE_COMBO_DIMS[dimIdx]] || [])) {
+      _iterZ(dimIdx + 1, [...parts, v], [...labels, v]);
     }
   }
-  if (zeros.length === 0) return;
+  _iterZ(0, [], []);
+  if (!zeros.length) {
+    document.getElementById('zero-section').innerHTML = '';
+    return;
+  }
   const html = `
     <div class="zero-list" data-term="0건 리스트">
       <h3>0건 조합 (폴백 필요) — 총 ${zeros.length}개</h3>
       <ul>
-        ${zeros.map(([a,b,c]) => `<li>${a} × ${b} × ${c}</li>`).join('')}
+        ${zeros.map(ls => `<li>${ls.join(' × ')}</li>`).join('')}
       </ul>
     </div>
   `;
@@ -1866,7 +2008,7 @@ function openModal(areaOrQ1, comboOrQ3, q4) {
   }
   CURRENT_AREA = area;
   CURRENT_COMBO = combo;
-  CURRENT_Q = [combo.Q1 || '', combo.Q3 || '', combo.Q4 || ''];
+  CURRENT_Q = ACTIVE_COMBO_DIMS.map(qk => combo[qk] || '');
   CURRENT_FILTERED = null;
   rebuildModalState();
 
@@ -1978,9 +2120,9 @@ document.getElementById('modal-search').addEventListener('input', (e) => {
 // 단일 후기 카드 HTML 생성 (대표 후기 / 전체 리스트 공통)
 function buildPassnoteHtml(p, idx, opts = {}) {
   const [q1, q3, q4] = CURRENT_Q;
-  const expQ1 = new Set(TAG_EXPANSION[q1]);
-  const expQ3 = new Set(TAG_EXPANSION[q3]);
-  const expQ4 = new Set(TAG_EXPANSION[q4]);
+  const expQ1 = new Set(ACTIVE_TAG_EXPANSION[q1] || [q1]);
+  const expQ3 = new Set(ACTIVE_TAG_EXPANSION[q3] || [q3]);
+  const expQ4 = new Set(ACTIVE_TAG_EXPANSION[q4] || [q4]);
   const allKW = [
     ...(Q_KEYWORDS[q1] || []),
     ...(Q_KEYWORDS[q3] || []),
@@ -2703,6 +2845,8 @@ _origNavClick.addEventListener('click', (e) => {
 });
 
 // ─────────── Phase 1: 시나리오 selector 초기화 ───────────
+// 현재 소스의 Q3 옵션 적용 후 초기화
+SC_OPTIONS.Q3 = SOURCES[CURRENT_SOURCE].Q3_SHORT || [];
 buildScenarioSelectors();
 syncScenarioFromSC();
 const scPreset = document.getElementById('sc-preset');
