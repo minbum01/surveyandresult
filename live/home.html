@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>합격수기 탐색 — 시험 선택</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: 'Pretendard', -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+    .fade-up { animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both; }
+
+    .exam-card {
+      position: relative; overflow: hidden;
+      border-radius: 24px;
+      cursor: pointer;
+      transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), box-shadow 0.35s ease;
+      min-height: 220px;
+      display: flex; flex-direction: column; justify-content: flex-end;
+      padding: 28px 28px 32px;
+      text-decoration: none;
+      border: 1.5px solid rgba(255,255,255,0.08);
+    }
+    .exam-card:hover { transform: translateY(-6px) scale(1.015); }
+    .exam-card:active { transform: scale(0.97); }
+
+    .card-gongmu  { background: linear-gradient(145deg, #1C2B4A 0%, #0F1A30 60%, #0A1220 100%); box-shadow: 0 20px 60px rgba(30,80,200,0.25); }
+    .card-police  { background: linear-gradient(145deg, #1A2744 0%, #0F1B38 60%, #09132A 100%); box-shadow: 0 20px 60px rgba(15,50,150,0.30); }
+    .card-fire    { background: linear-gradient(145deg, #3D1206 0%, #2A0D04 60%, #1A0902 100%); box-shadow: 0 20px 60px rgba(200,50,20,0.35); }
+
+    .card-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 12px; border-radius: 999px;
+      font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
+      margin-bottom: 16px; width: fit-content;
+    }
+    .badge-gongmu { background: rgba(80,140,255,0.18); color: #7EB8FF; border: 1px solid rgba(80,140,255,0.25); }
+    .badge-police { background: rgba(60,110,255,0.18); color: #6BB0FF; border: 1px solid rgba(60,110,255,0.25); }
+    .badge-fire   { background: rgba(255,80,20,0.20);  color: #FF9070; border: 1px solid rgba(255,80,20,0.28); }
+
+    .card-title {
+      font-size: clamp(28px, 4vw, 44px);
+      font-weight: 900; color: #fff;
+      line-height: 0.95; letter-spacing: -0.04em;
+    }
+    .card-sub {
+      font-size: 14px; color: rgba(255,255,255,0.55); font-weight: 500;
+      margin-top: 10px; line-height: 1.5;
+    }
+    .card-count {
+      position: absolute; top: 24px; right: 24px;
+      font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.30);
+      font-family: monospace; letter-spacing: 0.08em;
+    }
+    .card-arrow {
+      position: absolute; bottom: 28px; right: 28px;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: rgba(255,255,255,0.10);
+      border: 1.5px solid rgba(255,255,255,0.18);
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.3s, transform 0.3s;
+    }
+    .exam-card:hover .card-arrow {
+      background: rgba(255,255,255,0.22);
+      transform: translate(4px, -4px);
+    }
+
+    /* decorative shape */
+    .card-deco {
+      position: absolute; pointer-events: none;
+      border-radius: 50%; opacity: 0.07;
+    }
+  </style>
+</head>
+<body class="bg-[#0A0B0F] min-h-screen flex flex-col px-5 md:px-12 py-10">
+
+  <header class="fade-up flex justify-between items-start mb-12" style="animation-delay:.05s">
+    <div class="border border-white/10 rounded-full px-4 py-1.5 text-[10px] font-bold tracking-widest uppercase text-white/50">
+      Pass Note Finder
+    </div>
+    <div class="text-right text-[10px] font-mono uppercase text-white/25 leading-relaxed">
+      <p>합격수기 탐색 시스템</p>
+      <p class="text-white/40">BETA</p>
+    </div>
+  </header>
+
+  <main class="flex-1 flex flex-col justify-center max-w-3xl mx-auto w-full">
+    <div class="fade-up mb-10" style="animation-delay:.12s">
+      <p class="text-[10px] font-mono uppercase tracking-[0.22em] text-white/35 mb-3">어떤 시험을 준비하고 있나요?</p>
+      <h1 class="text-[clamp(36px,6vw,72px)] font-black tracking-tighter leading-[0.9] text-white">
+        FIND YOUR<br/>STORY.
+      </h1>
+    </div>
+
+    <div class="flex flex-col gap-4 fade-up" style="animation-delay:.22s">
+
+      <!-- 공무원 -->
+      <a href="index.html" class="exam-card card-gongmu">
+        <div class="card-deco" style="width:300px;height:300px;background:#3B7FFF;top:-80px;right:-60px;"></div>
+        <span class="card-count">2,112 NOTES</span>
+        <span class="card-badge badge-gongmu">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          공무원 시험
+        </span>
+        <h2 class="card-title">공무원</h2>
+        <p class="card-sub">국가직 · 지방직 · 서울시 · 8개 직렬<br/>나와 비슷한 합격자의 공부법을 찾아드립니다</p>
+        <div class="card-arrow">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+        </div>
+      </a>
+
+      <!-- 경찰 -->
+      <a href="police_survey.html" class="exam-card card-police">
+        <div class="card-deco" style="width:280px;height:280px;background:#2B5FFF;top:-60px;right:-50px;"></div>
+        <span class="card-count">1,337 NOTES</span>
+        <span class="card-badge badge-police">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+          경찰 시험
+        </span>
+        <h2 class="card-title">경찰</h2>
+        <p class="card-sub">공채 · 경채 · 남성·여성 맞춤 분석<br/>경찰 합격자 1,337명의 실제 수기 매칭</p>
+        <div class="card-arrow">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+        </div>
+      </a>
+
+      <!-- 소방 -->
+      <a href="fire_survey.html" class="exam-card card-fire">
+        <div class="card-deco" style="width:260px;height:260px;background:#FF4010;top:-50px;right:-40px;"></div>
+        <span class="card-count">396 NOTES</span>
+        <span class="card-badge badge-fire">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c0 0-8 6-8 13a8 8 0 0016 0C20 8 12 2 12 2zm0 17a5 5 0 01-5-5c0-3.5 3-7 5-9 2 2 5 5.5 5 9a5 5 0 01-5 5z"/></svg>
+          소방 시험
+        </span>
+        <h2 class="card-title">소방</h2>
+        <p class="card-sub">공채 남·여 · 소방직 합격 루트 분석<br/>소방 합격자 396명의 실제 수기 매칭</p>
+        <div class="card-arrow">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+        </div>
+      </a>
+
+    </div>
+  </main>
+
+  <footer class="fade-up mt-10 text-center" style="animation-delay:.35s">
+    <p class="text-[10px] font-mono text-white/20 uppercase tracking-widest">실제 합격수기 · 태그 분석 · 정확한 매칭</p>
+  </footer>
+
+</body>
+</html>
