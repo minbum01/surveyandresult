@@ -31,7 +31,11 @@
 
   function getStore() {
     try {
-      const o = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
+      // 인쇄모드(헤드리스)에서는 주입된 큐레이션을 사용 (localStorage 공유 불가)
+      const raw = (global.__PRINT_CUR__ != null)
+        ? global.__PRINT_CUR__
+        : localStorage.getItem(STORE_KEY);
+      const o = JSON.parse(raw || '{}');
       return (o && typeof o === 'object') ? o : {};
     } catch { return {}; }
   }

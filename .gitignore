@@ -20,3 +20,8 @@ crawl_new_progress.json
 crawl_new_failed.json
 __pycache__/
 all_reviews_backup_pre_increment.json
+_print_report.pdf
+live/_printdata.json
+_chrome_headless_profile/
+_post.json
+run_tagging.log

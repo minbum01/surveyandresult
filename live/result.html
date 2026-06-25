@@ -39,14 +39,16 @@ body{ font-family:var(--sans); background:var(--paper); color:var(--navy); -webk
 .sheet-inner{ width:1280px; height:905px; transform:scale(0.876969); transform-origin:top left; }
 .grid-1{ display:grid; grid-template-columns:486px 1fr; height:905px; }
 
-@page{ size:A4 landscape; margin:0; }
+/* 인쇄 = A4 세로 1장, 위=1면 / 아래=2면 (가로 시트 2개를 절반씩 2-up) */
+@page{ size:A4 portrait; margin:0; }
 @media print{
-  body{ padding:0; background:#fff; }
+  html,body{ padding:0; margin:0; background:#fff; }
   .layout-row{ display:block; max-width:none; margin:0; }
-  .sheets{ gap:0; }
   .debug-panel,.dev-toolbar,.loading{ display:none !important; }
-  .sheet{ box-shadow:none; page-break-after:always; break-after:page; }
-  .sheet:last-child{ page-break-after:auto; break-after:auto; }
+  .sheets{ display:block; gap:0; width:210mm; }
+  .sheet{ width:210mm; height:148.4mm; box-shadow:none; overflow:hidden;
+          page-break-after:avoid; break-after:avoid; page-break-inside:avoid; break-inside:avoid; }
+  .sheet-inner{ transform:scale(0.619) !important; transform-origin:top left; }
   -webkit-print-color-adjust:exact; print-color-adjust:exact;
 }
 
@@ -319,7 +321,7 @@ body{ font-family:var(--sans); background:var(--paper); color:var(--navy); -webk
         <div class="cta-source" id="cta-source">—</div>
       </div>
       <div class="cta-buttons">
-        <button class="btn-ghost" onclick="window.print()">리포트 출력</button>
+        <button class="btn-ghost" onclick="sendPrint(this)">리포트 출력</button>
         <button class="btn-mark">무료 학습 상담 신청</button>
       </div>
     </div>
@@ -954,10 +956,40 @@ document.getElementById('demo-select').addEventListener('change', (e) => {
   syncSelectorsFromA();
   loadAndRender();
 });
-loadAndRender();
+// ── 인쇄모드(?print=1): 헤드리스 크롬이 답변·큐레이션을 주입받아 렌더 ──
+const _printMode = new URLSearchParams(location.search).get('print');
+if (_printMode) {
+  fetch('_printdata.json?_=' + Date.now())
+    .then(r => r.json())
+    .then(pd => {
+      if (Array.isArray(pd.ans) && pd.ans.length >= 8) A = pd.ans;
+      if (pd.cur != null) window.__PRINT_CUR__ = pd.cur;
+      syncSelectorsFromA();
+      loadAndRender();
+    })
+    .catch(() => loadAndRender());
+} else {
+  loadAndRender();
+  // 관리자 페이지에서 핀/제외가 바뀌면(다른 탭) 즉시 재렌더 — 바로바로 연동
+  if (window.Curation) Curation.onChange(() => { if (LOADED) render(LOADED); });
+}
 
-// 관리자 페이지에서 핀/제외가 바뀌면(다른 탭) 즉시 재렌더 — 바로바로 연동
-if (window.Curation) Curation.onChange(() => { if (LOADED) render(LOADED); });
+// ── 무창 인쇄: 현재 답변+큐레이션을 인쇄서버로 전송 (크롬 인쇄창 안 뜸) ──
+function sendPrint(btn){
+  const old = btn.textContent;
+  const t0 = performance.now();
+  btn.disabled = true; btn.textContent = '인쇄 전송 중…';
+  fetch('/print', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ ans: A, cur: localStorage.getItem('admin_curation_v2') })
+  }).then(r => r.json())
+    .then(d => {
+      const sec = ((performance.now() - t0) / 1000).toFixed(1);
+      btn.textContent = d.ok ? ('인쇄됨 ✓ ' + sec + '초') : ('실패: ' + (d.error||''));
+    })
+    .catch(() => { btn.textContent = '실패 (서버 확인)'; })
+    .finally(() => { setTimeout(() => { btn.textContent = old; btn.disabled = false; }, 4000); });
+}
 </script>
 </body>
 </html>
