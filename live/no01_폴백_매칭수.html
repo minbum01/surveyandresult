@@ -393,6 +393,55 @@ body.show-terms .term-toggle {
 }
 body.show-terms .term-toggle:hover { background: var(--accent-gold-light, #E8D59E); }
 
+/* ════════ 라이브 결과 미리보기 도크 ════════ */
+.preview-dock {
+  position: fixed;
+  top: 0; right: 0;
+  width: 460px; height: 100vh;
+  background: #fff;
+  border-left: 1px solid #d6ddec;
+  box-shadow: -10px 0 40px -18px rgba(15,27,61,0.45);
+  z-index: 1200;
+  display: none;
+  flex-direction: column;
+}
+.preview-dock.open { display: flex; }
+body.preview-open { padding-right: 460px; }
+.preview-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px; border-bottom: 1px solid #e6ebf5;
+  background: #0F1B3D; color: #fff; flex: 0 0 auto;
+}
+.preview-title { font-size: 13px; font-weight: 800; letter-spacing: .01em; }
+.preview-combo { font-size: 11px; font-weight: 600; color: #9fb4ff; margin-left: 6px; }
+.preview-actions { display: flex; gap: 6px; }
+.preview-btn {
+  width: 28px; height: 28px; line-height: 26px; text-align: center;
+  border: 1px solid rgba(255,255,255,.25); background: transparent; color: #fff;
+  border-radius: 6px; font-size: 15px; cursor: pointer; text-decoration: none;
+  font-family: inherit; display: inline-block;
+}
+.preview-btn:hover { background: rgba(255,255,255,.12); }
+.preview-frame-wrap { flex: 1 1 auto; overflow: auto; background: #EEF1F7; }
+/* A4 가로 리포트(~1150px)를 도크 폭에 맞게 축소. 음수 마진으로 스크롤 영역도 축소 */
+.preview-iframe {
+  width: 1160px; height: 1760px; border: 0; display: block; background: #fff;
+  transform: scale(0.38); transform-origin: top left;
+  margin-right: -719px; margin-bottom: -1091px;
+}
+.preview-hint {
+  flex: 0 0 auto; padding: 8px 14px; font-size: 11px;
+  color: #6b7693; background: #f4f6fb; border-top: 1px solid #e6ebf5; line-height: 1.5;
+}
+#preview-toggle.active { background: var(--accent-gold, #C9A84A); color: #1a1a2e; }
+/* 미리보기 도크 안 조합 선택기 (이 화면을 누구 기준으로 볼지) */
+.preview-persona { flex: 0 0 auto; padding: 8px 10px; background: #11193a; border-bottom: 1px solid rgba(255,255,255,.08); display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: flex-end; }
+.pp-field { display: flex; flex-direction: column; gap: 2px; font-size: 9px; font-weight: 700; letter-spacing: .3px; color: #9fb4ff; }
+.pp-field select { background: #1c2547; color: #fff; border: 1px solid rgba(255,255,255,.18); border-radius: 5px; padding: 3px 6px; font-size: 11px; font-family: inherit; }
+.pp-q7 { flex-basis: 100%; }
+.pp-q7 .dt-checks { display: flex; flex-wrap: wrap; gap: 3px 10px; margin-top: 3px; }
+.pp-q7 .dt-checks label { display: flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 600; color: #cfd8f5; cursor: pointer; }
+
 /* ─── 모달 섹션 (대표 후기 / TOP 10 / 전체) ─── */
 .modal-section { margin-bottom: 18px; }
 .modal-section + .modal-section {
@@ -1240,6 +1289,13 @@ body.show-terms .term-toggle:hover { background: var(--accent-gold-light, #E8D59
       <div class="ae-checks" id="ae-matchkeys"></div>
       <div class="ae-warn" id="ae-warn">⚠ matchKeys 변경 시 이 영역의 핀이 모두 사라집니다.</div>
     </div>
+    <div class="ae-row">
+      <label class="ae-label">노출 개수 (핀이 있으면 그중에서 랜덤으로 이 개수만큼 노출)</label>
+      <input class="ae-input" id="ae-show" type="number" min="1" max="10" step="1" style="max-width:90px" placeholder="1" />
+      <div class="ae-warn" style="background:rgba(58,91,160,0.08);color:var(--accent-blue);">
+        💡 핀이 없으면 자동 1등만 노출. 핀이 많을수록 매번 다른 후기가 랜덤으로 나옵니다.
+      </div>
+    </div>
     <div class="ae-buttons">
       <button class="ae-btn ae-btn-delete" id="ae-btn-delete">🗑 삭제</button>
       <button class="ae-btn ae-btn-cancel" id="ae-btn-cancel">취소</button>
@@ -1249,10 +1305,37 @@ body.show-terms .term-toggle:hover { background: var(--accent-gold-light, #E8D59
 </div>
 
 <div class="pin-toolbar">
+  <button class="term-toggle" id="preview-toggle" onclick="togglePreview()" title="현재 조합 결과(result.html)를 옆에서 실시간으로 보기">👁 결과 미리보기</button>
   <button class="term-toggle" onclick="exportPins()" title="현재 핀+메모를 JSON 파일로 내려받기">📥 핀 내보내기</button>
   <button class="term-toggle" onclick="document.getElementById('pin-import-input').click()" title="JSON 파일 불러와서 핀 복원/병합">📤 핀 가져오기</button>
   <button class="term-toggle" id="term-toggle" onclick="toggleTerms()">UI 용어 표시</button>
   <input type="file" id="pin-import-input" accept=".json,application/json" style="display:none;" onchange="importPins(this.files[0])">
+</div>
+
+<!-- ════════ 라이브 결과 미리보기 (우측 도크) ════════ -->
+<div id="preview-dock" class="preview-dock">
+  <div class="preview-head">
+    <div class="preview-title">결과 미리보기 <span id="preview-combo" class="preview-combo">—</span></div>
+    <div class="preview-actions">
+      <button class="preview-btn" onclick="reloadPreview()" title="미리보기 새로고침">⟳</button>
+      <a class="preview-btn" id="preview-open" href="result.html" target="_blank" title="새 탭에서 크게 보기">⤢</a>
+      <button class="preview-btn" onclick="togglePreview()" title="닫기">×</button>
+    </div>
+  </div>
+  <div class="preview-persona" id="preview-persona">
+    <span class="pp-field">상황<select id="sc-q1"></select></span>
+    <span class="pp-field">시험<select id="sc-q2"></select></span>
+    <span class="pp-field">직렬<select id="sc-q3"></select></span>
+    <span class="pp-field">베이스<select id="sc-q4"></select></span>
+    <span class="pp-field">기간<select id="sc-q5"></select></span>
+    <span class="pp-field">시간<select id="sc-q6"></select></span>
+    <span class="pp-field">고민<select id="sc-q8"></select></span>
+    <span class="pp-field pp-q7">방식(복수)<span class="dt-checks" id="sc-q7-checks"></span></span>
+  </div>
+  <div class="preview-frame-wrap">
+    <iframe id="preview-iframe" class="preview-iframe" title="result 미리보기"></iframe>
+  </div>
+  <div class="preview-hint">위에서 조합(상황·직렬 등)을 바꾸면 이 화면이 그 사람 기준으로 바뀝니다. 핀/제외도 즉시 반영돼요.</div>
 </div>
 
 <script>
@@ -1497,7 +1580,7 @@ function renderSummary(eligibleN, totalN) {
   const total = allCounts.reduce((a,b)=>a+b, 0);
   const max = allCounts.length > 0 ? Math.max(...allCounts) : 0;
   const totalCombo = allCounts.length;
-  const dimDesc = ACTIVE_COMBO_DIMS.map(qk => `${qk}·${(ACTIVE_Q_OPTS[qk]||[]).length}`).join(' × ');
+  const dimDesc = ACTIVE_COMBO_DIMS.map(qk => `${Q_KO[qk]||qk}·${(ACTIVE_Q_OPTS[qk]||[]).length}`).join(' × ');
   document.getElementById('summary').innerHTML = `
     <div class="stat" data-term="통계 카드"><strong>${eligibleN.toLocaleString()}</strong>passage 보유 후기 (전체 ${totalN.toLocaleString()})</div>
     <div class="stat"><strong>${totalCombo}</strong>조합 (${dimDesc}) [${CURRENT_SOURCE}]</div>
@@ -1620,14 +1703,17 @@ const PASSAGE_KW = ['처음에','막막','걱정','불안','그래도','결국',
 // 기본 영역 (관리자가 수정/삭제 가능, 새 영역 추가 가능)
 // 각 영역: { name, matchKeys, location?(설명용) }
 const AREAS_DEFAULT = {
-  'no.01': { name: '동일경로 후기',     matchKeys: ['Q1','Q3','Q4'], location: 'persona passage' },
-  'no.02': { name: '패턴 인용구',       matchKeys: ['Q5','Q7','Q8'], location: 'persona hero-quote' },
-  'no.06': { name: '같은 출발점',       matchKeys: ['Q1','Q4'],      location: 'right-panel sec06' },
-  'no.07': { name: '다잡은 한 마디',    matchKeys: ['Q8'],           location: 'right-panel sec07' },
-  'no.08': { name: '첫 한 달 풍경',     matchKeys: ['Q1','Q3'],      location: 'right-panel sec08' },
-  'no.09': { name: '포기 직전',         matchKeys: ['Q1'],           location: 'right-panel sec09' },
-  'no.10': { name: '꾸준함 한 줄',      matchKeys: ['Q1','Q2','Q3','Q4','Q5','Q6','Q7','Q8'], location: 'right-panel sec10' },
+  'no.01': { name: '같은 길을 걸은 분의 기록',   matchKeys: ['Q1','Q3','Q4'], location: 'persona passage' },
+  'no.02': { name: '먼저 걸은 사람의 한마디',     matchKeys: ['Q5','Q7','Q8'], location: 'persona hero-quote' },
+  'no.06': { name: '같은 출발점에서 시작한 분들', matchKeys: ['Q1','Q4'],      location: 'right-panel sec06' },
+  'no.07': { name: '흔들렸을 때 다잡은 한 마디',  matchKeys: ['Q8'],           location: 'right-panel sec07' },
+  'no.08': { name: '첫 한 달 풍경',              matchKeys: ['Q1','Q3'],      location: 'right-panel sec08' },
+  'no.09': { name: '포기 직전, 다시 책상 앞',     matchKeys: ['Q1'],           location: 'right-panel sec09' },
+  'no.10': { name: '꾸준함을 말하는 한 줄',       matchKeys: ['Q1','Q2','Q3','Q4','Q5','Q6','Q7','Q8'], location: 'right-panel sec10' },
 };
+// 매칭 키(Q번호) → 한글 질문명 (이름 통일)
+const Q_KO = { Q1:'상황', Q2:'시험', Q3:'직렬', Q4:'베이스', Q5:'기간', Q6:'시간', Q7:'방식', Q8:'고민' };
+const keysKo = (mk) => (mk || []).map(k => Q_KO[k] || k).join(' × ');
 // AREAS 는 storage 에서 로드 (없으면 default)
 function loadAreas() {
   const s = getStore();
@@ -1635,6 +1721,12 @@ function loadAreas() {
     s.areas = JSON.parse(JSON.stringify(AREAS_DEFAULT));
     setStore(s);
   }
+  // 이름 통일: 기본 7영역은 표준 이름으로 강제 동기화 (matchKeys·핀 보존)
+  let changed = false;
+  for (const [code, def] of Object.entries(AREAS_DEFAULT)) {
+    if (s.areas[code] && s.areas[code].name !== def.name) { s.areas[code].name = def.name; changed = true; }
+  }
+  if (changed) setStore(s);
   return s.areas;
 }
 function saveAreas(areas) {
@@ -1709,6 +1801,8 @@ function applyScenario() {
   if (CURRENT_Q && CURRENT_Q.length) renderModalList();
   // 탭 헤더 진행률 갱신 (탭 활성 시)
   refreshAllAreaHeaders();
+  // 라이브 미리보기에 새 조합 반영
+  pushPreviewAnswers();
 }
 function syncScenarioFromSC() {
   for (const qk of ['Q1','Q2','Q3','Q4','Q5','Q6','Q8']) {
@@ -1718,6 +1812,83 @@ function syncScenarioFromSC() {
   const q7set = new Set(SC.Q7 || []);
   document.querySelectorAll('#sc-q7-checks input').forEach(cb => { cb.checked = q7set.has(cb.dataset.q7); });
 }
+
+// ═══════════ 라이브 결과 미리보기 (result.html iframe) ═══════════
+// 관리자에서 핀/제외/조합을 바꾸면 우측 도크의 result.html 이 즉시 갱신된다.
+const PREVIEW_LABELS = {
+  '전업수험생':'전업 수험생','직장병행':'직장 다니면서','재학수험생':'학교 다니면서','육아병행':'육아하면서','퇴직수험생':'은퇴·퇴직 후','아르바이트병행':'아르바이트하면서',
+  '국가직9급':'국가직 공무원','지방직9급':'지방직 공무원','서울시9급':'서울시 공무원',
+  '행정직':'일반행정직','세무직':'세무/관세직','공안직':'공안직','교육직':'교육행정직','기술직':'기술직','간호보건직':'간호보건직','사회복지직':'사회복지직','기타직렬':'기타직렬',
+  '노베이스':'공부는 처음이야','수능베이스':'수능 경험 있음','전공자':'전공자','토익베이스':'영어 성적 있음',
+  '1년이내':'1년 이내','1년이상':'1년 이상',
+  '하루10시간미만':'10시간 미만','하루10시간이상':'10시간 이상',
+  '인강병행':'인강 중심','기출반복':'기출 반복','회독반복':'회독 반복','독학위주':'독학 위주','노량진현강':'노량진 현강','스터디병행':'스터디 그룹',
+  '멘탈관리':'멘탈 관리','슬럼프극복':'슬럼프','영어약자':'영어가 약해요','효율중심':'시간이 부족하다','이해중심학습':'공부법을 모르겠다','커리큘럼중심':'커리큘럼을 못 잡겠다',
+};
+const PV_LABEL = (id) => PREVIEW_LABELS[id] || id;
+
+let PREVIEW_IFRAME = null, PREVIEW_READY = false;
+
+// 미리보기에 반영할 답변: 기본 SC + (모달 열려있으면) 지금 큐레이션 중인 조합으로 덮어쓰기
+function previewEffectiveSC() {
+  const sc = JSON.parse(JSON.stringify(SC));
+  const ov = document.getElementById('modal-overlay');
+  if (ov && ov.classList.contains('open') && CURRENT_COMBO) {
+    for (const k of Object.keys(CURRENT_COMBO)) {
+      const v = CURRENT_COMBO[k];
+      if (v != null && v !== '') sc[k] = v;
+    }
+  }
+  return sc;
+}
+function scToAnswers(sc) {
+  const single = (qk) => sc[qk] ? [{ tagId: sc[qk], label: PV_LABEL(sc[qk]) }] : [];
+  const multi  = (qk) => (sc[qk] || []).map(id => ({ tagId: id, label: PV_LABEL(id) }));
+  return [ single('Q1'), single('Q2'), single('Q3'), single('Q4'),
+           single('Q5'), single('Q6'), multi('Q7'), single('Q8') ];
+}
+function previewComboText(sc) {
+  return ['Q1','Q3','Q4'].map(k => PV_LABEL(sc[k])).filter(Boolean).join(' · ');
+}
+function pushPreviewAnswers() {
+  if (!PREVIEW_IFRAME || !PREVIEW_READY) return;
+  const sc = previewEffectiveSC();
+  PREVIEW_IFRAME.contentWindow.postMessage({ type: 'previewAnswers', answers: scToAnswers(sc) }, '*');
+  const cb = document.getElementById('preview-combo');
+  if (cb) cb.textContent = previewComboText(sc);
+}
+function pushPreviewRerender() {
+  if (!PREVIEW_IFRAME || !PREVIEW_READY) return;
+  PREVIEW_IFRAME.contentWindow.postMessage({ type: 'previewRerender' }, '*');
+}
+function togglePreview() {
+  const dock = document.getElementById('preview-dock');
+  const btn  = document.getElementById('preview-toggle');
+  const open = dock.classList.toggle('open');
+  document.body.classList.toggle('preview-open', open);
+  if (btn) btn.classList.toggle('active', open);
+  if (open) {
+    PREVIEW_IFRAME = document.getElementById('preview-iframe');
+    if (!PREVIEW_IFRAME.getAttribute('src')) {
+      PREVIEW_READY = false;
+      PREVIEW_IFRAME.setAttribute('src', 'result.html?preview=1');
+    } else {
+      pushPreviewAnswers();
+    }
+  }
+}
+function reloadPreview() {
+  if (!PREVIEW_IFRAME) return;
+  PREVIEW_READY = false;
+  PREVIEW_IFRAME.src = 'result.html?preview=1';
+}
+// result.html 이 로드되어 "준비됨"을 알리면 현재 조합 답변을 주입
+window.addEventListener('message', (e) => {
+  if (e.data && e.data.type === 'previewReady') {
+    PREVIEW_READY = true;
+    pushPreviewAnswers();
+  }
+});
 
 // ─────────── Phase 1: 핀 저장 v2 + 마이그레이션 ───────────
 // v2 구조:
@@ -1792,6 +1963,8 @@ function setStore(obj) {
   if (!obj.excludesGlobal) obj.excludesGlobal = [];
   if (!obj.reviewed) obj.reviewed = {};
   localStorage.setItem(STORE_KEY, JSON.stringify(obj));
+  // 핀/제외가 바뀔 때마다 라이브 미리보기 즉시 갱신
+  if (typeof pushPreviewRerender === 'function') pushPreviewRerender();
 }
 
 // 특정 (영역, 조합)에 핀된 후기 리스트 — Phase 4
@@ -2023,6 +2196,8 @@ function openModal(areaOrQ1, comboOrQ3, q4) {
   renderModalList();
   document.getElementById('modal-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
+  // 라이브 미리보기를 지금 큐레이션하는 조합으로 전환
+  pushPreviewAnswers();
 }
 
 // 핀 토글 — Phase 4: 현재 (CURRENT_AREA, CURRENT_COMBO) 에 저장
@@ -2093,6 +2268,8 @@ function toggleTop10Detail(pid) {
 function closeModal() {
   document.getElementById('modal-overlay').classList.remove('open');
   document.body.style.overflow = '';
+  // 모달을 닫으면 미리보기를 시나리오(SC) 조합으로 되돌림
+  pushPreviewAnswers();
 }
 
 document.getElementById('modal-overlay').addEventListener('click', (e) => {
@@ -2465,7 +2642,7 @@ function createTabContent(code) {
   div.innerHTML = `
     <div class="placeholder">
       <strong>${code} — ${escapeHtml(def.name || '(이름 없음)')}</strong>
-      매칭 키: ${(def.matchKeys || []).join(' × ') || '(미지정)'}<br>
+      매칭 키: ${keysKo(def.matchKeys) || '(미지정)'}<br>
       ${def.intent ? `<span style="display:inline-block;margin-top:8px;font-size:11px;color:var(--accent-blue);">💡 ${escapeHtml(def.intent)}</span><br>` : ''}
       <span style="opacity:.7;">셀 클릭 → 모달에서 후기 검수.</span>
     </div>
@@ -2484,6 +2661,7 @@ function openAreaEditor(code) {
   document.getElementById('ae-title').textContent = isNew ? `새 영역 추가 (${targetCode})` : `${code} 편집`;
   document.getElementById('ae-name').value = def.name || '';
   document.getElementById('ae-intent').value = def.intent || '';
+  document.getElementById('ae-show').value = (Number.isInteger(def.show) && def.show > 0) ? def.show : '';
   const Q_DESC = {
     Q1: { title: '상황',     opts: '전업·직장·재학·육아·퇴직·알바' },
     Q2: { title: '시험',     opts: '국가직·지방직·서울시 (9급)' },
@@ -2549,7 +2727,9 @@ function saveAreaFromForm(code, isNew, targetCode) {
       setStore(store);
     }
   }
-  areas[targetCode] = { ...(oldDef || {}), name, intent, matchKeys };
+  const showRaw = parseInt(document.getElementById('ae-show').value, 10);
+  const show = (Number.isInteger(showRaw) && showRaw > 0) ? showRaw : undefined;
+  areas[targetCode] = { ...(oldDef || {}), name, intent, matchKeys, show };
   saveAreas(areas);
   AREAS = areas;
 
@@ -2571,7 +2751,7 @@ function saveAreaFromForm(code, isNew, targetCode) {
     content.innerHTML = `
       <div class="placeholder">
         <strong>${targetCode} — ${escapeHtml(def.name)}</strong>
-        매칭 키: ${(def.matchKeys || []).join(' × ')}<br>
+        매칭 키: ${keysKo(def.matchKeys)}<br>
         <span style="opacity:.7;">매트릭스 표시는 다음 단계에서 구현됩니다.</span>
       </div>`;
     content.classList.add('active');
@@ -2639,7 +2819,7 @@ function renderAreaMatrix(area) {
     <div class="area-header">
       <div>
         <div class="area-h-name">${escapeHtml(def.name)} <span style="font-size:11px;color:var(--text-muted);font-weight:400;">(${area})</span></div>
-        <div class="area-h-keys">매칭 키: ${mk.length ? mk.map(k => `<code>${k}</code>`).join(' × ') : '<em>미지정</em>'}</div>
+        <div class="area-h-keys">매칭 키: ${mk.length ? mk.map(k => `<code>${Q_KO[k]||k}</code>`).join(' × ') : '<em>미지정</em>'}</div>
         ${def.intent ? `<div style="font-size:11.5px;color:var(--accent-blue);margin-top:4px;">💡 ${escapeHtml(def.intent)}</div>` : ''}
       </div>
       <div class="area-h-stat"><strong>${dim>0 ? totalCombos : '?'}</strong>총 조합</div>

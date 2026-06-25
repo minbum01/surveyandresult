@@ -89,6 +89,28 @@
    *  - 핀이 1개 이상이면 풀을 핀된 후기로만(핀 순서) 제한 → 큐레이션이 자동매칭을 이김
    *  - 핀이 없으면 제외만 반영하고 원래 풀 유지(자동매칭 그대로)
    * 풀 원소는 id 필드를 가진 후기 객체. 반환은 같은 형태의 배열. */
+  // 영역별 노출 개수 — store.areas[area].show 우선, 없으면 기본값
+  const DEFAULT_SHOW = { 'no.06': 2 };
+  function displayCount(area) {
+    const def = areaDef(area);
+    const n = def && def.show;
+    return (Number.isInteger(n) && n > 0) ? n : (DEFAULT_SHOW[area] || 1);
+  }
+
+  // (영역, 조합)에 핀이 있으면 핀된 후기들 중 count개를 랜덤으로 반환.
+  // 핀이 없으면 null → 호출부가 기존 자동(점수) 로직을 그대로 쓰도록.
+  function pinnedRandom(area, combo, pool, count) {
+    const ids = new Set(pinnedIdsFor(area, combo));
+    if (!ids.size) return null;
+    const cands = (Array.isArray(pool) ? pool : []).filter(p => ids.has(p.id));
+    if (!cands.length) return null;
+    for (let i = cands.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const t = cands[i]; cands[i] = cands[j]; cands[j] = t;
+    }
+    return cands.slice(0, count || 1);
+  }
+
   function applyPool(area, combo, pool) {
     if (!Array.isArray(pool)) return pool;
     const excl = excludedIdsFor(area, combo);
@@ -124,6 +146,8 @@
     pinnedIdsFor,
     excludedIdsFor,
     applyPool,
+    displayCount,
+    pinnedRandom,
     onChange,
   };
 })(window);

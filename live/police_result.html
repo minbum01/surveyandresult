@@ -225,10 +225,10 @@ body.preview-embed .sheets{ gap:14px; }
     <aside class="panel">
       <div class="ghost">ONE SHOT<br>KILL</div>
 
-      <div class="wordmark">HACKERS<span>공무원</span></div>
+      <div class="wordmark">HACKERS<span>경찰</span></div>
 
       <div class="panel-mast">
-        <div class="mast-kicker">해커스공무원 단기합격 리포트</div>
+        <div class="mast-kicker">해커스경찰 단기합격 리포트</div>
         <div class="mast-date" id="rpt-date"></div>
       </div>
 
@@ -356,25 +356,23 @@ body.preview-embed .sheets{ gap:14px; }
 <!-- ════════ Dev Toolbar (fixed) ════════ -->
 <div class="dev-toolbar">
   <div class="dt-row">
-    <label class="dt-q"><strong>Q1</strong><select id="sel-q1"></select></label>
-    <label class="dt-q"><strong>Q2</strong><select id="sel-q2"></select></label>
-    <label class="dt-q"><strong>Q3</strong><select id="sel-q3"></select></label>
-    <label class="dt-q"><strong>Q4</strong><select id="sel-q4"></select></label>
-    <label class="dt-q"><strong>Q5</strong><select id="sel-q5"></select></label>
-    <label class="dt-q"><strong>Q6</strong><select id="sel-q6"></select></label>
-    <label class="dt-q"><strong>Q8</strong><select id="sel-q8"></select></label>
+    <label class="dt-q"><strong>상황</strong><select id="sel-q1"></select></label>
+    <label class="dt-q"><strong>기간</strong><select id="sel-q2"></select></label>
+    <label class="dt-q"><strong>전형</strong><select id="sel-q3"></select></label>
+    <label class="dt-q"><strong>성별</strong><select id="sel-q4"></select></label>
+    <label class="dt-q"><strong>시간</strong><select id="sel-q5"></select></label>
+    <label class="dt-q" style="display:none"><strong>·</strong><select id="sel-q6"></select></label>
+    <label class="dt-q"><strong>걱정</strong><select id="sel-q8"></select></label>
   </div>
   <div class="dt-row">
-    <span class="dt-q-label">Q7 (복수)</span>
+    <span class="dt-q-label">방식 (복수)</span>
     <div class="dt-checks" id="q7-checks"></div>
     <div class="dt-spacer"></div>
     <select id="demo-select">
       <option value="">— 프리셋 —</option>
-      <option value="0">직장+행정+노베</option>
-      <option value="1">전업+세무+전공자</option>
-      <option value="2">육아+교육+노베</option>
-      <option value="3">재학+행정+수능</option>
-      <option value="4">퇴직+공안+토익</option>
+      <option value="0">직장·공채·남</option>
+      <option value="1">전업·101경비단·남</option>
+      <option value="2">재학·간부·여</option>
     </select>
     <span class="dt-divider"></span>
     <button onclick="document.body.classList.toggle('no-marker')">선택지 마커 ON/OFF</button>
@@ -384,44 +382,47 @@ body.preview-embed .sheets{ gap:14px; }
 <script>
 // 관리자 미리보기 임베드 모드: 디버그/툴바 숨김
 try { if (new URLSearchParams(location.search).get('preview')) document.body.classList.add('preview-embed'); } catch(_){}
+// ── 경찰 태그 확장맵 (police_reviews_data.json 태그 기준) ──
+// 슬롯: 0상황 1기간 2전형 3성별 4시간 5(빈) 6방식(복수) 7걱정
 const TAG_EXPANSION = {
-  '전업수험생': ['20대초반','군복무수험생','재시생','전업수험생','전역수험생','전직렬전환','초시생'],
-  '직장병행': ['고졸수험생','재직수험생','직장병행'],
-  '재학수험생': ['복학수험생','서울4년제','재학수험생','지거국','지방4년제','통학수험생','학업병행','휴학수험생'],
-  '육아병행': ['40대','결혼준비','기혼','맘시생','워킹맘','육아병행','임신수험생','출산직후면접'],
-  '퇴직수험생': ['50대','경력단절','경력직','계약직경력','물류경력','사업경험','생산직경력','서비스직경력','주6일직장','콜센터경력','퇴직수험생'],
-  '아르바이트병행': ['N잡러','교대근무','아르바이트병행','주4일알바'],
-  '국가직9급': ['1차2차병행','2관왕','7급병행','PSAT병행','국가직7급','국가직9급','국가직병행'],
-  '지방직9급': ['2관왕','지방직7급','지방직8급','지방직9급','지방직병행'],
-  '서울시9급': ['서울시8급','서울시9급'],
-  '행정직': ['우정행정직','행정직'],
-  '세무직': ['관세직','세무직'],
-  '공안직': ['검찰직','교정직','보호직','철도경찰직','출입국관리직'],
-  '교육직': ['교육직'],
-  '기술직': ['건축직','공업직','군수직','기계일반','기계직','기술직','농업직','방송통신직','시설직','임업직','전기직','전산직','토목직','환경직'],
-  '간호보건직': ['간호보건직','보건직'],
-  '사회복지직': ['사회복지직'],
-  '기타직렬': ['감사직','계리직','고용노동직','국회직8급','국회직9급','기상직','기체직','도시계획직','방재안전직','법원직9급','소수직렬','식품위생직','외무영사직','운전직','조경직','지적직','직업상담직','차량직','통계직','회계직'],
-  '노베이스': ['노베이스'],
-  '수능베이스': ['경찰직베이스','국어베이스','수능베이스','제2외국어','한국사베이스','한능검','한능검베이스','한자자격증'],
-  '전공자': ['4년제','CPA베이스','IT경력','경영학전공','경제학전공','공학전공','관세사베이스','국시베이스','국어전공','기사자격증','무역학전공','법학전공','부전공','사범대','사회과학전공','사회복지전공','석사학위','세무사베이스','심리학전공','역사학전공','영어전공','임용베이스','재경관리사베이스','전공위주','전공자','전기기사','전산회계베이스','통계학전공','행정법베이스','행정학전공','형사소송법베이스','회계세무전공'],
-  '토익베이스': ['영어강사경력','영어베이스','지텔프','토익베이스','해외거주수험생'],
-  '1년이내': ['6개월~1년','6개월미만','단기완성','단기합격'],
-  '1년이상': ['1년6개월~2년','1년~1년6개월','2년~3년','3년이상'],
-  '하루10시간미만': ['하루10시간미만'],
-  '하루10시간이상': ['하루10시간','하루10시간이상','하루13시간','하루14시간이상'],
-  '인강병행': ['1.2배속수강','1.3배속수강','1.5배속수강','1.6배속수강','1.8배속수강','2배속수강','3배속수강','오전인강','완강중심','인강병행'],
-  '기출반복': ['5급기출활용','OX중심','기출반복','기출위주','동형모의고사','문제풀이중심','봉투모의고사','빈출위주','빈칸학습','선지분석','오답노트','최신판례중심','출제경향분석','타직렬기출','판례중심','하프모의고사'],
-  '회독반복': ['개념중심','기본서회독','단권화','단어장회독','독해위주','두문자어암기','마인드맵활용','매일전과목','문법위주','복습중심','서브노트제작','서울시7급','암기중심','약점공략','영단어매일암기','영어단어매일암기','요약본제작','유형별정리','이론중심','이미지암기','키워드암기','타이핑단권화','필기노트','회독반복'],
-  '독학위주': ['기화펜활용','독학위주','막판스퍼트','말노트활용','맵핑학습','면접독학','무한반복','백지공부법','소거법활용','스토리텔링암기','압축이론','오전암기','취침전단어암기'],
-  '노량진현강': ['노량진현강','마킹연습','현강병행'],
-  '스터디병행': ['5분발표','과목깨기','면접스터디','모의면접','블로그정리','손필기노트','스터디병행','오프라인스터디','캠스터디'],
-  '멘탈관리': ['멘탈관리','수면관리','스트레스관리','운동병행','컨디션관리'],
-  '슬럼프극복': ['건강이슈','과도한자신감','모의고사슬럼프','번아웃경험','슬럼프극복','실수관리','연애영향','운동병행','체력관리'],
-  '영어약자': ['영어노베이스','영어약자'],
-  '효율중심': ['127회독법','147회독법','8421공부법','SNS차단','고시원공부','기숙사공부','녹음활용','목차학습','선택과집중','스터디플랜','스톱워치활용','시간관리','식사중학습','엑셀활용','영어노트','오후암기','이동시간학습','이면지활용','자기객관화','자기암시','주말휴식','집공부','타자공부법','틈새시간활용','파일정리','홀수짝수회독','효율중심'],
-  '이해중심학습': ['예습복습병행','이해중심학습'],
-  '커리큘럼중심': ['기초중심','다회독','단계별학습','당일복습','도시락','무주일공부','무회독반복','완강중심','전과목','전년도강의활용','커리큘럼중심'],
+  // 상황 (slot0)
+  '전업수험생': ['전업수험생'],
+  '직장병행': ['직장병행'],
+  '재학수험생': ['재학수험생'],
+  '육아병행': ['육아병행'],
+  '퇴직수험생': ['퇴직'],
+  '아르바이트병행': ['아르바이트'],
+  // 성별 (slot3)
+  '남성': ['남성'],
+  '여성': ['여성'],
+  // 전형 (slot2)
+  '일반공채': ['일반공채','일반공채(남)','일반공채(여)','공채'],
+  '경찰간부': ['경찰간부','간부후보','경행','경행경채'],
+  '101경비단': ['101경비단'],
+  '경채': ['경채','해양경찰','해경'],
+  // 준비기간 (slot1)
+  '6개월미만': ['수험기간6개월미만'],
+  '6개월~1년': ['수험기간6개월~1년'],
+  '1년~2년': ['수험기간1년이상'],
+  '2년이상': ['수험기간2년이상'],
+  // 공부시간 (slot4)
+  '5시간미만': ['6시간공부','효율공부'],
+  '5~8시간': ['8시간공부','순공시간확보'],
+  '8~10시간': ['10시간공부','순공시간확보'],
+  '10시간이상': ['10시간이상공부','12시간공부','13시간공부'],
+  // 공부방식 (slot6, 복수)
+  '인강병행': ['인강수강','풀커리수강','강사고정'],
+  '기출반복': ['기출중시','기출분석','기출활용'],
+  '회독반복': ['반복회독','다회독','급제약점중심회독'],
+  '독학위주': ['단권화','OX학습','기출중시'],          // FIX: '독학탈피'(반대 의미) 제거
+  '스터디병행': ['스터디활용','면접스터디'],
+  // 걱정 (slot7)
+  '체력시험': ['체력준비','체력학원','체력약점','체력역전','체력중요인식'],
+  '영어약자': ['이해+암기병행','자투리시간활용'],        // FIX: 죽은 태그(단어암기·영어약점) 제거
+  '형사법': ['최신판례중시','형사법약점','OX학습'],
+  '면접': ['면접준비','면접스터디','면접학원','면접중요인식'],
+  '멘탈관리': ['멘탈관리','불안극복','루틴유지'],
+  '슬럼프극복': ['슬럼프극복','동기부여','꾸준함'],
 };
 const Q1_DIRECT_TAGS = ['전업수험생','직장병행','재학수험생','육아병행','퇴직수험생','아르바이트병행'];
 function hasExpanded(ts, tagId) {
@@ -429,30 +430,40 @@ function hasExpanded(ts, tagId) {
   if (Q1_DIRECT_TAGS.includes(tagId)) {
     for (const o of Q1_DIRECT_TAGS) if (o !== tagId && ts.has(o)) return false;
   }
-  if (tagId === '행정직' && ts.has('교육직')) return false;
   const exp = TAG_EXPANSION[tagId] || [tagId];
   for (const t of exp) if (ts.has(t)) return true;
   return false;
 }
-function jobMatch(p, q3) {
+function jobMatch(p, q3) {   // q3 = 전형(slot2)
   if (!q3) return true;
   const ts = new Set(p.tags || []);
-  if (q3 === '행정직' && ts.has('교육직')) return false;
   const exp = TAG_EXPANSION[q3] || [q3];
   for (const t of exp) if (ts.has(t) || p.job === t) return true;
   return false;
 }
 
+// 경찰 설문 answersByQ 순서: [0상황,1성별,2전형,3기간,4시간,5방식(복수),6걱정]
+// → 리포트 8슬롯: [0상황,1기간,2전형,3성별,4시간,5(빈),6방식,7걱정]
+const POLICE_DEMO = [
+  {id:'직장병행',label:'직장 다니면서'}, {id:'남성',label:'남성'}, {id:'일반공채',label:'일반공채'},
+  {id:'6개월~1년',label:'6개월 ~ 1년'}, {id:'5~8시간',label:'5 ~ 8시간'},
+  [{id:'인강병행',label:'인강 중심'},{id:'기출반복',label:'기출 반복'}], {id:'멘탈관리',label:'멘탈 관리'},
+];
+function _normOpt(o){ return (o && o.id) ? { tagId:o.id, label:(o.label||o.id) } : null; }
+function policeToSlots(raw){
+  const r = (Array.isArray(raw) && raw.length >= 7) ? raw : POLICE_DEMO;
+  const one = (i) => { const v=r[i]; const o=Array.isArray(v)?v[0]:v; const n=_normOpt(o); return n?[n]:[]; };
+  const multi = (i) => { const v=r[i]; const arr=Array.isArray(v)?v:(v?[v]:[]); return arr.map(_normOpt).filter(Boolean); };
+  return [ one(0), one(3), one(2), one(1), one(4), [], multi(5), one(6) ];
+}
 const DEMO_SETS = [
-  [[{tagId:'직장병행', label:'직장 다니면서'}],[{tagId:'국가직9급', label:'국가직 공무원'}],[{tagId:'행정직', label:'일반행정직'}],[{tagId:'노베이스', label:'공부는 처음이야!'}],[{tagId:'1년이내', label:'1년 이내'}],[{tagId:'하루10시간미만', label:'5 ~ 8시간'}],[{tagId:'인강병행', label:'인강 중심'}, {tagId:'기출반복', label:'기출 반복'}],[{tagId:'멘탈관리', label:'멘탈 관리'}]],
-  [[{tagId:'전업수험생', label:'전업 수험생'}],[{tagId:'국가직9급', label:'국가직 공무원'}],[{tagId:'세무직', label:'세무/관세직'}],[{tagId:'전공자', label:'전공자'}],[{tagId:'1년이내', label:'1년 이내'}],[{tagId:'하루10시간이상', label:'10시간 이상'}],[{tagId:'기출반복', label:'기출 반복'}, {tagId:'독학위주', label:'독학 위주'}],[{tagId:'효율중심', label:'시간이 부족하다'}]],
-  [[{tagId:'육아병행', label:'육아하면서'}],[{tagId:'지방직9급', label:'지방직 공무원'}],[{tagId:'교육직', label:'교육행정직'}],[{tagId:'노베이스', label:'공부는 처음이야!'}],[{tagId:'1년이상', label:'1년 이상'}],[{tagId:'하루10시간미만', label:'5시간 미만'}],[{tagId:'인강병행', label:'인강 중심'}, {tagId:'회독반복', label:'회독 반복'}],[{tagId:'슬럼프극복', label:'슬럼프'}]],
-  [[{tagId:'재학수험생', label:'학교 다니면서'}],[{tagId:'서울시9급', label:'서울시 공무원'}],[{tagId:'행정직', label:'일반행정직'}],[{tagId:'수능베이스', label:'수능 경험 있음'}],[{tagId:'1년이내', label:'1년 이내'}],[{tagId:'하루10시간이상', label:'8 ~ 10시간'}],[{tagId:'인강병행', label:'인강 중심'}, {tagId:'스터디병행', label:'스터디 그룹'}],[{tagId:'커리큘럼중심', label:'커리큘럼을 못 잡겠다'}]],
-  [[{tagId:'퇴직수험생', label:'은퇴·퇴직 후'}],[{tagId:'국가직9급', label:'국가직 공무원'}],[{tagId:'공안직', label:'공안직'}],[{tagId:'토익베이스', label:'영어 성적 있음'}],[{tagId:'1년이상', label:'1년 이상'}],[{tagId:'하루10시간이상', label:'10시간 이상'}],[{tagId:'기출반복', label:'기출 반복'}, {tagId:'회독반복', label:'회독 반복'}],[{tagId:'이해중심학습', label:'공부법을 모르겠다'}]],
+  policeToSlots(POLICE_DEMO),
+  policeToSlots([{id:'전업수험생',label:'전업 수험생'},{id:'남성',label:'남성'},{id:'101경비단',label:'101경비단'},{id:'6개월미만',label:'6개월 미만'},{id:'10시간이상',label:'10시간 이상'},[{id:'기출반복',label:'기출 반복'},{id:'회독반복',label:'회독 반복'}],{id:'체력시험',label:'체력시험'}]),
+  policeToSlots([{id:'재학수험생',label:'학교 다니면서'},{id:'여성',label:'여성'},{id:'경찰간부',label:'경찰간부후보'},{id:'1년~2년',label:'1년 ~ 2년'},{id:'8~10시간',label:'8 ~ 10시간'},[{id:'인강병행',label:'인강 중심'},{id:'스터디병행',label:'스터디 그룹'}],{id:'형사법',label:'형사법'}]),
 ];
 let A;
-try { const raw = sessionStorage.getItem('passNoteAnswers'); A = raw ? JSON.parse(raw) : DEMO_SETS[0]; if (!Array.isArray(A) || A.length < 8) A = DEMO_SETS[0]; }
-catch { A = DEMO_SETS[0]; }
+try { const raw = sessionStorage.getItem('passNoteAnswers'); A = policeToSlots(raw ? JSON.parse(raw) : null); }
+catch { A = policeToSlots(null); }
 const get = (i) => A[i]?.[0]?.tagId || null;
 const getLabel = (i) => A[i]?.[0]?.label || '';
 const getMulti = (i) => (A[i]||[]).map(x=>x.tagId);
@@ -466,12 +477,7 @@ function splitSentences(text) {
 function emptyHtml(msg) { return `<div class="empty-msg">${msg}</div>`; }
 
 // ─── 페르소나 좌측 ───
-function pickPassage(allPassnotes, combo) {
-  // 핀이 있으면: 핀된 후기 중 랜덤 노출 (자동 점수 무시)
-  if (window.Curation && combo) {
-    const forced = Curation.pinnedRandom('no.01', combo, allPassnotes.filter(p => p.passage), Curation.displayCount('no.01'));
-    if (forced && forced.length) return { passnote: forced[0], level: '핀(랜덤)', count: forced.length };
-  }
+function pickPassage(allPassnotes) {
   const Q1 = get(0), Q4 = get(3), Q3 = get(2);
   const matchQ = (ts, qid) => hasExpanded(ts, qid);
   const matchJob = (p) => jobMatch(p, Q3);
@@ -504,12 +510,12 @@ function pickPassage(allPassnotes, combo) {
 
 const PERSONA_PREFER = ['루틴','마음','스스로','처음','지나니까','됐','된다','됩니다','되었','믿','버텼','꾸준','하루하루','매일','용기','다행','다잡','놓지','선택','시작','포기하지','막막','희망','확신','확실'];
 const Q8_QUOTE_KW = {
+  '체력시험':['체력','운동','달리기','윗몸','팔굽혀','악력','순발력','체력학원','체단','체력시험'],
+  '영어약자':['영어','단어','독해','문법','어휘','영문','구문','영단어'],
+  '형사법':['형사법','형법','형소','형사소송','판례','법조문','두문자','암기'],
+  '면접':['면접','인성검사','스피치','시사','자기소개','집단토론','면접스터디'],
   '멘탈관리':['멘탈','마음','심리','불안','걱정','평정','다잡','마인드','흔들리','안정','자신감','감정','컨디션'],
   '슬럼프극복':['슬럼프','번아웃','무기력','포기','위기','극복','버티','버텼','버텨','견디','한계','다잡','다시','일어서'],
-  '영어약자':['영어','토익','지텔프','단어','문법','독해','어휘','영문','영어단어'],
-  '효율중심':['효율','시간','단기','짧','빠르','압축','집중','핵심','선택과집중','자투리'],
-  '이해중심학습':['이해','원리','개념','흐름','깊이','왜','본질','맥락','머리에','뜻'],
-  '커리큘럼중심':['커리큘럼','커리','학원','인강','단계','순서','계획','로드맵','일정','강의'],
 };
 function quoteScore(q) {
   if (!q) return -1;
@@ -559,19 +565,7 @@ function pickQuote(allPassnotes) {
 }
 
 // ─── 우측 분석 ───
-function renderNo06(passnotes, combo) {
-  const cnt = (window.Curation) ? Curation.displayCount('no.06') : 2;
-  // 핀이 있으면: 핀된 후기 중 cnt개 랜덤
-  if (window.Curation && combo) {
-    const forced = Curation.pinnedRandom('no.06', combo, passnotes.filter(p => p.passage), cnt);
-    if (forced && forced.length) {
-      document.getElementById('sec06-body').innerHTML = forced.map(p => {
-        const psg = (p.passage || '').slice(0, 120);
-        return `<div class="mini-card"><div class="mini-card-title">${escapeHtml(p.title || '')}</div><div class="mini-card-passage">"${escapeHtml(psg)}…"</div></div>`;
-      }).join('');
-      return { matched: forced.length, picked: forced.length, pinned: true };
-    }
-  }
+function renderNo06(passnotes) {
   const Q1 = get(0), Q4 = get(3);
   const KW_VIBE = ['처음','막막','시작','다행','됐','됩니다','버텼','꾸준','하루하루','놓지','마음'];
   const cands = passnotes.filter(p => { const ts = new Set(p.tags || []); return hasExpanded(ts, Q1) && hasExpanded(ts, Q4) && p.passage; });
@@ -582,7 +576,7 @@ function renderNo06(passnotes, combo) {
     return { p, s };
   });
   scored.sort((a, b) => b.s - a.s);
-  const top2 = scored.slice(0, cnt);
+  const top2 = scored.slice(0, 2);
   if (top2.length === 0) {
     document.getElementById('sec06-body').innerHTML = emptyHtml('Q1×Q4 매칭 후기 없음');
     return { matched: 0 };
@@ -678,11 +672,10 @@ function renderNo10(passnotes) {
     if (hasExpanded(ts, get(2))) s++;
     if (hasExpanded(ts, get(3))) s++;
     if (hasExpanded(ts, get(4))) s++;
-    if (hasExpanded(ts, get(5))) s++;
     if (Q7.length === 0 || Q7.some(q => hasExpanded(ts, q))) s++;
     if (hasExpanded(ts, get(7))) s++;
     return { p, s };
-  }).filter(x => x.s >= 5);
+  }).filter(x => x.s >= 4);
   scored.sort((a,b) => b.s - a.s);
   const top = scored.slice(0, 60);
   const quotes = [];
@@ -714,7 +707,6 @@ function matchScore(p) {
   if (hasExpanded(ts, get(2))) hits++;
   if (hasExpanded(ts, get(3))) hits++;
   if (hasExpanded(ts, get(4))) hits++;
-  if (hasExpanded(ts, get(5))) hits++;
   const Q7 = getMulti(6);
   if (Q7.length === 0 || Q7.some(q => hasExpanded(ts, q))) hits++;
   if (hasExpanded(ts, get(7))) hits++;
@@ -728,7 +720,7 @@ function pickTopStories(passnotes) {
 function pickClosingQuote(passnotes) {
   const Q8 = get(7);
   const q8kw = (Q8 && Q8_QUOTE_KW[Q8]) || [];
-  const scored = passnotes.map(p => ({ p, s: matchScore(p) })).filter(x => x.s >= 5).sort((a,b) => b.s - a.s);
+  const scored = passnotes.map(p => ({ p, s: matchScore(p) })).filter(x => x.s >= 4).sort((a,b) => b.s - a.s);
   const cands = [];
   for (const x of scored.slice(0, 60)) {
     for (const q of (x.p.quotes || [])) {
@@ -748,35 +740,34 @@ function profileShort(p) {
   const SITU_LIST = ['전업수험생','직장병행','재학수험생','육아병행','퇴직수험생','아르바이트병행'];
   const SITU_LABEL = {'전업수험생':'전업','직장병행':'직장병행','재학수험생':'재학','육아병행':'육아병행','퇴직수험생':'퇴직','아르바이트병행':'알바병행'};
   const situ = SITU_LIST.find(x => ts.has(x));
-  const period = ['6개월미만','6개월~1년','1년~1년6개월','1년6개월~2년','2년~3년','3년이상'].find(x => ts.has(x));
-  const periodStr = ({'6개월미만':'6개월','6개월~1년':'1년이내','1년~1년6개월':'1년반','1년6개월~2년':'2년','2년~3년':'2년이상','3년이상':'3년이상'})[period] || '';
+  const period = ['수험기간6개월미만','수험기간6개월~1년','수험기간1년이상','수험기간2년이상'].find(x => ts.has(x));
+  const periodStr = ({'수험기간6개월미만':'6개월','수험기간6개월~1년':'1년이내','수험기간1년이상':'1~2년','수험기간2년이상':'2년이상'})[period] || '';
   const base = SITU_LABEL[situ] || situ || '';
   return `${base}${periodStr ? ' · ' + periodStr + ' 합격' : ''}`;
 }
 // no.12/13/14 — 정적 데모 (Q3별 집계는 후속 단계)
 const REGRET_BY_Q3 = {
-  '행정직': [
-    { stat: '61%가 언급', text: '"초반에 너무 많은 과목을 동시에 시작한 것"', tip: '처음 2개월은 국어·영어 2과목에 집중, 나머지는 3개월 차부터' },
-    { stat: '48%가 언급', text: '"체력 관리를 너무 늦게 시작한 것"', tip: '주 2회 30분 걷기부터. 수험 후반 체력이 성적을 좌우' },
+  '경찰간부': [
+    { stat: '많이 언급', text: '"2차(체력·면접)를 너무 늦게 준비한 것"', tip: '이론과 체력을 처음부터 병행 — 간부는 2차 비중이 큼' },
+    { stat: '많이 언급', text: '"헌법·행정법을 가볍게 본 것"', tip: '간부 시험 범위가 넓다. 초반에 과목별 로드맵부터' },
   ],
   '_default': [
-    { stat: '많이 언급', text: '"기출을 늦게 시작한 것"', tip: '시작 후 1개월 내 기출 한 번 훑기' },
-    { stat: '많이 언급', text: '"잠을 줄여 공부한 것"', tip: '수면 6시간 이상 사수 — 공부 효율의 기본' },
+    { stat: '많이 언급', text: '"체력 준비를 너무 늦게 시작한 것"', tip: '이론과 병행해 주 2~3회 체력 루틴을 초반부터' },
+    { stat: '많이 언급', text: '"형사법 판례 암기를 미룬 것"', tip: '시작 1개월 내 기출 판례부터 한 번 훑기' },
   ],
 };
 const FIRSTMONTH_BY_Q1Q3 = {
   '_default': [
-    { strong: '기본서 선택 + 1과목 1회독', sub: '합격자 89%가 첫 달에 완료' },
-    { strong: '하루 루틴 고정', sub: '시간 패턴 확립' },
-    { strong: '학습 기록 시작', sub: '합격자 67%가 첫 달부터 순공시간 기록' },
-    { strong: '같은 반 스터디 1명 확보', sub: '직장병행 합격자의 핵심 생존 전략' },
+    { strong: '형사법·경찰학 기본 강의 1회독', sub: '합격자 다수가 첫 달에 착수' },
+    { strong: '하루 루틴 + 순공시간 기록', sub: '시간 패턴 확립' },
+    { strong: '체력 측정 + 주 2회 운동 시작', sub: '체력은 일찍 시작할수록 유리' },
+    { strong: '기출 유형 한 번 훑기', sub: '출제 감각 잡기' },
   ],
 };
 const HARD_SUBJECT_BY_Q3 = {
-  '행정직':  { title: '행정직 합격자가 어려워한 과목', bars: [['행정법',62],['행정학',41],['국어',28],['영어',22],['한국사',15]], tip: '노베이스 합격자 78%가 행정법을 가장 먼저 시작' },
-  '세무직':  { title: '세무직 합격자가 어려워한 과목', bars: [['세법',68],['회계학',55],['행정법',32],['영어',25],['한국사',12]], tip: '세법은 회독 수보다 이해도가 관건' },
-  '교육직':  { title: '교육직 합격자가 어려워한 과목', bars: [['교육학',58],['행정법',45],['국어',30],['영어',24],['한국사',14]], tip: '교육학 강의를 일찍 시작해 주제별 정리' },
-  '_default': { title: '합격자가 어려워한 과목', bars: [['전공과목',60],['국어',32],['영어',28],['한국사',18],['선택과목',24]], tip: '약점 과목은 매일 30분이라도 꾸준히' },
+  '경찰간부':  { title: '간부후보 합격자가 어려워한 과목', bars: [['형사법',58],['경찰학',44],['헌법',40],['행정법',30],['영어',20]], tip: '범위가 넓다 — 헌법·행정법을 초반에 배분' },
+  '101경비단': { title: '101경비단 합격자가 어려워한 과목', bars: [['체력',55],['형사법',50],['경찰학',38],['헌법',26],['영어',18]], tip: '체력 기준이 높다 — 체력 준비를 최우선' },
+  '_default':  { title: '경찰 합격자가 어려워한 과목', bars: [['형사법',62],['경찰학',45],['헌법',30],['영어',24],['한국사',13]], tip: '형사법·경찰학에 학습 시간의 절반 이상을 배분' },
 };
 function renderPage2(C) {
   // no.11 — 유사 후기 카드 3건
@@ -795,7 +786,7 @@ function renderPage2(C) {
     const quote = (p.quotes && p.quotes[0]) || (p.passage || '').slice(0, 100);
     return `
       <div class="story-card">
-        <div class="story-match">● 8개 중 ${s}개 일치</div>
+        <div class="story-match">● 7개 중 ${s}개 일치</div>
         <div class="story-profile">${escapeHtml(profileShort(p))}</div>
         <div class="story-quote"><p>${escapeHtml(quote)}</p></div>
         <div class="story-tags">${tagsHtml}</div>
@@ -850,7 +841,7 @@ function loadAndRender() {
     document.getElementById('loading').textContent = '⚠ 로컬 서버에서 열어주세요';
     return;
   }
-  fetch('reviews_data.json').then(r => r.json()).then(data => {
+  fetch('../police_reviews_data.json').then(r => r.json()).then(data => {
     render(data);
     document.getElementById('loading').classList.add('hidden');
   }).catch(e => { document.getElementById('loading').textContent = '데이터 로드 실패: ' + e.message; });
@@ -865,9 +856,9 @@ function render(data) {
   const combo = (window.Curation) ? Curation.comboFromAnswers(A) : null;
   const C = (area) => (window.Curation) ? Curation.applyPool(area, combo, ps) : ps;
 
-  document.getElementById('profile-line').innerHTML = `${getLabel(0)}<br>${getLabel(2) || '공무원'}을 준비하는 분`;
+  document.getElementById('profile-line').innerHTML = `${getLabel(0)}<br>${getLabel(2) || '경찰'} 준비하는 분`;
 
-  const passResult = pickPassage(C('no.01'), combo);
+  const passResult = pickPassage(C('no.01'));
   if (passResult && passResult.passnote.passage) {
     document.getElementById('passage-value').textContent = passResult.passnote.passage;
     const t = (passResult.passnote.title || '').trim();
@@ -892,7 +883,7 @@ function render(data) {
     document.getElementById('hero-quote-source').textContent = '';
   }
 
-  const r6  = renderNo06(C('no.06'), combo);
+  const r6  = renderNo06(C('no.06'));
   const r7  = renderNo07(C('no.07'));
   const r8  = renderNo08(C('no.08'));
   const r9  = renderNo09(C('no.09'));
@@ -928,15 +919,16 @@ function renderDebug({passResult, quoteResult, r6, r7, r8, r9, r10}) {
 }
 
 // ─── 답변 빌더 ───
+// 경찰 dev 툴바 — 슬롯 매핑: Q1→상황(0) Q2→기간(1) Q3→전형(2) Q4→성별(3) Q5→시간(4) Q6→빈(5) Q7→방식(6) Q8→걱정(7)
 const Q_OPTIONS = {
-  Q1: [['전업수험생','전업 수험생'],['직장병행','직장 다니면서'],['재학수험생','학교 다니면서'],['육아병행','육아하면서'],['퇴직수험생','은퇴·퇴직 후'],['아르바이트병행','아르바이트하면서']],
-  Q2: [['국가직9급','국가직 공무원'],['지방직9급','지방직 공무원'],['서울시9급','서울시 공무원']],
-  Q3: [['행정직','일반행정직'],['세무직','세무/관세직'],['공안직','공안직'],['교육직','교육행정직'],['기술직','기술직'],['간호보건직','간호보건직'],['사회복지직','사회복지직'],['기타직렬','기타직렬']],
-  Q4: [['노베이스','공부는 처음이야'],['수능베이스','수능 경험 있음'],['전공자','전공자'],['토익베이스','영어 성적 있음']],
-  Q5: [['1년이내','1년 이내'],['1년이상','1년 이상']],
-  Q6: [['하루10시간미만','10시간 미만'],['하루10시간이상','10시간 이상']],
-  Q7: [['인강병행','인강 중심'],['기출반복','기출 반복'],['회독반복','회독 반복'],['독학위주','독학 위주'],['노량진현강','노량진 현강'],['스터디병행','스터디 그룹']],
-  Q8: [['멘탈관리','멘탈 관리'],['슬럼프극복','슬럼프'],['영어약자','영어가 약해요'],['효율중심','시간이 부족하다'],['이해중심학습','공부법을 모르겠다'],['커리큘럼중심','커리큘럼을 못 잡겠다']],
+  Q1: [['전업수험생','전업 수험생'],['직장병행','직장 다니면서'],['재학수험생','학교 다니면서'],['육아병행','육아하면서'],['퇴직수험생','은퇴·퇴직 후'],['아르바이트병행','알바하면서']],
+  Q2: [['6개월미만','6개월 미만'],['6개월~1년','6개월~1년'],['1년~2년','1년~2년'],['2년이상','2년 이상']],
+  Q3: [['일반공채','일반공채'],['경찰간부','경찰간부후보'],['101경비단','101경비단'],['경채','경력채용']],
+  Q4: [['남성','남성'],['여성','여성']],
+  Q5: [['5시간미만','5시간 미만'],['5~8시간','5~8시간'],['8~10시간','8~10시간'],['10시간이상','10시간 이상']],
+  Q6: [['','—']],
+  Q7: [['인강병행','인강 중심'],['기출반복','기출 반복'],['회독반복','회독 반복'],['독학위주','독학 위주'],['스터디병행','스터디 그룹']],
+  Q8: [['체력시험','체력시험'],['영어약자','영어가 약해요'],['형사법','형사법'],['면접','면접 준비'],['멘탈관리','멘탈 관리'],['슬럼프극복','슬럼프']],
 };
 function buildSelectors() {
   for (const qk of ['Q1','Q2','Q3','Q4','Q5','Q6','Q8']) {
@@ -978,7 +970,9 @@ buildSelectors();
 syncSelectorsFromA();
 document.getElementById('demo-select').addEventListener('change', (e) => {
   if (!e.target.value) return;
-  A = DEMO_SETS[parseInt(e.target.value, 10)];
+  const _ds = DEMO_SETS[parseInt(e.target.value, 10)];
+  if (!_ds) return;
+  A = _ds;
   syncSelectorsFromA();
   loadAndRender();
 });
