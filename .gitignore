@@ -13,3 +13,10 @@ debug2_out.txt
 debug3_out.txt
 tmp_test.txt
 test_output.txt
+
+_chrome_print_profile/
+crawl_new.log
+crawl_new_progress.json
+crawl_new_failed.json
+__pycache__/
+all_reviews_backup_pre_increment.json

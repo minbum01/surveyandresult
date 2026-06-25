@@ -303,6 +303,7 @@ body {
 
 .empty-msg { color: var(--text-muted); font-size: 11.5px; padding: 6px 0; }
 </style>
+<script src="curation_sync.js"></script>
 </head>
 <body>
 
@@ -697,12 +698,17 @@ function loadAndRender() {
   }).catch(e => { document.getElementById('loading').textContent = '데이터 로드 실패: ' + e.message; });
 }
 
+let LOADED = null;            // 마지막 로드 데이터 캐시 (실시간 재렌더용)
 function render(data) {
-  const r6  = renderNo06(data.passnotes);
-  const r7  = renderNo07(data.passnotes);
-  const r8  = renderNo08(data.passnotes);
-  const r9  = renderNo09(data.passnotes);
-  const r10 = renderNo10(data.passnotes);
+  LOADED = data;
+  // 관리자 큐레이션(핀/제외) 적용: 영역별 후보 풀을 감싼다
+  const combo = (window.Curation) ? Curation.comboFromAnswers(A) : null;
+  const C = (area) => (window.Curation) ? Curation.applyPool(area, combo, data.passnotes) : data.passnotes;
+  const r6  = renderNo06(C('no.06'));
+  const r7  = renderNo07(C('no.07'));
+  const r8  = renderNo08(C('no.08'));
+  const r9  = renderNo09(C('no.09'));
+  const r10 = renderNo10(C('no.10'));
   renderDebug({r6,r7,r8,r9,r10});
 }
 
@@ -779,6 +785,9 @@ document.getElementById('demo-select').addEventListener('change', (e) => {
   loadAndRender();
 });
 loadAndRender();
+
+// 관리자 페이지에서 핀/제외가 바뀌면 즉시 재렌더 — 바로바로 연동
+if (window.Curation) Curation.onChange(() => { if (LOADED) render(LOADED); });
 </script>
 </body>
 </html>

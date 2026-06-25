@@ -500,6 +500,7 @@ body {
 }
 .loading.hidden { display: none; }
 </style>
+<script src="curation_sync.js"></script>
 </head>
 <body>
 
@@ -1088,7 +1089,12 @@ function loadAndRender() {
     });
 }
 
+let LOADED = null;            // 마지막 로드 데이터 캐시 (실시간 재렌더용)
 function render(data) {
+  LOADED = data;
+  // 관리자 큐레이션(핀/제외) 적용
+  const combo = (window.Curation) ? Curation.comboFromAnswers(A) : null;
+  const C = (area) => (window.Curation) ? Curation.applyPool(area, combo, data.passnotes) : data.passnotes;
   // ── 한 줄 요약 ──
   const profileText = `${getLabel(0)}<br>${getLabel(2) || '공무원'}을 준비하는 분`;
   document.getElementById('profile-line').innerHTML = profileText;
@@ -1100,7 +1106,7 @@ function render(data) {
 
   // ── no.04 메인 인용구 (Q5×Q7×Q8 매칭) — 패턴 매칭 ──
   // 출처 라벨은 합성 라벨 대신 실제 후기 제목을 그대로 사용
-  const quoteResult = pickQuote(data.passnotes);
+  const quoteResult = pickQuote(C('no.02'));
   if (quoteResult) {
     document.getElementById('hero-quote').textContent = quoteResult.quote;
     const qpTitle = (quoteResult.passnote.title || '').trim();
@@ -1132,7 +1138,7 @@ function render(data) {
 
   // ── no.02 — 같은 길을 걸은 분의 후기 (정체성 매칭) ──
   // 출처 라벨은 합성 라벨 대신 실제 후기 제목을 그대로 사용 — 진짜 느낌 강조
-  const passResult = pickPassage(data.passnotes);
+  const passResult = pickPassage(C('no.01'));
   if (passResult && passResult.passnote.passage) {
     document.getElementById('passage-value').textContent = passResult.passnote.passage;
     const ppTitle = (passResult.passnote.title || '').trim();
@@ -1322,6 +1328,9 @@ document.getElementById('demo-select').addEventListener('change', (e) => {
 });
 
 loadAndRender();
+
+// 관리자 페이지에서 핀/제외가 바뀌면 즉시 재렌더 — 바로바로 연동
+if (window.Curation) Curation.onChange(() => { if (LOADED) render(LOADED); });
 </script>
 
 </body>
