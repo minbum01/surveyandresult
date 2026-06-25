@@ -1,0 +1,38 @@
+# Vercel 배포에서 제외 (웹에 불필요·대용량) — 정적 사이트만 올림
+# 데이터 파이프라인 / 코드
+*.py
+__pycache__/
+*.log
+*.db
+*.pptx
+*.xlsx
+
+# 크롤 원본/중간 데이터 (대용량, 웹 미사용)
+all_reviews*.json
+*_최종합격.json
+*_필기합격.json
+*_2023이후.json
+police_reviews.json
+fire_reviews.json
+reviews.json
+crawl_*.json
+last_tag_result.json
+auto_pins_*.json
+pins_*.json
+
+# 로컬 인쇄/크롬 프로필/백업/임시
+tools/
+_chrome_print_profile/
+_chrome_headless_profile/
+_print_report.pdf
+_print_shot.png
+*_backup*
+all_reviews_backup_pre_increment.json
+
+# 내부 작업 폴더/문서 (웹 미사용)
+답변정리/
+memory/
+*.md
+
+# 루트 중복 데이터 (live/ 안의 것을 페이지가 fetch)
+/reviews_data.json
