@@ -110,7 +110,6 @@
         ← 시험 선택
       </a>
       <div class="text-right text-[10px] font-mono uppercase text-white/25 flex flex-col gap-0.5">
-        <p><strong class="text-white/80 text-sm">1,337</strong> NOTES</p>
         <p><strong class="text-white/60 text-sm">7</strong> QUESTIONS</p>
       </div>
     </header>
@@ -124,7 +123,7 @@
       </div>
       <div class="fade-up mt-6 max-w-xs" style="animation-delay:.25s">
         <p class="text-white/45 text-sm font-medium leading-relaxed">
-          1,337개의 실제 경찰 합격수기 중<br>
+          실제 경찰 합격수기 중<br>
           <strong class="text-white/80">나와 가장 비슷한 합격자</strong>의<br>이야기를 찾아드립니다.
         </p>
       </div>
@@ -192,7 +191,7 @@
     </div>
     <h3 class="text-2xl font-black tracking-[.12em] uppercase text-white mb-7">Analyzing</h3>
     <div class="flex flex-col gap-2.5 font-mono text-sm text-white/40">
-      <p>1,337개 경찰 합격수기 분석 중...</p>
+      <p>경찰 합격수기 분석 중...</p>
       <p id="ld2" class="transition-opacity duration-700 opacity-0">태그 매칭 중...</p>
       <p id="ld3" class="transition-opacity duration-700 opacity-0">나와 비슷한 합격자 탐색 중...</p>
     </div>
@@ -300,10 +299,8 @@ const Qs = [
   {
     step:'04', title:'준비 기간이 얼마나 됐나요?', desc:'목표 기간도 괜찮습니다', multi:false,
     opts:[
-      {id:'6개월미만',  label:'6개월 미만',  desc:'단기 집중으로 빠르게 합격',        img:'images/q5_기간/01_1년이내.jpg'},
-      {id:'6개월~1년',  label:'6개월 ~ 1년', desc:'핵심을 확실히 잡는 기간',          img:'images/q5_기간/02_1년이상.jpg'},
-      {id:'1년~2년',    label:'1년 ~ 2년',   desc:'탄탄하게 쌓아 반드시 합격',        bg:'linear-gradient(135deg,#1A2A3A,#0F1A28)'},
-      {id:'2년이상',    label:'2년 이상',     desc:'끝까지 포기하지 않는 의지',        bg:'linear-gradient(135deg,#2A1A2A,#1A0F1A)'},
+      {id:'1년미만', label:'1년 미만', desc:'단기 집중으로 빠르게 합격', img:'images/q5_기간/01_1년이내.jpg'},
+      {id:'1년이상', label:'1년 이상', desc:'탄탄하게 쌓아 반드시 합격', img:'images/q5_기간/02_1년이상.jpg'},
     ]
   },
   {
@@ -357,10 +354,8 @@ const TAG_EXP = {
   '아르바이트병행': ['아르바이트','아르바이트병행'],
 
   // 준비 기간 (Q4)
-  '6개월미만': ['수험기간6개월미만'],
-  '6개월~1년': ['수험기간6개월~1년'],
-  '1년~2년':   ['수험기간1년이상'],
-  '2년이상':   ['수험기간2년이상'],
+  '1년미만': ['수험기간6개월미만','수험기간6개월~1년'],
+  '1년이상': ['수험기간1년이상','수험기간2년이상'],
 
   // 공부 시간 (Q5)
   '5시간미만':  ['6시간공부','효율공부'],

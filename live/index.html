@@ -652,7 +652,6 @@
         Pass Note Finder
       </div>
       <div class="text-right text-[10px] font-mono uppercase text-zinc-400 flex flex-col gap-0.5">
-        <p><strong class="text-zinc-900 text-sm">2,112</strong> NOTES</p>
         <p><strong class="text-zinc-900 text-sm">8</strong> QUESTIONS</p>
       </div>
     </header>
@@ -665,7 +664,7 @@
       </div>
       <div class="fade-up mt-6 max-w-xs" style="animation-delay:.25s">
         <p class="text-zinc-500 text-sm md:text-base font-medium leading-relaxed">
-          2,112개의 실제 합격수기 중<br>
+          실제 합격수기 중<br>
           <strong class="text-zinc-900">나와 가장 비슷한 합격자</strong>의<br>이야기를 찾아드립니다.
         </p>
       </div>
@@ -762,11 +761,11 @@
     </div>
     <h3 class="text-2xl md:text-3xl font-black tracking-[0.12em] uppercase text-[#111] mb-7">Analyzing</h3>
     <div class="flex flex-col gap-2.5 font-mono text-sm text-zinc-500">
-      <p>2,112개 합격수기 데이터 분석 중...</p>
+      <p>합격수기 데이터 분석 중...</p>
       <p id="ld2" class="transition-opacity duration-700 opacity-0">응답 패턴 · 태그 매칭 중...</p>
       <p id="ld3" class="transition-opacity duration-700 opacity-0">나와 가장 비슷한 합격자 탐색 중...</p>
     </div>
-    <p id="ld-cnt" class="mt-8 font-mono text-xs text-zinc-300">0 / 2,112</p>
+    <p id="ld-cnt" class="mt-8 font-mono text-xs text-zinc-300">0%</p>
   </div>
 </div>
 
@@ -1717,14 +1716,14 @@ function transitionToQ(nextIdx, restore=false) {
 function startLoading() {
   show('loading');
   ['ld2','ld3'].forEach(id=>document.getElementById(id).style.opacity='0');
-  document.getElementById('ld-cnt').textContent='0 / 2,112';
+  document.getElementById('ld-cnt').textContent='0%';
   let n=0;
-  const ivl=setInterval(()=>{ n+=Math.floor(Math.random()*180+60); if(n>2112)n=2112; document.getElementById('ld-cnt').textContent=n.toLocaleString()+' / 2,112'; },90);
+  const ivl=setInterval(()=>{ n+=Math.floor(Math.random()*9+4); if(n>97)n=97; document.getElementById('ld-cnt').textContent=n+'%'; },90);
   setTimeout(()=>document.getElementById('ld2').style.opacity='1', 600);
   setTimeout(()=>document.getElementById('ld3').style.opacity='1', 1200);
   setTimeout(()=>{
     clearInterval(ivl);
-    document.getElementById('ld-cnt').textContent='2,112 / 2,112';
+    document.getElementById('ld-cnt').textContent='100%';
     setTimeout(() => {
       // 답변 저장 — result.html 에서 향후 참조 가능
       try { sessionStorage.setItem('passNoteAnswers', JSON.stringify(S.answersByQ)); } catch(e){}
