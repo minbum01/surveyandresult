@@ -66,3 +66,15 @@ anon public key      = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 - 관리자(no01): **☁ 서버 저장**(로그인 후 upsert) / **⬇ 서버 불러오기** 버튼 추가
 - 라이브(Vercel) 재배포 확인됨
 - **[나] 할 일: 관리자에서 `☁ 서버 저장` 1번 클릭(로그인=minbum01@gmail.com+비번) → 라이브에 핀 반영됨**
+
+## 🖨️ 인쇄 모니터 실시간 + 스테이션 실행 (2026-06-27)
+- (assistant) `print_admin.html` 폴링 → **Supabase Realtime 구독**으로 전환(끊김 대비 5초 백업 폴링 유지)
+- (assistant) 스테이션 실행용 `print_station.bat` + `station_env.bat.example` 추가
+- **[나] 할 일 ①** SQL Editor에서 **`supabase/migration_realtime.sql` RUN**
+      → print_jobs·stations 를 realtime publication에 등록(이거 안 하면 모니터가 실시간으로 안 뜨고 5초 폴링만 됨)
+- **[나] 할 일 ②** 프린트 스테이션 PC에서:
+      1) `station_env.bat.example` 복사 → `station_env.bat`
+      2) **service_role 키**(대시보드 → Settings → API → service_role 'secret') 를 `SUPABASE_SERVICE_KEY` 에 입력
+      3) 2대면 한쪽 `STATION_ID=A`, 다른쪽 `B`
+      4) `print_station.bat` 더블클릭 → 인쇄 모니터에서 🟢 가동 확인
+      ⚠ `station_env.bat`(키 포함)은 .gitignore 처리됨 — 절대 커밋·웹업로드 금지

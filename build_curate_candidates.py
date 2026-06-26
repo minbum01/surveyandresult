@@ -7,7 +7,7 @@ build_curate_candidates.py — 조합별 상위 N 후보를 표시정보까지 �
 출력: live/curate_candidates.json
   { exam, areas:{ "no.01":{keys, combos:[ {combo:{Q1,Q3,Q4}, items:[ {id,title,profile,quote,tags,score} x N ] } ] } } }
 """
-import json, os, collections
+import json, os, collections, re
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC  = os.path.join(HERE, 'live', 'reviews_data.json')
@@ -199,16 +199,45 @@ def pick_no09(reviews, combo):   # Q1 포기 직전 — 인용에 슬럼프 키�
             out.append((best + short_bonus(p), p))
     return _topn(out)
 
+# no.10 내 직렬 팁 — 같은직렬 전공과목 + 공통(국·영) 공부 팁 문장
+SUBJECT_BY_JOB = {
+  '행정직': ['행정법','행정학'], '세무직': ['세법','회계학','회계','관세법'],
+  '공안직': ['형법','형사소송법','형소법','교정학','형사정책'], '교육직': ['교육학'],
+  '기술직': ['전공','기계','전기','토목','전산','건축','화학','물리','정보보호'],
+  '간호보건직': ['간호','보건','공중보건'], '사회복지직': ['사회복지','사회복지학'], '기타직렬': [],
+}
+COMMON_SUBJ = ['국어','영어']
+ADVICE10 = ['회독','기출','단권화','정리','이해','암기','강의','인강','복습','문제풀이','반복','개념','오답','공부법']
+def _sents(t):
+    return [s.strip() for s in re.split(r'(?<=[.!?])\s+|\n+', t or '') if len(s.strip()) > 5]
+def pick_no10(reviews, combo):   # Q3 직렬 — 같은직렬 전공/공통과목 팁
+    subj = (SUBJECT_BY_JOB.get(combo['Q3']) or []) + COMMON_SUBJ
+    out = []
+    for p in cand(reviews, ['Q3'], combo):
+        best = 0
+        for s in _sents(p.get('passage') or ''):
+            if not (22 <= len(s) <= 110): continue
+            hit = any(k in s for k in subj)
+            adv = sum(1 for k in ADVICE10 if k in s)
+            if not adv: continue
+            sc = adv + (3 if hit else 0)
+            if sc > best: best = sc
+        if best:
+            out.append((best + short_bonus(p), p))
+    return _topn(out)
+
 # no.08(첫한달)·no.09(포기직전)는 결과페이지에서 삭제됨 → 후보생성 제외
 AREAS = {
   'no.01': {'keys': ['Q1','Q3','Q4'], 'pick': pick_no01, 'label': '동일경로 대표후기(감정형)'},
   'no.06': {'keys': ['Q1','Q4'],      'pick': pick_no06, 'label': '같은 출발점(실전형)'},
   'no.07': {'keys': ['Q8'],           'pick': pick_no07, 'label': '내 약점은 이렇게 보완했다(Q8)'},
+  'no.10': {'keys': ['Q3'],           'pick': pick_no10, 'label': '내 직렬 팁(전공·국영)'},
 }
 COMBOS = {
   'no.01': [{'Q1': a, 'Q3': b, 'Q4': c} for a in Q1 for b in Q3 for c in Q4],
   'no.06': [{'Q1': a, 'Q4': c} for a in Q1 for c in Q4],
   'no.07': [{'Q8': x} for x in Q8],
+  'no.10': [{'Q3': b} for b in Q3],
 }
 
 def profile(p):

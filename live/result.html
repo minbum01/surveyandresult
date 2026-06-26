@@ -111,6 +111,8 @@ body{ font-family:var(--sans); background:var(--paper); color:var(--navy); -webk
 /* 카드: 흰 바탕 + 블루 테두리 + 블루 좌측바 (채움 없음) */
 .cards-row{ display:grid; grid-template-columns:1fr 1fr; gap:11px; }
 .mini-card{ background:var(--card); border:1px solid var(--bd); border-left:4px solid var(--blue); padding:12px 14px; }
+.cards-row .mini-card:only-child{ grid-column:1 / -1; padding:16px 18px; }
+.cards-row .mini-card:only-child .mini-card-passage{ -webkit-line-clamp:4; font-size:13px; }
 .mini-card-title{ font-weight:700; font-size:10px; color:var(--blue); margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .mini-card-passage{ font-weight:500; font-size:11.5px; line-height:1.6; color:var(--ink-soft); -webkit-line-clamp:3; display:-webkit-box; -webkit-box-orient:vertical; overflow:hidden; }
 
@@ -249,7 +251,6 @@ body.preview-embed .sheets{ gap:14px; }
       </div>
 
       <div class="panel-id">
-        <div class="id-label">수험 정체</div>
         <div class="profile-line" id="profile-line">—</div>
       </div>
 
@@ -650,35 +651,51 @@ const SUBJECT_BY_JOB = {
   '사회복지직': ['사회복지','사회복지학'],
   '기타직렬': [],
 };
+// no.10 — 내 직렬 팁: 같은직렬 전공과목 2개 + 직렬무관 국·영(공통과목) 1개 = 3개
 function renderNo10(passnotes) {
   const Q3 = get(2);
   const subjKW = SUBJECT_BY_JOB[Q3] || [];
+  const COMMON = ['국어','영어'];
   const ADVICE = ['회독','기출','단권화','정리','이해','암기','강의','인강','복습','문제풀이','반복','개념','오답','공부법'];
-  const cands = passnotes.filter(p => jobMatch(p, Q3) && p.passage);
-  const tips = [];
-  for (const p of cands) {
-    for (const s of splitSentences(p.passage)) {
-      if (s.length < 22 || s.length > 110) continue;
-      const subj = subjKW.find(k => s.includes(k));
-      if (subjKW.length && !subj) continue;                // 과목 있는 직렬은 과목 언급 필수
-      const adv = ADVICE.filter(k => s.includes(k));
-      if (adv.length === 0) continue;
-      tips.push({ text: s, p, subj: subj || '전공', sc: adv.length + (subj ? 3 : 0) });
+  // 후보 수집(후기당 1문장) — requireSubj: 해당 과목 언급 필수 여부
+  function collect(pool, subjects, requireSubj) {
+    const out = [];
+    for (const p of pool) {
+      if (!p.passage) continue;
+      for (const s of splitSentences(p.passage)) {
+        if (s.length < 22 || s.length > 110) continue;
+        const subj = subjects.find(k => s.includes(k));
+        if (requireSubj && !subj) continue;
+        const adv = ADVICE.filter(k => s.includes(k));
+        if (adv.length === 0) continue;
+        out.push({ text: s, p, subj: subj || '전공', sc: adv.length + (subj ? 3 : 0) });
+      }
     }
+    out.sort((a, b) => b.sc - a.sc);
+    const byRev = new Map();
+    for (const t of out) if (!byRev.has(t.p.id)) byRev.set(t.p.id, t);
+    return [...byRev.values()];
   }
-  tips.sort((a, b) => b.sc - a.sc);
-  const byRev = new Map();
-  for (const t of tips) if (!byRev.has(t.p.id)) byRev.set(t.p.id, t);
-  const win = [...byRev.values()].slice(0, Math.min(15, byRev.size));
-  const picks = shuffle(win).slice(0, 3);
+  const sameJob   = passnotes.filter(p => jobMatch(p, Q3));
+  const majorTips = collect(sameJob, subjKW.length ? subjKW : COMMON, subjKW.length > 0); // 같은직렬·전공
+  const commonTips= collect(passnotes, COMMON, true);                                      // 직렬무관·국영
+  // 같은직렬 전공 2 + 직렬무관 국영 1, 넓은 풀(상위20)에서 랜덤, 후기 중복 제거
+  const used = new Set();
+  const take = (arr, n) => {
+    const pool = shuffle(arr.filter(t => !used.has(t.p.id)).slice(0, 20)).slice(0, n);
+    pool.forEach(t => used.add(t.p.id));
+    return pool;
+  };
+  let picks = [...take(majorTips, 2), ...take(commonTips, 1)];
+  if (picks.length < 3) picks = picks.concat(take(majorTips.concat(commonTips), 3 - picks.length));
   if (!picks.length) {
-    document.getElementById('sec10-body').innerHTML = emptyHtml('직렬 전공 팁 없음');
-    return { matched: cands.length, picked: 0 };
+    document.getElementById('sec10-body').innerHTML = emptyHtml('직렬 전공/공통 팁 없음');
+    return { matched: 0, picked: 0 };
   }
   document.getElementById('sec10-body').innerHTML = picks.map(t =>
     `<div class="tip-item"><span class="tip-subj">#${escapeHtml(t.subj)}</span><div class="tip-text">${escapeHtml(t.text)}</div><div class="tip-src">— ${escapeHtml(t.p.title || '')}</div></div>`
   ).join('');
-  return { matched: cands.length, picked: picks.length };
+  return { matched: majorTips.length + commonTips.length, picked: picks.length };
 }
 
 // ════════════ PAGE 2 (no.11~15) ════════════
@@ -852,7 +869,7 @@ function render(data) {
   const combo = (window.Curation) ? Curation.comboFromAnswers(A) : null;
   const C = (area) => (window.Curation) ? Curation.applyPool(area, combo, ps) : ps;
 
-  document.getElementById('profile-line').innerHTML = `${getLabel(0)}<br>${getLabel(2) || '공무원'}을 준비하는 분`;
+  document.getElementById('profile-line').innerHTML = `${getLabel(0)}<br>${getLabel(2) || '공무원'} 준비하는 당신에게`;
 
   const passResult = pickPassage(C('no.01'), combo);
   if (passResult && passResult.passnote.passage) {

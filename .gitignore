@@ -25,3 +25,6 @@ live/_printdata.json
 _chrome_headless_profile/
 _post.json
 run_tagging.log
+
+# 프린트 스테이션 비밀 환경변수 (service_role 키 포함 — 절대 커밋 금지)
+station_env.bat

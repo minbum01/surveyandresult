@@ -7,7 +7,7 @@ build_police_candidates.py — 경찰: 조합(전형×성별)별 상위 N 후보
 경찰은 상황(Q1) 태그가 거의 없어 **전형(Q3)×성별(Q4)** 축으로 선정.
 출력: live/police_curate_candidates.json
 """
-import json, os
+import json, os, re
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC  = os.path.join(HERE, 'police_reviews_data.json')
@@ -137,6 +137,25 @@ def sel_no09(p, combo):   # 전형(Q3) — 슬럼프 키워드 인용
     return True, s, (hit_q + others)[:3]
 
 # 영역 정의: keys(matchKeys)·combos·selector·label
+# no.10 경찰 수험 팁 — 직렬/전형 무관, 경찰 과목·공부법 문장 (단일 조합)
+SUBJ10 = ['형사법','형법','형소','경찰학','헌법','범죄학','영어','한국사']
+ADVICE10 = ['회독','기출','단권화','정리','이해','암기','강의','인강','복습','문제풀이','반복','개념','오답','공부법','판례']
+def sel_no10(p, combo):
+    pg = p.get('passage') or ''
+    best = 0; tips = []
+    for s in re.split(r'(?<=[.!?])\s+|\n+', pg):
+        s = s.strip()
+        if not (22 <= len(s) <= 110): continue
+        if not any(k in s for k in SUBJ10): continue
+        adv = sum(1 for k in ADVICE10 if k in s)
+        if not adv: continue
+        sc = adv + 3
+        tips.append((sc, s)); best = max(best, sc)
+    if not best: return (False, 0, [])
+    tips.sort(key=lambda x: -x[0])
+    bonus = 5 if (set(p.get('tags') or []) & SHORT_TAGS) else 0
+    return (True, best + bonus, [s for _, s in tips[:2]])
+
 AREAS = {
   'no.01': {'keys': ['Q3','Q4'], 'combos': [{'Q3': b, 'Q4': c} for b in Q3 for c in Q4],
             'sel': sel_passage(score_emo),    'label': '동일전형 대표후기(감정형)'},
@@ -148,6 +167,8 @@ AREAS = {
             'sel': sel_no08, 'label': '합격자의 첫 한 달(전형별)'},
   'no.09': {'keys': ['Q3'], 'combos': [{'Q3': b} for b in Q3],
             'sel': sel_no09, 'label': '포기하고 싶던 순간(전형별)'},
+  'no.10': {'keys': [], 'combos': [{}],
+            'sel': sel_no10, 'label': '경찰 합격생이 말해주는 수험 팁'},
 }
 
 def profile(p):

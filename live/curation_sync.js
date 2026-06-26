@@ -76,6 +76,12 @@
   }
 
   function areaDef(area) {
+    // no.10 은 빌드 기준 키를 강제(공무원=직렬 Q3 / 경찰=수험팁 직렬무관). store의 옛 키(전체 Q) 무시.
+    if (area === 'no.10') {
+      return (EXAM() === '경찰')
+        ? { name: '경찰 수험 팁', matchKeys: [] }
+        : { name: '내 직렬 팁', matchKeys: ['Q3'] };
+    }
     const store = getStore();
     return (store.areas && store.areas[area]) || AREAS_DEFAULT[area] || { matchKeys: [] };
   }

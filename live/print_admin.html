@@ -47,7 +47,7 @@
   <h1>🖨️ 인쇄 모니터</h1>
   <span class="muted" id="conn">연결 확인 중…</span>
   <span class="sp"></span>
-  <label class="muted"><input type="checkbox" id="auto" checked> 자동 새로고침</label>
+  <label class="muted"><input type="checkbox" id="auto" checked> 백업 새로고침(5초)</label>
   <button id="refresh">새로고침</button>
   <button id="login" class="primary" style="display:none">로그인</button>
 </header>
@@ -139,14 +139,33 @@ async function reprint(id){
 
 async function refresh(){ if(!supa) return; await Promise.all([loadStations(), loadJobs()]); }
 
+// ── 실시간 구독: print_jobs/stations 변경 시 즉시 반영 (폴링 대신) ──
+//   ⚠ Supabase 대시보드에서 두 테이블을 realtime publication에 넣어야 이벤트가 옴.
+//     supabase/migration_realtime.sql 참고.
+let chan=null;
+function startRealtime(){
+  if(chan || !supa) return;
+  chan = supa.channel('print-monitor')
+    .on('postgres_changes', {event:'*', schema:'public', table:'print_jobs'}, loadJobs)
+    .on('postgres_changes', {event:'*', schema:'public', table:'stations'},   loadStations)
+    .subscribe((status)=>{
+      $('conn').textContent = (status==='SUBSCRIBED') ? '🟢 실시간 연결됨'
+        : (status==='CHANNEL_ERROR'||status==='TIMED_OUT') ? '⚠ 실시간 끊김(백업 폴링 중)'
+        : '실시간 연결 중…';
+    });
+}
+function stopRealtime(){ if(chan){ supa.removeChannel(chan); chan=null; } }
+
+// ── 백업 폴링: 실시간이 끊겨도 갱신되도록 + 스테이션 생존표시(🟢/⚪)는
+//   DB 이벤트 없이 시간만으로 바뀌므로 주기적 재평가가 항상 필요 ──
 let timer=null;
-function startPoll(){ stopPoll(); if($('auto').checked) timer=setInterval(refresh, 2500); }
+function startPoll(){ stopPoll(); if($('auto').checked) timer=setInterval(refresh, 5000); }
 function stopPoll(){ if(timer){ clearInterval(timer); timer=null; } }
 
 function enterBoard(){
   $('gate').style.display='none'; $('board').style.display='block';
-  $('login').style.display='none'; $('conn').textContent='연결됨';
-  refresh(); startPoll();
+  $('login').style.display='none'; $('conn').textContent='연결 중…';
+  refresh(); startRealtime(); startPoll();
 }
 
 $('refresh').onclick = refresh;

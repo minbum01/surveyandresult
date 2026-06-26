@@ -21,6 +21,8 @@ auto_pins_*.json
 pins_*.json
 
 # 로컬 인쇄/크롬 프로필/백업/임시
+*.bat
+station_env*
 tools/
 _chrome_print_profile/
 _chrome_headless_profile/
