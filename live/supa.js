@@ -13,8 +13,8 @@
 (function (global) {
   'use strict';
 
-  const SUPABASE_URL  = 'https://YOUR-PROJECT.supabase.co';   // TODO: 채우기
-  const SUPABASE_ANON = 'YOUR-ANON-PUBLIC-KEY';               // TODO: 채우기 (anon, 공개 OK)
+  const SUPABASE_URL  = 'https://zxjhgcumweqaxcemoiga.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4amhnY3Vtd2VxYXhjZW1vaWdhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MTExNjksImV4cCI6MjA5Nzk4NzE2OX0.vRETMCzDvd0HONqz9rlDXFqrF_ZQP_kp-wURphltsQo';
 
   const READY = !SUPABASE_URL.includes('YOUR-PROJECT')
              && !SUPABASE_ANON.includes('YOUR-ANON');

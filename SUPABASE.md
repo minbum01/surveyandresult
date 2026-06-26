@@ -17,9 +17,9 @@
 
 ## 📌 값 (생기면 기록 — service_role 금지)
 ```
-Supabase Project URL = https://____.supabase.co
-anon public key      = eyJ____
-관리자 이메일         = ____
+Supabase Project URL = https://zxjhgcumweqaxcemoiga.supabase.co
+anon public key      = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4amhnY3Vtd2VxYXhjZW1vaWdhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MTExNjksImV4cCI6MjA5Nzk4NzE2OX0.vRETMCzDvd0HONqz9rlDXFqrF_ZQP_kp-wURphltsQo
+관리자 이메일         = minbum01@gmail.com
 (DB 비번/ service_role 키 = 여기 적지 말 것, 따로 안전하게 보관)
 ```
 
@@ -43,3 +43,20 @@ anon public key      = eyJ____
 
 ## 📒 진행 로그
 - 2026-06-26: 문서 생성. schema.sql·supa.js·exam분리 준비 완료. **Supabase 프로젝트 생성+스키마 RUN+키 전달 대기 중.**
+
+---
+
+## ✅ 연결 완료 (2026-06-26)
+- [x] 프로젝트 생성 / 스키마 RUN (테이블 curation·print_jobs·stations 존재 확인)
+- [x] 관리자 계정 (minbum01@gmail.com)
+- [x] URL·anon 키 → `live/supa.js`에 입력 완료
+- [x] (assistant 점검) REST로 curation·print_jobs 접근 OK, RLS 작동 확인
+- 라이브 사이트(Vercel)에 supa.js 반영됨(push 시 자동 재배포)
+
+## ⏭ 다음 (큐레이션을 라이브에 띄우려면)
+- [ ] (assistant) 페이지에 supabase-js + supa.js 로드 + `curation_sync`를 Supabase 읽기로 전환 → **result.html 건드려서 결과페이지 터미널과 조율 필요**
+- [ ] (나) 공무원 핀 작업 끝나면 → 내보낸 JSON을 Supabase `curation`(exam='공무원') 행에 주입 (assistant가 넣어줌)
+- [ ] (나중) service_role 키 → 프린트 스테이션 PC에만
+
+## 📒 진행 로그
+- 2026-06-26: URL=zxjhgcumweqaxcemoiga / anon·관리자이메일 입력, 스키마·RLS 점검 통과, supa.js 연결.
