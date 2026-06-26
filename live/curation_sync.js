@@ -90,7 +90,8 @@
    *  - 핀이 없으면 제외만 반영하고 원래 풀 유지(자동매칭 그대로)
    * 풀 원소는 id 필드를 가진 후기 객체. 반환은 같은 형태의 배열. */
   // 영역별 노출 개수 — store.areas[area].show 우선, 없으면 기본값
-  const DEFAULT_SHOW = { 'no.06': 2 };
+  // no.06(같은 출발점)은 박스 1개만 (사용자 요청)
+  const DEFAULT_SHOW = { 'no.06': 1 };
   function displayCount(area) {
     const def = areaDef(area);
     const n = def && def.show;
