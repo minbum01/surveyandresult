@@ -372,18 +372,18 @@
     .q-prev-btn:active { transform: scale(0.96); }
     .q-prev-btn svg { transition: transform 0.25s ease; }
     .q-prev-btn:hover svg { transform: translateX(-3px); }
-    .q-text-wrap { margin-left: auto; text-align: right; max-width: 70%; }
+    .q-text-wrap { text-align: left; margin-right: auto; max-width: 64%; }
     .q-title {
-      font-size: clamp(22px, 2.8vw, 38px);
+      font-size: clamp(26px, 3.4vw, 48px);
       font-weight: 900;
       color: #fff;
-      line-height: 1.08;
-      letter-spacing: -0.028em;
+      line-height: 1.06;
+      letter-spacing: -0.03em;
       word-break: keep-all;
       text-shadow: 0 2px 18px rgba(0,0,0,0.45);
     }
     .q-desc {
-      font-size: clamp(12px, 1.05vw, 15px);
+      font-size: clamp(13px, 1.2vw, 17px);
       color: rgba(255,255,255,0.55);
       font-weight: 600;
       margin-top: 8px;
@@ -434,14 +434,14 @@
     }
     .opt-item-text { min-width: 0; flex: 1; }
     .opt-item-label {
-      font-size: clamp(15px, 1.75vw, 22px);
+      font-size: clamp(17px, 2vw, 26px);
       font-weight: 900;
       color: #fff; line-height: 1.12;
       letter-spacing: -0.018em;
       text-shadow: 0 1px 12px rgba(0,0,0,0.55);
     }
     .opt-item-desc {
-      font-size: clamp(11px, 1.05vw, 14px);
+      font-size: clamp(12px, 1.15vw, 15px);
       color: rgba(255,255,255,0.68);
       line-height: 1.45; margin-top: 5px;
       font-weight: 500;
@@ -497,9 +497,9 @@
       .q-header-row { gap: 14px; padding-bottom: 12px; }
       .q-step-num { font-size: 44px; }
       .q-step-of { padding-bottom: 8px; font-size: 11px; }
-      .q-title { font-size: 17px; }
-      .q-desc { font-size: 11px; margin-top: 4px; }
-      .q-text-wrap { max-width: 60%; }
+      .q-title { font-size: 20px; }
+      .q-desc { font-size: 12px; margin-top: 4px; }
+      .q-text-wrap { max-width: 62%; }
       #opt-sidebar { padding: calc(var(--q-header-h) + 14px) 8px 20px; gap: 4px; }
       .q-prev-btn { padding: 12px 18px 12px 14px; font-size: 13px; }
       .opt-item-content { padding: 0 10px; }
@@ -574,7 +574,7 @@
       display: flex;
       align-items: center;
       gap: 18px;
-      padding: 16px 22px 16px 32px;
+      padding: 20px 28px 20px 40px;
       background: linear-gradient(135deg, #E50914 0%, #B30710 100%);
       border: none;
       border-radius: 60px;
@@ -594,7 +594,7 @@
     }
     .next-btn:active { transform: scale(0.97); }
     .next-btn-text {
-      font-size: 16px;
+      font-size: 19px;
       font-weight: 900;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -603,7 +603,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 44px; height: 44px;
+      width: 52px; height: 52px;
       border-radius: 50%;
       background: #fff;
       color: #E50914;
@@ -719,9 +719,9 @@
     <div id="main-card-watermark" class="absolute left-[24%] top-[8%] font-black text-white/[0.05] leading-none select-none" style="font-size:clamp(180px,26vw,380px); letter-spacing:-0.07em;">01</div>
     <!-- content (right-aligned) -->
     <div id="main-card-content" class="relative z-10 text-right max-w-[640px]">
-      <h3 id="main-card-label" class="font-black text-white break-keep" style="font-size:clamp(46px,7.2vw,96px); line-height:0.88; letter-spacing:-0.04em; text-shadow:0 6px 50px rgba(0,0,0,0.5);"></h3>
-      <div class="w-20 h-[3px] bg-[#E50914] mt-6 mb-5 ml-auto rounded-full"></div>
-      <p id="main-card-desc" class="text-white/75 break-keep" style="font-size:clamp(15px,1.6vw,21px); font-weight:600; line-height:1.55; letter-spacing:0.005em;"></p>
+      <h3 id="main-card-label" class="font-black text-white break-keep" style="font-size:clamp(54px,8.2vw,112px); line-height:0.86; letter-spacing:-0.045em; text-shadow:0 6px 50px rgba(0,0,0,0.5);"></h3>
+      <div class="w-24 h-[4px] bg-[#E50914] mt-6 mb-5 ml-auto rounded-full"></div>
+      <p id="main-card-desc" class="text-white/75 break-keep" style="font-size:clamp(17px,1.85vw,25px); font-weight:600; line-height:1.5; letter-spacing:0.005em;"></p>
     </div>
   </div>
 
