@@ -124,6 +124,14 @@ if os.path.exists(_EXC):
 def canon(name):
     return ALIAS.get(name, name)
 
+SUBJ_CANON = {}               # 과목 변형 → 대표과목 (회계/회계원리→회계학 등)
+_SC = os.path.join(HERE, 'live', 'subject_canon.json')
+if os.path.exists(_SC):
+    SUBJ_CANON = dict(json.load(open(_SC, encoding='utf-8')))
+
+def canon_subj(s):
+    return SUBJ_CANON.get(s, s)
+
 MIN_SUBJECT_MENTIONS = 5          # OCR 조각·희소 과목 컷
 BAD_SUBJECTS = {'미상', '비공개', '기타', '공통', '선택', '없음', '-', '미정'}
 
@@ -140,10 +148,11 @@ def pick_courses(reviews, limit=5):
     for p in reviews:
         for pair in (p.get('inst') or []):
             if len(pair) == 2 and pair[0] and pair[1]:
+                subj = canon_subj(pair[0])     # 과목 변형을 대표과목으로 병합
                 inst = canon(pair[1])          # OCR 변형을 실제 이름으로 병합
-                if pair[0] in EXCLUDE_SUBJECTS or inst in EXCLUDE_INSTRUCTORS:
+                if subj in EXCLUDE_SUBJECTS or inst in EXCLUDE_INSTRUCTORS:
                     continue
-                subj_inst[pair[0]][inst] += 1
+                subj_inst[subj][inst] += 1
     subj_total = collections.Counter({s: sum(c.values()) for s, c in subj_inst.items()})
     # 전문과목(비공통) 먼저, 그다음 공통과목 — 둘 다 등장 많은 순
     spec = [s for s, _ in subj_total.most_common() if s not in COMMON_SUBJ]

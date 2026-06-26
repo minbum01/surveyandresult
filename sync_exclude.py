@@ -15,7 +15,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 MD     = os.path.join(HERE, '강사교재_검수목록.md')
 SRC    = os.path.join(HERE, 'live', 'reviews_data.json')
 EXC    = os.path.join(HERE, 'live', 'result_exclude.json')
-MANUAL = os.path.join(HERE, 'live', 'aliases_manual.json')  # 사용자 수동 별칭 (선택)
+MANUAL = os.path.join(HERE, 'live', 'aliases_manual.json')    # 사용자 수동 별칭 (선택)
+CURMAN = os.path.join(HERE, 'live', 'curation_manual.json')   # 수동 강사/과목 제외 (선택)
 
 def parse_line(line):
     """'강사:'/'제거:' 뒤의 토큰들을 (mark, name) 목록으로. name = '(' 앞부분."""
@@ -36,7 +37,14 @@ def parse_line(line):
     return out
 
 def main():
-    # 1) 원본 과목별 강사 집합 + 전역 강사 카운트 + 강사별 대표과목
+    # 과목 대표 매핑 로드 (회계/회계원리→회계학 등)
+    subj_canon = {}
+    SC = os.path.join(HERE, 'live', 'subject_canon.json')
+    if os.path.exists(SC):
+        subj_canon = dict(json.load(open(SC, encoding='utf-8')))
+    csubj = lambda s: subj_canon.get(s, s)
+
+    # 1) 원본 과목별 강사 집합 + 전역 강사 카운트 + 강사별 대표과목 (과목은 대표로 병합)
     ps = json.load(open(SRC, encoding='utf-8'))['passnotes']
     orig = collections.defaultdict(set)
     inst_cnt = collections.Counter()
@@ -44,15 +52,26 @@ def main():
     for p in ps:
         for pr in (p.get('inst') or []):
             if len(pr) == 2 and pr[0] and pr[1]:
-                orig[pr[0]].add(pr[1])
+                subj = csubj(pr[0])
+                orig[subj].add(pr[1])
                 inst_cnt[pr[1]] += 1
-                inst_subj[pr[1]][pr[0]] += 1
+                inst_subj[pr[1]][subj] += 1
     def top_subj(n):
         return inst_subj[n].most_common(1)[0][0] if inst_subj[n] else None
 
+    # 수동 큐레이션(강사/과목 제외) 로드 — 문서 마크와 별개로 항상 적용
+    man_excl_inst, man_excl_subj = set(), set()
+    if os.path.exists(CURMAN):
+        try:
+            cm = json.load(open(CURMAN, encoding='utf-8'))
+            man_excl_inst = set(cm.get('exclude_instructors') or [])
+            man_excl_subj = set(cm.get('exclude_subjects') or [])
+        except Exception:
+            pass
+
     # 2) 문서 파싱 (❌=전역 강제제외 / ✅=전역 강제유지 — 다른 과목 표시보다 우선)
     kept_all, excl_all = set(), set()
-    force_excl, force_keep = set(), set()
+    force_excl, force_keep = set(man_excl_inst), set()
     cur = None
     for line in open(MD, encoding='utf-8'):
         s = line.strip()
@@ -112,9 +131,9 @@ def main():
         aliases.pop(n, None)
     blacklist = sorted((((excl_all - kept_all) | force_excl) - force_keep) - set(aliases))
 
-    data = {'instructors': blacklist, 'subjects': [], 'aliases': aliases}
+    data = {'instructors': blacklist, 'subjects': sorted(man_excl_subj), 'aliases': aliases}
     json.dump(data, open(EXC, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
-    print(f"해커스 유지 {len(kept_all)}명 / 블랙리스트 {len(blacklist)}명 / 별칭 {len(aliases)}개(자동 {len(auto)})")
+    print(f"해커스 유지 {len(kept_all)}명 / 블랙리스트 {len(blacklist)}명 / 별칭 {len(aliases)}개 / 제외과목 {len(man_excl_subj)}")
 
     subprocess.run([sys.executable, os.path.join(HERE, 'build_result_stats.py')], check=True)
 

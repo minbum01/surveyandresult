@@ -63,24 +63,24 @@
   ],
   "courses": [
    {
-    "subject": "세법",
-    "instructor": "이훈엽"
-   },
-   {
     "subject": "회계학",
     "instructor": "정윤돈"
+   },
+   {
+    "subject": "세법",
+    "instructor": "이훈엽"
    },
    {
     "subject": "면접",
     "instructor": "피티윤"
    },
    {
-    "subject": "무역학",
-    "instructor": "이명호"
+    "subject": "PSAT 언어논리",
+    "instructor": "조은정"
    },
    {
-    "subject": "행정법",
-    "instructor": "김대현"
+    "subject": "PSAT 자료해석",
+    "instructor": "김용훈"
    }
   ],
   "passCopy": "나와 같은 직렬 합격자들이 가장 많이 들은 강의예요. 해커스공무원 패스로 한 번에 들을 수 있어요."
@@ -196,6 +196,10 @@
     "instructor": "피티윤"
    },
    {
+    "subject": "컴퓨터일반",
+    "instructor": "곽후근"
+   },
+   {
     "subject": "정보보호론",
     "instructor": "곽후근"
    },
@@ -204,12 +208,8 @@
     "instructor": "이인호"
    },
    {
-    "subject": "컴퓨터일반",
-    "instructor": "곽후근"
-   },
-   {
-    "subject": "행정법",
-    "instructor": "신동욱"
+    "subject": "기계일반",
+    "instructor": "이선형"
    }
   ],
   "passCopy": "나와 같은 직렬 합격자들이 가장 많이 들은 강의예요. 해커스공무원 패스로 한 번에 들을 수 있어요."
@@ -243,16 +243,16 @@
     "instructor": "피티윤"
    },
    {
-    "subject": "보건행정",
-    "instructor": "최성희"
-   },
-   {
     "subject": "간호관리",
     "instructor": "최성희"
    },
    {
-    "subject": "전공",
-    "instructor": "이영주"
+    "subject": "보건행정",
+    "instructor": "최성희"
+   },
+   {
+    "subject": "지역사회간호학",
+    "instructor": "최성희"
    }
   ],
   "passCopy": "나와 같은 직렬 합격자들이 가장 많이 들은 강의예요. 해커스공무원 패스로 한 번에 들을 수 있어요."
@@ -278,12 +278,12 @@
   ],
   "courses": [
    {
-    "subject": "행정법",
-    "instructor": "신동욱"
-   },
-   {
     "subject": "사회복지학개론",
     "instructor": "박정훈"
+   },
+   {
+    "subject": "행정법",
+    "instructor": "신동욱"
    },
    {
     "subject": "면접",
@@ -333,12 +333,12 @@
     "instructor": "이명호"
    },
    {
-    "subject": "국제법",
-    "instructor": "이상구"
+    "subject": "PSAT 언어논리",
+    "instructor": "조은정"
    },
    {
-    "subject": "헌법",
-    "instructor": "신동욱"
+    "subject": "PSAT 상황판단",
+    "instructor": "길규범"
    }
   ],
   "passCopy": "나와 같은 직렬 합격자들이 가장 많이 들은 강의예요. 해커스공무원 패스로 한 번에 들을 수 있어요."
@@ -376,12 +376,12 @@
     "instructor": "서현"
    },
    {
-    "subject": "교육학",
-    "instructor": "강서연"
+    "subject": "회계학",
+    "instructor": "정윤돈"
    },
    {
-    "subject": "세법",
-    "instructor": "이훈엽"
+    "subject": "교육학",
+    "instructor": "강서연"
    }
   ],
   "passCopy": "나와 같은 직렬 합격자들이 가장 많이 들은 강의예요. 해커스공무원 패스로 한 번에 들을 수 있어요."
