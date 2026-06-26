@@ -101,7 +101,7 @@ body{ font-family:var(--sans); background:var(--paper); color:var(--navy); -webk
 .sec:last-child{ margin-bottom:0; border-bottom:none; }
 .sec-head{ display:flex; align-items:center; gap:9px; margin-bottom:9px; }
 .mark{ width:10px; height:10px; background:var(--blue); flex-shrink:0; }
-.sec-title{ font-weight:800; font-size:14px; color:var(--navy); letter-spacing:-.01em; }
+.sec-title{ font-weight:800; font-size:15.5px; color:var(--navy); letter-spacing:-.01em; }
 .empty-msg{ font-weight:600; font-size:10.5px; color:var(--ink-mute); padding:4px 0; }
 
 /* 카드: 흰 바탕 + 블루 테두리 + 블루 좌측바 (채움 없음) */
@@ -109,21 +109,21 @@ body{ font-family:var(--sans); background:var(--paper); color:var(--navy); -webk
 .mini-card{ background:var(--card); border:1px solid var(--bd); border-left:4px solid var(--blue); padding:12px 14px; }
 .cards-row .mini-card:only-child{ grid-column:1 / -1; padding:16px 18px; }
 .cards-row .mini-card:only-child .mini-card-passage{ -webkit-line-clamp:4; font-size:13px; }
-.mini-card-title{ font-weight:700; font-size:10px; color:var(--blue); margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.mini-card-passage{ font-weight:500; font-size:11.5px; line-height:1.6; color:var(--ink-soft); -webkit-line-clamp:3; display:-webkit-box; -webkit-box-orient:vertical; overflow:hidden; }
+.mini-card-title{ font-weight:700; font-size:11.5px; color:var(--blue); margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.mini-card-passage{ font-weight:500; font-size:13px; line-height:1.6; color:var(--ink-soft); -webkit-line-clamp:3; display:-webkit-box; -webkit-box-orient:vertical; overflow:hidden; }
 
 .quote-block{ background:var(--card); border:1px solid var(--bd); border-left:4px solid var(--blue); padding:13px 16px; }
 .tip-block{ display:flex; flex-direction:column; gap:8px; }
 .tip-item{ background:var(--card); border:1px solid var(--bd); border-left:4px solid var(--blue); padding:9px 13px; }
-.tip-subj{ font-weight:800; font-size:9.5px; color:var(--navy); }
-.tip-text{ font-weight:600; font-size:12px; line-height:1.55; color:var(--navy); margin-top:4px; -webkit-line-clamp:2; display:-webkit-box; -webkit-box-orient:vertical; overflow:hidden; }
+.tip-subj{ font-weight:800; font-size:11px; color:var(--navy); }
+.tip-text{ font-weight:600; font-size:13.5px; line-height:1.55; color:var(--navy); margin-top:4px; -webkit-line-clamp:2; display:-webkit-box; -webkit-box-orient:vertical; overflow:hidden; }
 .tip-src{ font-weight:600; font-size:9px; color:var(--ink-mute); margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.quote-keyword{ font-weight:800; font-size:10.5px; color:var(--blue); margin-bottom:6px; }
-.quote-text{ font-weight:600; font-size:13.5px; line-height:1.66; color:var(--navy); -webkit-line-clamp:3; display:-webkit-box; -webkit-box-orient:vertical; overflow:hidden; }
+.quote-keyword{ font-weight:800; font-size:12px; color:var(--blue); margin-bottom:6px; }
+.quote-text{ font-weight:600; font-size:15px; line-height:1.66; color:var(--navy); -webkit-line-clamp:3; display:-webkit-box; -webkit-box-orient:vertical; overflow:hidden; }
 .quote-source{ font-weight:600; font-size:9.5px; color:var(--ink-mute); margin-top:8px; }
 
 .excerpt-block{ background:var(--card); border:1px solid var(--bd); border-left:4px solid var(--blue); padding:13px 16px; }
-.excerpt-text{ font-weight:500; font-size:12.5px; line-height:1.68; color:var(--ink-soft); -webkit-line-clamp:3; display:-webkit-box; -webkit-box-orient:vertical; overflow:hidden; }
+.excerpt-text{ font-weight:500; font-size:14px; line-height:1.68; color:var(--ink-soft); -webkit-line-clamp:3; display:-webkit-box; -webkit-box-orient:vertical; overflow:hidden; }
 .excerpt-source{ font-weight:600; font-size:9.5px; color:var(--ink-mute); margin-top:8px; }
 
 /* ════════ SHEET 2 ════════ */
@@ -146,7 +146,7 @@ body{ font-family:var(--sans); background:var(--paper); color:var(--navy); -webk
 .story-tag{ font-weight:600; font-size:9px; padding:2px 7px; border:1px solid var(--bd); color:var(--ink-soft); border-radius:2px; }
 .story-tag.matched{ border-color:var(--blue); color:var(--blue); }
 
-.bottom-grid{ display:grid; grid-template-columns:1fr 340px; gap:15px; margin-top:16px; }
+.bottom-grid{ display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-top:16px; }
 .insight-card{ background:var(--card); border:1px solid var(--bd); border-left:4px solid var(--blue); padding:17px 18px; }
 .hard-subject{ display:flex; flex-direction:column; }
 .regret-item{ margin-bottom:12px; }
@@ -279,12 +279,12 @@ body.preview-embed .sheets{ gap:14px; }
       </div>
 
       <div class="sec">
-        <div class="sec-head"><i class="mark"></i><span class="sec-title">나와 같은 전형으로 붙은 분들</span></div>
+        <div class="sec-head"><i class="mark"></i><span class="sec-title">나와 비슷한 합격으로</span></div>
         <div class="sec-body cards-row" id="sec06-body"><div class="empty-msg">— 로딩 중 —</div></div>
       </div>
       <div class="sec">
         <div class="sec-head"><i class="mark"></i><span class="sec-title">그 고민, 이렇게 넘었습니다</span></div>
-        <div class="sec-body quote-block" id="sec07-body"><div class="empty-msg">— 로딩 중 —</div></div>
+        <div class="sec-body tip-block" id="sec07-body"><div class="empty-msg">— 로딩 중 —</div></div>
       </div>
       <div class="sec">
         <div class="sec-head"><i class="mark"></i><span class="sec-title">경찰 합격생이 말해주는 수험 팁</span></div>
@@ -316,10 +316,9 @@ body.preview-embed .sheets{ gap:14px; }
         <div class="sec-head"><i class="mark"></i><span class="sec-title">최신 합격자의 공부법</span></div>
         <div id="regret-body">— 로딩 중 —</div>
       </div>
-      <div class="insight-card hard-subject">
-        <div class="sec-head"><i class="mark"></i><span class="sec-title" id="hardsubject-title">최신 합격자가 들은 강의</span></div>
-        <div class="subject-bars" id="hardsubject-body"><div class="empty-msg">— 로딩 중 —</div></div>
-        <div class="subject-tip" id="hardsubject-tip"></div>
+      <div class="insight-card">
+        <div class="sec-head"><i class="mark"></i><span class="sec-title">경찰 합격자의 첫 달 루틴</span></div>
+        <div class="first-month-list" id="firstmonth-body"><div class="empty-msg">— 로딩 중 —</div></div>
       </div>
     </div>
 
@@ -624,7 +623,7 @@ function renderNo06(passnotes) {
     return { p, s };
   });
   scored.sort((a, b) => b.s - a.s);
-  const showN = (window.Curation && Curation.displayCount) ? Curation.displayCount('no.06') : 1;
+  const showN = Math.max(2, (window.Curation && Curation.displayCount) ? Curation.displayCount('no.06') : 2);
   const top2 = sampleFreshRand(scored, TOP_POOL, showN);   // 상위권 중 랜덤 + 중복제거
   if (top2.length === 0) {
     document.getElementById('sec06-body').innerHTML = emptyHtml('전형×성별 매칭 후기 없음');
@@ -655,13 +654,15 @@ function renderNo07(passnotes) {
     }
   }
   quotes.sort((a,b) => b.s - a.s);
-  const best = pickFreshRand(quotes, TOP_POOL);
-  if (!best) {
+  const picks = sampleFreshRand(quotes, TOP_POOL, 2);
+  if (!picks.length) {
     document.getElementById('sec07-body').innerHTML = emptyHtml('극복 인용구 없음');
     return { matched: cands.length, picked: 0 };
   }
-  document.getElementById('sec07-body').innerHTML = `<div class="quote-keyword">#${escapeHtml(best.kw)}</div><div class="quote-text">${escapeHtml(best.q)}</div><div class="quote-source">— ${escapeHtml(best.p.title || '')}</div>`;
-  return { matched: cands.length, picked: 1, kw: best.kw };
+  document.getElementById('sec07-body').innerHTML = picks.map(best =>
+    `<div class="quote-block"><div class="quote-keyword">#${escapeHtml(best.kw)}</div><div class="quote-text">${escapeHtml(best.q)}</div><div class="quote-source">— ${escapeHtml(best.p.title || '')}</div></div>`
+  ).join('');
+  return { matched: cands.length, picked: picks.length, kw: picks[0].kw };
 }
 function renderNo08(passnotes) {
   // 경찰: content 필드가 없어(0건) passage 에서 "첫 달/처음에" 문장 추출 · 전형(Q3) 축
@@ -853,7 +854,9 @@ function renderPage2(C) {
   const q3 = get(2);
   const CONCERN_CAT = {'체력시험':'체력','슬럼프극복':'멘탈','멘탈관리':'멘탈','형사법':'공부법','영어약자':'공부법','면접':'공부법'};
   const wantCat = CONCERN_CAT[get(7)] || null;
-  let strat = (STATS && Array.isArray(STATS.strategy)) ? STATS.strategy.slice() : [];
+  let strat = (STATS && Array.isArray(STATS.strategy))
+    ? STATS.strategy.filter(s => !textHasBlocked(s.text) && !textHasBlocked(s.title))   // 금지 강사명 포함 전략 제외
+    : [];
   strat.sort((a,b) => ((b.cat===wantCat)?1:0) - ((a.cat===wantCat)?1:0));
   const picks = strat.slice(0, 3);
   if (picks.length) {
@@ -871,26 +874,13 @@ function renderPage2(C) {
       <div class="regret-tip"><strong>합격자 권장:</strong> ${r.tip}</div></div>`).join('');
   }
 
-  // no.14 — 최신 합격자가 들은 강의 (해커스 강사, 숫자 미노출 · 경채는 범죄학 강조)
-  const courseSet = (q3 === '경채' && STATS && STATS.courses_경채) ? STATS.courses_경채
-                  : (STATS && STATS.courses) || null;
-  document.getElementById('hardsubject-title').textContent = '최신 합격자가 들은 강의';
-  if (courseSet && Object.keys(courseSet).length) {
-    const order = (q3 === '경채') ? ['범죄학','형사법','경찰학','헌법','영어'] : ['형사법','경찰학','헌법','범죄학','영어'];
-    const subs = order.filter(s => courseSet[s] && courseSet[s].length);
-    document.getElementById('hardsubject-body').innerHTML = subs.map((s, i) => {
-      const names = courseSet[s].slice(0, 2).join(' · ');
-      return `<div class="subject-row">
-        <div class="subject-name">${escapeHtml(s)}</div>
-        <div class="subject-bar-track"><div class="subject-bar-fill ${i===0?'top':''}" style="width:100%;"></div></div>
-        <div class="subject-pct" style="min-width:74px;text-align:right;font-weight:800;color:#13235b">${escapeHtml(names)}</div>
-      </div>`;
-    }).join('');
-    document.getElementById('hardsubject-tip').innerHTML = '💡 합격자 다수가 들은 커리큘럼 — <strong>해커스 경찰 패스</strong>로 한 번에';
-  } else {
-    document.getElementById('hardsubject-body').innerHTML = emptyHtml('강의 데이터 집계 중');
-    document.getElementById('hardsubject-tip').innerHTML = '';
-  }
+  // no.13 — 첫 달 (Q1×Q3)
+  const fm = FIRSTMONTH_BY_Q1Q3['_default'];
+  document.getElementById('firstmonth-body').innerHTML = fm.map((it, i) => `
+    <div class="fm-item">
+      <div class="fm-number">${i+1}</div>
+      <div class="fm-content"><strong>${it.strong}</strong><br><span class="fm-pct">${it.sub}</span></div>
+    </div>`).join('');
 
   // no.15 — CTA 닫는 인용구
   const cq = pickClosingQuote(C('no.15'));
@@ -923,9 +913,25 @@ function loadAndRender() {
 }
 
 let LOADED = null;            // 마지막 로드 데이터 캐시 (실시간 재렌더용)
+// 노출 금지 강사명 — 결과 페이지 어디에도 보이면 안 됨
+const BLOCK_NAMES = ['박철한','황남기','천재근'];
+function textHasBlocked(s) { const t = String(s || ''); return BLOCK_NAMES.some(n => t.includes(n)); }
+// 후기 본문/제목/인용구 어디든 포함되면 그 후기 전체 제외
+function hasBlockedName(p) {
+  return textHasBlocked((p.title || '') + ' ' + (p.passage || '') + ' ' + ((p.quotes || []).join(' ')));
+}
+// 최종 안전망: 렌더 후 결과지에 금지어가 남아 있으면 그 항목/문장을 제거
+function scrubBlockedNames() {
+  document.querySelectorAll('.sheet .mini-card, .sheet .quote-block, .sheet .tip-item, .sheet .story-card, .sheet .regret-item, .sheet .excerpt-block')
+    .forEach(el => { if (textHasBlocked(el.textContent)) el.remove(); });
+  ['passage-value','hero-quote','cta-quote'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && textHasBlocked(el.textContent)) el.textContent = '';
+  });
+}
 function render(data) {
   LOADED = data;
-  const ps = data.passnotes;
+  const ps = (data.passnotes || []).filter(p => !hasBlockedName(p));
   USED_IDS = new Set();        // 매 렌더마다 영역 간 중복제거 초기화
 
   // 관리자 큐레이션(핀/제외) 적용: 영역별 후보 풀을 감싼다
@@ -966,6 +972,7 @@ function render(data) {
   // ── PAGE 2 (no.11~15) ──
   renderPage2(C);
 
+  scrubBlockedNames();   // 최종 안전망: 결과지에 금지 강사명이 남지 않도록 마지막에 한 번 더 제거
   renderDebug({passResult, quoteResult, r6, r7, r10});
 }
 
@@ -1057,7 +1064,7 @@ if (_printMode) {
     .then(pd => {
       if (Array.isArray(pd.ans) && pd.ans.length >= 8) A = pd.ans;
       if (pd.cur != null) window.__PRINT_CUR__ = pd.cur;
-      if (pd.ticket != null) { const el = document.getElementById('print-ticket'); if (el) el.textContent = '#' + pd.ticket; }  // 출력번호 배지
+      if (pd.label != null || pd.ticket != null) { const el = document.getElementById('print-ticket'); if (el) el.textContent = pd.label || ('#' + pd.ticket); }  // 출력번호 배지 (라벨 C-3 우선)
       syncSelectorsFromA();
       const go = () => loadAndRender();
       if (pd.cur == null && window.Curation && Curation.loadRemote) {
@@ -1079,7 +1086,8 @@ function sendPrint(btn){
   // 클라우드 인쇄 큐 우선(Supabase, 서버/배포 터미널) → 출력번호 표시. 없으면 로컬 /print 폴백.
   if (window.enqueuePrint) {
     window.enqueuePrint('경찰', A, null)
-      .then(ticket => { btn.textContent = '출력 #' + ticket + ' 접수 ✓'; })
+      .then(r => { const label = (r && r.label) || ('#' + (r && r.ticket));
+                   btn.textContent = '출력 접수 ✓  ' + label + ' — 프린트대에 "' + label + '" 라고 말하세요'; })
       .catch(e => { btn.textContent = '실패: ' + ((e && e.message) || e); })
       .finally(() => { setTimeout(() => { btn.textContent = old; btn.disabled = false; }, 5000); });
     return;
