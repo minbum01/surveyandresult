@@ -271,9 +271,8 @@
       right: 0;
       height: var(--q-header-h);
       z-index: 22;
-      background: rgba(0,0,0,0.72);
-      backdrop-filter: blur(3px);
-      -webkit-backdrop-filter: blur(3px);
+      background: rgba(0,0,0,0.78);
+      /* StanbyME 성능: backdrop blur 제거 (저사양 GPU 재합성 비용) */
       pointer-events: none;
     }
 
@@ -396,9 +395,8 @@
       left: 0; top: 0; bottom: 0;
       width: var(--q-side-w);
       z-index: 25;
-      background: rgba(0,0,0,0.72);
-      backdrop-filter: blur(3px);
-      -webkit-backdrop-filter: blur(3px);
+      background: rgba(0,0,0,0.78);
+      /* StanbyME 성능: backdrop blur 제거 */
       display: flex;
       flex-direction: column;
       padding: calc(var(--q-header-h) + 18px) 12px 24px;
@@ -475,7 +473,7 @@
       55%      { box-shadow: 0 0 0 7px rgba(255,255,255,0.18); }
     }
     #opt-sidebar:not(.has-selection) .opt-item:first-child .opt-item-chevron {
-      animation: optChevHint 1.9s ease-out infinite;
+      /* StanbyME 성능: box-shadow 무한 펄스 중단 (정적 강조는 유지) */
       background: rgba(255,255,255,0.24);
       border-color: rgba(255,255,255,0.55);
       color: #fff;
@@ -619,7 +617,7 @@
       100% { box-shadow: 0 14px 40px rgba(229,9,20,0.45), 0 0 0 0   rgba(229,9,20,0),    0 0 0 1px rgba(255,255,255,0.10) inset; }
     }
     #next-btn-wrap.visible .next-btn:not(:hover) {
-      animation: nextHalo 1.9s ease-out infinite;
+      /* StanbyME 성능: box-shadow halo 무한 애니메이션 중단 (정적 버튼 유지) */
     }
     @keyframes nextArrowNudge {
       0%, 60%, 100% { transform: translateX(0); }
