@@ -29,6 +29,10 @@ POLL_SEC   = 1.5
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
 SERVICE_KEY  = os.environ.get("SUPABASE_SERVICE_KEY", "")
 STATION_ID   = os.environ.get("STATION_ID", "A")
+PRINTER      = os.environ.get("PRINTER", "")   # 특정 프린터명(잉크젯 A/B). 빈값=기본 프린터
+#  잉크젯 2대를 한 PC에서 쓰려면: 인스턴스 2개 실행, 각각
+#    STATION_ID=A PRINTER="Canon ..."   /   STATION_ID=B PRINTER="Epson ..."
+#  큐(SKIP LOCKED)가 두 인스턴스에 작업을 자동 분배 → 2대 병렬 출력.
 
 # 시험종류 → 결과 페이지
 EXAM_PAGE = {"공무원": "result.html", "경찰": "police_result.html", "소방": "result.html"}
@@ -98,7 +102,8 @@ def render_pdf(page):
     return os.path.exists(PDF_OUT) and os.path.getsize(PDF_OUT) > 1000
 
 def print_pdf():
-    subprocess.run([SUMATRA, "-print-to-default", "-silent",
+    target = ["-print-to", PRINTER] if PRINTER else ["-print-to-default"]
+    subprocess.run([SUMATRA] + target + ["-silent",
                     "-print-settings", PRINT_SETTINGS, PDF_OUT],
                    timeout=120, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
@@ -124,7 +129,7 @@ def main():
     if not SUMATRA: print("⚠ tools/SumatraPDF.exe 없음"); sys.exit(1)
 
     start_local_server()
-    print(f"[station {STATION_ID}] 시작 · 렌더서버 :{PORT} · 큐 폴링 {POLL_SEC}s")
+    print(f"[station {STATION_ID}] 시작 · 프린터={PRINTER or '기본'} · 렌더서버 :{PORT} · 큐 폴링 {POLL_SEC}s")
     while True:
         try:
             job = rpc("claim_next_job", {"p_station": STATION_ID})

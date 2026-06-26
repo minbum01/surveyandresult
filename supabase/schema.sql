@@ -20,8 +20,9 @@ create table if not exists print_jobs (
   answers    jsonb not null,                   -- passNoteAnswers (8슬롯 / 경찰 answersByQ)
   cur        jsonb,                            -- (선택) 인쇄 시점 큐레이션 스냅샷
   ticket     int,                              -- 출력번호(표시용)
+  device     text,                             -- 어느 스탠바이미(태블릿)가 보냈는지
   status     text not null default 'pending',  -- pending|printing|done|error
-  station    text,
+  station    text,                             -- 어느 프린트 스테이션(에이전트)이 처리했는지
   error      text,
   created_at timestamptz not null default now(),
   claimed_at timestamptz,
@@ -42,14 +43,14 @@ create sequence if not exists print_ticket_seq;
 -- ---------- RPC (함수) ----------
 
 -- 결과 페이지(anon)가 인쇄 등록 → 출력번호 반환. 테이블 직접 접근 없이 이걸로만.
-create or replace function enqueue_print(p_exam text, p_answers jsonb, p_cur jsonb)
+create or replace function enqueue_print(p_exam text, p_answers jsonb, p_cur jsonb, p_device text default null)
 returns int
 language plpgsql security definer
 as $$
 declare t int;
 begin
   t := nextval('print_ticket_seq');
-  insert into print_jobs(exam, answers, cur, ticket) values (p_exam, p_answers, p_cur, t);
+  insert into print_jobs(exam, answers, cur, ticket, device) values (p_exam, p_answers, p_cur, t, p_device);
   return t;
 end; $$;
 
@@ -118,7 +119,7 @@ create policy jobs_admin_read on print_jobs for select to authenticated using (t
 create policy stations_read   on stations  for select to authenticated using (true);
 
 -- anon이 호출 가능한 함수만 grant
-grant execute on function enqueue_print(text,jsonb,jsonb) to anon, authenticated;
+grant execute on function enqueue_print(text,jsonb,jsonb,text) to anon, authenticated;
 grant execute on function requeue_job(bigint) to authenticated;
 -- claim_next_job / complete_job / fail_job 은 service_role(스테이션)만 — anon/authenticated grant 안 함
 

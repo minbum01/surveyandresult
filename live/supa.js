@@ -30,4 +30,26 @@
   // 페이지/시험 종류 (각 페이지에서 필요 시 덮어쓰기)
   //   공무원: result.html → '공무원' / 경찰: police_result.html → '경찰'
   global.CURRENT_EXAM = global.CURRENT_EXAM || '공무원';
+
+  // ── 기기(스탠바이미) 식별 ──
+  // 각 태블릿을 1회 `...?d=탭A` 로 열면 localStorage에 저장 → 이후 모든 페이지·인쇄에 따라붙음.
+  try {
+    const _d = new URLSearchParams(location.search).get('d');
+    if (_d) localStorage.setItem('device_id', _d);
+  } catch (e) {}
+  global.DEVICE_ID = (function () {
+    try { return localStorage.getItem('device_id') || ''; } catch (e) { return ''; }
+  })();
+
+  // ── 인쇄 큐 등록 (결과페이지 공용) ──
+  // 결과 도달 후 '출력' 클릭 → Supabase print_jobs 큐에 등록 → 메인컴 print_agent가 받아 인쇄.
+  // 반환: 출력번호(ticket, int). 실패 시 throw.
+  global.enqueuePrint = async function (exam, answers, cur) {
+    if (!global.supa) throw new Error('Supabase 미연결(supa.js 키 확인)');
+    const { data, error } = await global.supa.rpc('enqueue_print', {
+      p_exam: exam, p_answers: answers, p_cur: cur, p_device: global.DEVICE_ID || null
+    });
+    if (error) throw new Error(error.message);
+    return data; // 출력번호
+  };
 })(window);

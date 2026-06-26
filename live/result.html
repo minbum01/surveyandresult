@@ -52,6 +52,12 @@ body{ font-family:var(--sans); background:var(--paper); color:var(--navy); -webk
   -webkit-print-color-adjust:exact; print-color-adjust:exact;
 }
 
+/* 출력번호 배지 (인쇄물 우상단 — 종이↔사람 매칭용). 평소엔 숨김, 인쇄작업일 때만 표시 */
+.sheet-1{ position:relative; }
+.print-ticket{ display:none; position:absolute; top:3.5mm; right:6mm; z-index:60;
+  font-weight:900; font-size:15pt; color:var(--blue,#1F4FE0); letter-spacing:.02em; }
+.print-ticket.show{ display:block; }
+
 /* ════════ LEFT — 화이트 패널(블루 라인/타이포) ════════ */
 .panel{ position:relative; overflow:hidden; background:var(--card); color:var(--navy);
   padding:30px 36px 22px; display:flex; flex-direction:column; height:905px; border-right:2px solid var(--blue); }
@@ -218,6 +224,7 @@ body.preview-embed .sheets{ gap:14px; }
 
 <!-- ════════ SHEET 1 (A4 가로) ════════ -->
 <div class="sheet sheet-1">
+  <div id="print-ticket" class="print-ticket"></div>
   <div id="loading" class="loading">합격수기 매칭 중…</div>
   <div class="sheet-inner grid-1">
 
@@ -554,7 +561,9 @@ function pickQuote(allPassnotes) {
     if (strictQ8.length > 0) cands = strictQ8;
   }
   cands.sort((a,b) => b.s - a.s);
-  return cands.length ? { passnote: cands[0].p, quote: cands[0].q, level } : null;
+  const poolQ = cands.slice(0, Math.min(25, cands.length));      // 상위권 풀에서 랜덤(500명 다양화)
+  const pk = poolQ[Math.floor(Math.random() * poolQ.length)];
+  return pk ? { passnote: pk.p, quote: pk.q, level } : null;
 }
 
 // ─── 우측 분석 ───
@@ -611,7 +620,8 @@ function renderNo07(passnotes) {
     }
   }
   quotes.sort((a,b) => b.s - a.s);
-  const best = quotes[0];
+  const pool07 = quotes.slice(0, Math.min(25, quotes.length));   // 상위권 풀에서 랜덤(500명 다양화)
+  const best = pool07[Math.floor(Math.random() * pool07.length)];
   if (!best) {
     document.getElementById('sec07-body').innerHTML = emptyHtml(`${Q8} 주제 인용구 없음`);
     return { matched: cands.length, picked: 0 };
@@ -636,7 +646,8 @@ function renderNo08(passnotes) {
     }
   }
   sents.sort((a,b) => b.score - a.score);
-  const best = sents[0];
+  const pool08 = sents.slice(0, Math.min(25, sents.length));     // 상위권 풀에서 랜덤(500명 다양화)
+  const best = pool08[Math.floor(Math.random() * pool08.length)];
   if (!best) {
     document.getElementById('sec08-body').innerHTML = emptyHtml('"첫 달/처음에" 문장 없음');
     return { matched: cands.length, picked: 0 };
@@ -659,7 +670,8 @@ function renderNo09(passnotes) {
     }
   }
   quotes.sort((a,b) => b.s - a.s);
-  const best = quotes[0];
+  const pool09 = quotes.slice(0, Math.min(25, quotes.length));   // 상위권 풀에서 랜덤(500명 다양화)
+  const best = pool09[Math.floor(Math.random() * pool09.length)];
   if (!best) {
     document.getElementById('sec09-body').innerHTML = emptyHtml('포기/극복 인용구 없음');
     return { matched: cands.length, picked: 0 };
@@ -696,7 +708,8 @@ function renderNo10(passnotes) {
     }
   }
   quotes.sort((a,b) => b.s - a.s);
-  const best = quotes[0];
+  const pool10 = quotes.slice(0, Math.min(25, quotes.length));   // 상위권 풀에서 랜덤(500명 다양화)
+  const best = pool10[Math.floor(Math.random() * pool10.length)];
   if (!best) {
     document.getElementById('sec10-body').innerHTML = emptyHtml('꾸준함 인용구 없음');
     return { matched: top.length, picked: 0 };
@@ -998,9 +1011,17 @@ const _printMode = new URLSearchParams(location.search).get('print');
 if (_printMode) {
   fetch('_printdata.json?_=' + Date.now())
     .then(r => r.json())
-    .then(pd => {
+    .then(async pd => {
       if (Array.isArray(pd.ans) && pd.ans.length >= 8) A = pd.ans;
-      if (pd.cur != null) window.__PRINT_CUR__ = pd.cur;
+      if (pd.cur != null) {
+        window.__PRINT_CUR__ = pd.cur;                       // 작업에 스냅샷 있으면 사용
+      } else if (window.Curation && Curation.loadRemote) {
+        try { await Curation.loadRemote(); } catch (e) {}    // 없으면 서버 큐레이션으로 인쇄
+      }
+      if (pd.ticket != null) {                               // 출력번호 종이에 찍기
+        const tk = document.getElementById('print-ticket');
+        if (tk) { tk.textContent = '#' + pd.ticket; tk.classList.add('show'); }
+      }
       syncSelectorsFromA();
       loadAndRender();
     })
@@ -1013,11 +1034,25 @@ if (_printMode) {
   if (window.Curation && Curation.loadRemote) Curation.loadRemote();
 }
 
-// ── 무창 인쇄: 현재 답변+큐레이션을 인쇄서버로 전송 (크롬 인쇄창 안 뜸) ──
-function sendPrint(btn){
+// ── 출력: 결과를 인쇄 큐로 보냄 ──
+//  · 행사(클라우드): Supabase print_jobs 큐에 등록 → 프린트대 컴퓨터(print_agent)가 받아 인쇄 → 출력번호 표시
+//  · 폴백(단일 PC, supa 없음): 같은 PC의 print_server.py(/print)로 직접 무창 인쇄
+async function sendPrint(btn){
   const old = btn.textContent;
+  btn.disabled = true; btn.textContent = '출력 전송 중…';
+  if (window.supa && window.enqueuePrint) {
+    try {
+      // cur=null → 인쇄 시 프린트대 컴퓨터가 서버 큐레이션을 그대로 사용
+      const ticket = await window.enqueuePrint(window.CURRENT_EXAM || '공무원', A, null);
+      btn.textContent = `출력 접수 ✓  #${ticket} — 프린트대에서 받으세요`;
+    } catch (e) {
+      btn.textContent = '실패: ' + (e.message || e);
+    } finally {
+      setTimeout(() => { btn.textContent = old; btn.disabled = false; }, 6000);
+    }
+    return;
+  }
   const t0 = performance.now();
-  btn.disabled = true; btn.textContent = '인쇄 전송 중…';
   fetch('/print', {
     method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({ ans: A, cur: localStorage.getItem('admin_curation_v2') })
