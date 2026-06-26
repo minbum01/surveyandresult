@@ -284,14 +284,6 @@ body.preview-embed .sheets{ gap:14px; }
         <div class="sec-body quote-block" id="sec07-body"><div class="empty-msg">— 로딩 중 —</div></div>
       </div>
       <div class="sec">
-        <div class="sec-head"><i class="mark"></i><span class="sec-title">합격자의 첫 한 달</span></div>
-        <div class="sec-body excerpt-block" id="sec08-body"><div class="empty-msg">— 로딩 중 —</div></div>
-      </div>
-      <div class="sec">
-        <div class="sec-head"><i class="mark"></i><span class="sec-title">포기하고 싶던 순간, 버틴 한마디</span></div>
-        <div class="sec-body quote-block" id="sec09-body"><div class="empty-msg">— 로딩 중 —</div></div>
-      </div>
-      <div class="sec">
         <div class="sec-head"><i class="mark"></i><span class="sec-title">경찰 합격생이 말해주는 수험 팁</span></div>
         <div class="sec-body tip-block" id="sec10-body"><div class="empty-msg">— 로딩 중 —</div></div>
       </div>
@@ -645,28 +637,28 @@ function renderNo06(passnotes) {
   }).join('');
   return { matched: cands.length, picked: top2.length };
 }
+// no.07 — 그 고민, 이렇게 넘었습니다 (걱정 극복 + '포기 직전 버틴 한마디' 편입)
 function renderNo07(passnotes) {
   const Q8 = get(7);
   const q8kw = (Q8 && Q8_QUOTE_KW[Q8]) || [];
-  if (!Q8 || q8kw.length === 0) {
-    document.getElementById('sec07-body').innerHTML = emptyHtml('Q8 답변 미선택');
-    return { matched: 0 };
-  }
-  const cands = passnotes.filter(p => { const ts = new Set(p.tags || []); return hasExpanded(ts, Q8) && p.quotes && p.quotes.length; });
+  const PERSEVERE = ['포기하지','포기하려','버텼','버텨','버티','그래도','다잡','마음을 다','놓지','다시','한계','극복','이겨','견디'];  // no.09 편입
+  const kws = [...new Set([...q8kw, ...PERSEVERE])];
+  const cands = passnotes.filter(p => p.quotes && p.quotes.length);   // 편입: 걱정태그 필터 완화(포기서사 포함)
   const quotes = [];
   for (const p of cands) {
     for (const q of (p.quotes || [])) {
-      const m = q8kw.filter(k => q.includes(k));
+      const m = kws.filter(k => q.includes(k));
       if (m.length === 0) continue;
       let s = m.length * 2;
       if (q.length >= 50 && q.length <= 130) s += 3;
-      quotes.push({ q, p, s, kw: m[0] });
+      if (q8kw.some(k => q.includes(k))) s += 3;   // 선택한 걱정 주제 우선 가점
+      quotes.push({ q, p, s, kw: (q8kw.find(k => q.includes(k)) || m[0]) });
     }
   }
   quotes.sort((a,b) => b.s - a.s);
   const best = pickFreshRand(quotes, TOP_POOL);
   if (!best) {
-    document.getElementById('sec07-body').innerHTML = emptyHtml(`${Q8} 주제 인용구 없음`);
+    document.getElementById('sec07-body').innerHTML = emptyHtml('극복 인용구 없음');
     return { matched: cands.length, picked: 0 };
   }
   document.getElementById('sec07-body').innerHTML = `<div class="quote-keyword">#${escapeHtml(best.kw)}</div><div class="quote-text">${escapeHtml(best.q)}</div><div class="quote-source">— ${escapeHtml(best.p.title || '')}</div>`;
@@ -971,17 +963,15 @@ function render(data) {
 
   const r6  = renderNo06(C('no.06'));
   const r7  = renderNo07(C('no.07'));
-  const r8  = renderNo08(C('no.08'));
-  const r9  = renderNo09(C('no.09'));
   const r10 = renderNo10(C('no.10'));
 
   // ── PAGE 2 (no.11~15) ──
   renderPage2(C);
 
-  renderDebug({passResult, quoteResult, r6, r7, r8, r9, r10});
+  renderDebug({passResult, quoteResult, r6, r7, r10});
 }
 
-function renderDebug({passResult, quoteResult, r6, r7, r8, r9, r10}) {
+function renderDebug({passResult, quoteResult, r6, r7, r10}) {
   const rows = [];
   for (let i = 0; i < 8; i++) {
     const labels = (A[i] || []).map(x => x.label).join(', ') || '—';
@@ -994,9 +984,7 @@ function renderDebug({passResult, quoteResult, r6, r7, r8, r9, r10}) {
     ['no.01', '동일경로 후기 (전형×성별)', passResult ? `★ ${passResult.level} / 후보 ${passResult.count}건` : '없음'],
     ['no.02', '패턴 인용구 (시간×방식×걱정)', quoteResult ? `★ ${quoteResult.level}` : '없음'],
     ['no.06', '같은 출발점 (전형×성별)', fmt(r6, ` · ${r6.picked||0}장`)],
-    ['no.07', '다잡은 한 마디 (걱정)', fmt(r7)],
-    ['no.08', '첫 한 달 (전형·passage)', fmt(r8)],
-    ['no.09', '포기 직전 (전형+슬럼프)', fmt(r9)],
+    ['no.07', '그 고민, 이렇게 넘었습니다 (걱정+포기서사)', fmt(r7)],
     ['no.10', '경찰 수험 팁 (과목·공부법)', fmt(r10)],
   ];
   document.getElementById('dbg-areas').innerHTML = areas.map(([code, name, info]) =>

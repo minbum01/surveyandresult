@@ -162,11 +162,7 @@ AREAS = {
   'no.06': {'keys': ['Q3','Q4'], 'combos': [{'Q3': b, 'Q4': c} for b in Q3 for c in Q4],
             'sel': sel_passage(score_method), 'label': '같은 전형으로 붙은 분들(실전형)'},
   'no.07': {'keys': ['Q8'], 'combos': [{'Q8': q} for q in Q8_LIST],
-            'sel': sel_no07, 'label': '그 고민, 이렇게 넘었습니다(걱정별)'},
-  'no.08': {'keys': ['Q3'], 'combos': [{'Q3': b} for b in Q3],
-            'sel': sel_no08, 'label': '합격자의 첫 한 달(전형별)'},
-  'no.09': {'keys': ['Q3'], 'combos': [{'Q3': b} for b in Q3],
-            'sel': sel_no09, 'label': '포기하고 싶던 순간(전형별)'},
+            'sel': sel_no07, 'label': '그 고민, 이렇게 넘었습니다(걱정+포기서사)'},
   'no.10': {'keys': [], 'combos': [{}],
             'sel': sel_no10, 'label': '경찰 합격생이 말해주는 수험 팁'},
 }
