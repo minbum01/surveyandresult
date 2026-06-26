@@ -48,6 +48,9 @@
   .empty{ text-align:center; color:var(--ink-mute); padding:40px; }
   kbd{ font-size:10px; background:var(--bd-soft); border:1px solid var(--bd); border-radius:3px; padding:1px 5px; }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supa.js"></script>
+<script src="curation_sync.js"></script>
 </head>
 <body>
 <header>
@@ -60,6 +63,7 @@
     <button class="btn sm" id="bulk">🚀 남은 조합 전체 자동확정</button>
     <button class="btn ghost sm" id="rebulk">♻️ 전체 재확정(덮어쓰기)</button>
     <button class="btn ghost sm" id="export">📤 백업 내보내기</button>
+    <button class="btn sm" id="server-save" style="background:#1F4FE0;border-color:#1F4FE0;" title="현재 선정 결과를 Supabase에 저장 → 태블릿(라이브)에 반영">☁ 서버 저장</button>
   </div>
 </header>
 <main>
@@ -107,6 +111,7 @@ function init(){
     document.getElementById('all-ok').onclick=()=>{ setAll('ok'); };
     document.getElementById('all-no').onclick=()=>{ setAll('no'); };
     document.getElementById('export').onclick=exportStore;
+    document.getElementById('server-save').onclick=pushToServer;
     document.getElementById('bulk').onclick=()=>bulkConfirm(false);
     document.getElementById('rebulk').onclick=()=>bulkConfirm(true);
     renderCombo();
@@ -226,6 +231,26 @@ function bulkConfirm(overwrite){
   saveStore(store);
   alert(`${overwrite?'전체 재확정(덮어쓰기)':'전체 자동확정'} 완료\n조합 ${nc}개 · 핀 ${np}건 · 제외 ${ne}건`);
   renderCombo();
+}
+// ── Supabase 서버 저장 (검수 → 라이브 반영) ──
+async function ensureAuth(){
+  if(!window.supa){ alert('Supabase 미연결(supa.js 키 확인)'); return false; }
+  const { data:{ session } } = await supa.auth.getSession();
+  if(session) return true;
+  const email=prompt('관리자 이메일'); if(!email) return false;
+  const pw=prompt('비밀번호'); if(!pw) return false;
+  const { error }=await supa.auth.signInWithPassword({ email:email.trim(), password:pw });
+  if(error){ alert('로그인 실패: '+error.message); return false; }
+  return true;
+}
+async function pushToServer(){
+  if(!window.Curation){ alert('curation_sync.js 로드 확인'); return; }
+  if(!(await ensureAuth())) return;
+  const store=ensure(loadStore());
+  const cnt=Object.values(store.pins||{}).reduce((s,a)=>s+a.length,0);
+  if(!confirm(`현재 선정(핀 ${cnt}건)을 서버(${window.CURRENT_EXAM||'공무원'})에 저장합니다.\n→ 태블릿(라이브)에 즉시 반영. 진행?`)) return;
+  const r=await Curation.saveRemote(store);
+  alert(r.ok ? `☁ 서버 저장 완료 (핀 ${cnt}건)\n→ 라이브(태블릿)에 반영됨` : '실패: '+r.error);
 }
 function exportStore(){
   const store=ensure(loadStore());

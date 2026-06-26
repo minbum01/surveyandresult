@@ -985,7 +985,8 @@ document.getElementById('demo-select').addEventListener('change', (e) => {
 // ── 인쇄모드(?print=1): 헤드리스 크롬이 답변·큐레이션을 주입받아 렌더 ──
 const _printMode = new URLSearchParams(location.search).get('print');
 if (_printMode) {
-  fetch('_printdata.json?_=' + Date.now())
+  const _pdFile = new URLSearchParams(location.search).get('pd') || '_printdata.json';
+  fetch(_pdFile + '?_=' + Date.now())
     .then(r => r.json())
     .then(async pd => {
       if (Array.isArray(pd.ans) && pd.ans.length >= 8) A = pd.ans;

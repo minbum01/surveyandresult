@@ -69,12 +69,14 @@ anon public key      = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 
 ## 🖨️ 인쇄 모니터 실시간 + 스테이션 실행 (2026-06-27)
 - (assistant) `print_admin.html` 폴링 → **Supabase Realtime 구독**으로 전환(끊김 대비 5초 백업 폴링 유지)
-- (assistant) 스테이션 실행용 `print_station.bat` + `station_env.bat.example` 추가
+- (assistant) 스테이션 실행기 추가: `print_station.bat`(1개) / `print_station_2printers.bat`(2대 동시) + `station_env.bat.example`
+- (assistant) **한 PC에 프린터 2대** 지원: `print_agent.py`·결과페이지를 인스턴스별(STATION_ID별) 포트·임시파일로 분리 → 동시 인쇄 충돌 제거
 - **[나] 할 일 ①** SQL Editor에서 **`supabase/migration_realtime.sql` RUN**
       → print_jobs·stations 를 realtime publication에 등록(이거 안 하면 모니터가 실시간으로 안 뜨고 5초 폴링만 됨)
 - **[나] 할 일 ②** 프린트 스테이션 PC에서:
       1) `station_env.bat.example` 복사 → `station_env.bat`
       2) **service_role 키**(대시보드 → Settings → API → service_role 'secret') 를 `SUPABASE_SERVICE_KEY` 에 입력
-      3) 2대면 한쪽 `STATION_ID=A`, 다른쪽 `B`
-      4) `print_station.bat` 더블클릭 → 인쇄 모니터에서 🟢 가동 확인
+      3) **프린터 2대 이름**을 `PRINTER_A` / `PRINTER_B` 에 입력(제어판 '장치 및 프린터' 이름 그대로)
+      4) **`print_station_2printers.bat` 더블클릭** → A/B 두 창이 뜸 → 인쇄 모니터에서 둘 다 🟢 가동 확인
+      · (프린터 1대 테스트만 할 땐 `print_station.bat` 더블클릭, PRINTER_A 비우면 기본 프린터로)
       ⚠ `station_env.bat`(키 포함)은 .gitignore 처리됨 — 절대 커밋·웹업로드 금지

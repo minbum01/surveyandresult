@@ -20,19 +20,23 @@ from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-PORT = int(os.environ.get("AGENT_PORT", "8191"))           # 렌더용 로컬 서버 포트
-PRINT_DATA = os.path.join(ROOT, "live", "_printdata.json")
-PDF_OUT    = os.path.join(ROOT, "_agent_report.pdf")
-PRINT_SETTINGS = os.environ.get("PRINT_SETTINGS", "noscale")
-POLL_SEC   = 1.5
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
 SERVICE_KEY  = os.environ.get("SUPABASE_SERVICE_KEY", "")
 STATION_ID   = os.environ.get("STATION_ID", "A")
-PRINTER      = os.environ.get("PRINTER", "")   # 특정 프린터명(잉크젯 A/B). 빈값=기본 프린터
-#  잉크젯 2대를 한 PC에서 쓰려면: 인스턴스 2개 실행, 각각
-#    STATION_ID=A PRINTER="Canon ..."   /   STATION_ID=B PRINTER="Epson ..."
-#  큐(SKIP LOCKED)가 두 인스턴스에 작업을 자동 분배 → 2대 병렬 출력.
+PRINTER      = os.environ.get("PRINTER", "")   # 특정 프린터명. 빈값=기본 프린터
+#  ── 한 PC에 프린터 2대(인스턴스 2개) ──
+#    창1: STATION_ID=A PRINTER="Canon ..."    창2: STATION_ID=B PRINTER="Epson ..."
+#    아래 PORT/PRINT_DATA/PDF_OUT 가 STATION_ID 별로 자동 분리되어 동시 인쇄해도 충돌 없음.
+#    큐(SKIP LOCKED)가 두 인스턴스에 작업을 자동 분배 → 2대 병렬 출력(밀림 방지).
+
+# 인스턴스 격리: 같은 PC에서 2개 띄워도 렌더 포트·임시파일이 안 겹치도록 STATION_ID로 분리
+_sid = "".join(c for c in STATION_ID if c.isalnum()) or "A"
+PORT = int(os.environ.get("AGENT_PORT", str(8191 + (sum(map(ord, _sid)) % 80))))  # 렌더용 로컬 서버 포트
+PRINT_DATA = os.path.join(ROOT, "live", f"_printdata_{_sid}.json")  # 인스턴스별 답변 주입 파일
+PDF_OUT    = os.path.join(ROOT, f"_agent_report_{_sid}.pdf")        # 인스턴스별 PDF
+PRINT_SETTINGS = os.environ.get("PRINT_SETTINGS", "noscale")
+POLL_SEC   = 1.5
 
 # 시험종류 → 결과 페이지
 EXAM_PAGE = {"공무원": "result.html", "경찰": "police_result.html", "소방": "result.html"}
@@ -87,7 +91,8 @@ def render_pdf(page):
         try: os.remove(PDF_OUT)
         except OSError: pass
     prof = tempfile.mkdtemp(prefix="agent_")
-    url = f"http://127.0.0.1:{PORT}/live/{page}?print=1&_={int(time.time()*1000)}"
+    pdname = os.path.basename(PRINT_DATA)   # 인스턴스별 답변파일을 페이지가 fetch 하도록 전달
+    url = f"http://127.0.0.1:{PORT}/live/{page}?print=1&pd={pdname}&_={int(time.time()*1000)}"
     cmd = [CHROME, "--headless=new", "--disable-gpu", "--no-sandbox", "--no-first-run",
            "--no-default-browser-check", "--disable-background-networking",
            f"--user-data-dir={prof}", "--virtual-time-budget=10000",
