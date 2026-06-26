@@ -216,6 +216,9 @@ body{ font-family:var(--sans); background:var(--paper); color:var(--navy); -webk
 .dev-toolbar select{ background:rgba(255,255,255,.1); color:#fff; border:1px solid rgba(255,255,255,.2); padding:4px 8px; font-size:11px; max-width:150px; font-family:inherit; }
 .dev-toolbar select option{ background:#222; color:#fff; }
 .dyn::before{ display:none !important; }
+/* 운영 화면: 개발 도구(디버그 패널/툴바) 항상 숨김 */
+.debug-panel,
+.dev-toolbar{ display:none !important; }
 /* 관리자 미리보기 임베드(?preview=1): 디버그/툴바 숨기고 시트만 */
 body.preview-embed{ padding:0 !important; background:#EEF1F7; }
 body.preview-embed .debug-panel,
