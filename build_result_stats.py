@@ -185,11 +185,16 @@ def build(reviews):
         'passCopy': PASS_COPY,
     }
 
+RECENT_YEARS = ('2026년', '2025년')   # 공무원: 최신 합격자 우선
+def recent_pool(reviews, minN=10):
+    r = [p for p in reviews if str(p.get('year') or '') in RECENT_YEARS]
+    return r if len(r) >= minN else reviews   # 최신이 너무 적으면 전체로 폴백
+
 def main():
     data = json.load(open(SRC, encoding='utf-8'))
     ps = data['passnotes']
-    result = {q3: build([p for p in ps if job_match(p, q3)]) for q3 in JOB_EXP}
-    result['_default'] = build(ps)
+    result = {q3: build(recent_pool([p for p in ps if job_match(p, q3)])) for q3 in JOB_EXP}
+    result['_default'] = build(recent_pool(ps))
     json.dump(result, open(OUT, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     for q3, v in result.items():
         print(f"{q3}: n={v['count']} strat={len(v['strategy'])} courses={[c['subject']+'/'+c['instructor'] for c in v['courses']]}")

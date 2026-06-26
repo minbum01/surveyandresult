@@ -125,6 +125,10 @@ def write_md(pair):
 
 def main():
     reviews = load()
+    # 경찰: 최신 합격자(2025~2026) 우선 — 2026이 적어 2025까지 확대
+    recent = [p for p in reviews if str(p.get('year') or '') in ('2026', '2025')]
+    if len(recent) >= 30:
+        reviews = recent
     pair = aggregate(reviews)
     write_md(pair)                                  # 최초 1회만 생성(있으면 보존)
     wl, ex = read_md_whitelist()                    # 사람 검수 결과 우선

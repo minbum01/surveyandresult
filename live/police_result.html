@@ -146,7 +146,7 @@ body{ font-family:var(--sans); background:var(--paper); color:var(--navy); -webk
 .story-tag{ font-weight:600; font-size:9px; padding:2px 7px; border:1px solid var(--bd); color:var(--ink-soft); border-radius:2px; }
 .story-tag.matched{ border-color:var(--blue); color:var(--blue); }
 
-.bottom-grid{ display:grid; grid-template-columns:1fr 1fr 300px; gap:15px; margin-top:16px; }
+.bottom-grid{ display:grid; grid-template-columns:1fr 340px; gap:15px; margin-top:16px; }
 .insight-card{ background:var(--card); border:1px solid var(--bd); border-left:4px solid var(--blue); padding:17px 18px; }
 .hard-subject{ display:flex; flex-direction:column; }
 .regret-item{ margin-bottom:12px; }
@@ -310,15 +310,11 @@ body.preview-embed .sheets{ gap:14px; }
     <!-- 하단 3분할 -->
     <div class="bottom-grid">
       <div class="insight-card">
-        <div class="sec-head"><i class="mark"></i><span class="sec-title">다시 준비한다면 꼭 할 것</span></div>
+        <div class="sec-head"><i class="mark"></i><span class="sec-title">최신 합격자의 공부법</span></div>
         <div id="regret-body">— 로딩 중 —</div>
       </div>
-      <div class="insight-card">
-        <div class="sec-head"><i class="mark"></i><span class="sec-title">경찰 합격자의 첫 달 루틴</span></div>
-        <div class="first-month-list" id="firstmonth-body"><div class="empty-msg">— 로딩 중 —</div></div>
-      </div>
       <div class="insight-card hard-subject">
-        <div class="sec-head"><i class="mark"></i><span class="sec-title" id="hardsubject-title">합격자가 어려워한 과목</span></div>
+        <div class="sec-head"><i class="mark"></i><span class="sec-title" id="hardsubject-title">최신 합격자가 들은 강의</span></div>
         <div class="subject-bars" id="hardsubject-body"><div class="empty-msg">— 로딩 중 —</div></div>
         <div class="subject-tip" id="hardsubject-tip"></div>
       </div>
@@ -872,18 +868,10 @@ function renderPage2(C) {
       <div class="regret-tip"><strong>합격자 권장:</strong> ${r.tip}</div></div>`).join('');
   }
 
-  // no.13 — 첫 달 (Q1×Q3)
-  const fm = FIRSTMONTH_BY_Q1Q3['_default'];
-  document.getElementById('firstmonth-body').innerHTML = fm.map((it, i) => `
-    <div class="fm-item">
-      <div class="fm-number">${i+1}</div>
-      <div class="fm-content"><strong>${it.strong}</strong><br><span class="fm-pct">${it.sub}</span></div>
-    </div>`).join('');
-
-  // no.14 — 합격자들이 들은 강의 (해커스 강사, 숫자 미노출 · 경채는 범죄학 강조)
+  // no.14 — 최신 합격자가 들은 강의 (해커스 강사, 숫자 미노출 · 경채는 범죄학 강조)
   const courseSet = (q3 === '경채' && STATS && STATS.courses_경채) ? STATS.courses_경채
                   : (STATS && STATS.courses) || null;
-  document.getElementById('hardsubject-title').textContent = '합격자들이 들은 강의';
+  document.getElementById('hardsubject-title').textContent = '최신 합격자가 들은 강의';
   if (courseSet && Object.keys(courseSet).length) {
     const order = (q3 === '경채') ? ['범죄학','형사법','경찰학','헌법','영어'] : ['형사법','경찰학','헌법','범죄학','영어'];
     const subs = order.filter(s => courseSet[s] && courseSet[s].length);

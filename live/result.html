@@ -154,7 +154,7 @@ body{ font-family:var(--sans); background:var(--paper); color:var(--navy); -webk
 .story-tag{ font-weight:600; font-size:9px; padding:2px 7px; border:1px solid var(--bd); color:var(--ink-soft); border-radius:2px; }
 .story-tag.matched{ border-color:var(--blue); color:var(--blue); }
 
-.bottom-grid{ display:grid; grid-template-columns:1fr 1fr 300px; gap:15px; margin-top:16px; }
+.bottom-grid{ display:grid; grid-template-columns:1fr 340px; gap:15px; margin-top:16px; }
 .insight-card{ background:var(--card); border:1px solid var(--bd); border-left:4px solid var(--blue); padding:17px 18px; }
 .hard-subject{ display:flex; flex-direction:column; }
 .strat-item{ margin-bottom:13px; padding-left:13px; border-left:3px solid var(--blue); }
@@ -315,15 +315,11 @@ body.preview-embed .sheets{ gap:14px; }
     <!-- 하단 3분할 -->
     <div class="bottom-grid">
       <div class="insight-card">
-        <div class="sec-head"><i class="mark"></i><span class="sec-title">다시 시작한다면 꼭 할 것</span></div>
+        <div class="sec-head"><i class="mark"></i><span class="sec-title">2026 합격자의 공부법</span></div>
         <div id="regret-body">— 로딩 중 —</div>
       </div>
-      <div class="insight-card">
-        <div class="sec-head"><i class="mark"></i><span class="sec-title">합격생의 첫 달 체크리스트</span></div>
-        <div class="first-month-list" id="firstmonth-body"><div class="empty-msg">— 로딩 중 —</div></div>
-      </div>
       <div class="insight-card hard-subject">
-        <div class="sec-head"><i class="mark"></i><span class="sec-title">나와 비슷한 합격자들이 들은 강의</span></div>
+        <div class="sec-head"><i class="mark"></i><span class="sec-title">2026 합격자가 들은 강의</span></div>
         <div class="subject-bars" id="hardsubject-body"><div class="empty-msg">— 로딩 중 —</div></div>
         <div class="subject-tip" id="hardsubject-tip"></div>
       </div>
@@ -818,14 +814,7 @@ function renderPage2(C) {
     document.getElementById('regret-body').innerHTML = emptyHtml('합격수기에서 모으는 중');
   }
 
-  // no.13 — 첫 달 체크리스트 (정성형, 숫자 없음)
-  document.getElementById('firstmonth-body').innerHTML = FIRSTMONTH_CHECKLIST.map((it, i) => `
-    <div class="fm-item">
-      <div class="fm-number">${i+1}</div>
-      <div class="fm-content"><strong>${it.strong}</strong><br><span class="fm-sub">${it.sub}</span></div>
-    </div>`).join('');
-
-  // no.14 — 나와 비슷한 합격자들이 들은 강의 (구매유도)
+  // no.14 — 2026 합격자가 들은 강의 (구매유도)
   const courses = coursesFor(q3);
   const st = statFor(q3);
   if (courses.length) {
