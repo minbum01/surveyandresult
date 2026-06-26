@@ -80,3 +80,14 @@ anon public key      = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
       4) **`print_station_2printers.bat` 더블클릭** → A/B 두 창이 뜸 → 인쇄 모니터에서 둘 다 🟢 가동 확인
       · (프린터 1대 테스트만 할 땐 `print_station.bat` 더블클릭, PRINTER_A 비우면 기본 프린터로)
       ⚠ `station_env.bat`(키 포함)은 .gitignore 처리됨 — 절대 커밋·웹업로드 금지
+
+## ✅ 결정: 행사장은 "전부 수동" 운영 (2026-06-27)
+> 자동분배(claim/realtime) 불안 → **사람이 목록 보고 직접 골라 출력**하는 방식으로 운영.
+- 흐름: 태블릿 설문→결과→[출력] 클릭 → `print_jobs`에 적재 / 프린트대 PC에서 골라 인쇄
+- 실행: **`print_station_manual.bat` 더블클릭** → 브라우저에 목록(`http://127.0.0.1:8250/__pick`) 자동 오픈
+        → 각 줄 **[🖨 A로]/[🖨 B로]** 버튼으로 한가한 프린터에 출력(중복 방지: printing 선점+락)
+- 준비: `station_env.bat` 에 **SERVICE_KEY + PRINTER_A + PRINTER_B**만 채우면 끝
+        (STATION_ID·포트·AUTO_CLAIM 은 bat가 자동 설정)
+- **수동만 쓰면 `migration_realtime.sql`(할 일 ①)·자동 print_admin 모니터는 안 해도 됨.**
+        필요한 클라우드 준비물 = schema.sql(이미 RUN) + service_role 키 뿐.
+- 자동 모드(`print_station.bat`/`_2printers.bat`)는 언제든 병행/전환 가능(코드 그대로 둠).
