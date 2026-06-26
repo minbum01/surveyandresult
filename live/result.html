@@ -713,10 +713,19 @@ function matchScore(p) {
   if (hasExpanded(ts, get(7))) hits++;
   return hits;
 }
+// 후기의 '가장 좋은 인용구' 선택 (첫 인용구 대신 키워드 점수 1등 + 길이 필터)
+function bestQuote(p) {
+  const qs = (p.quotes || []).filter(q => q && q.length >= 30 && q.length <= 160);
+  if (qs.length) { qs.sort((a, b) => quoteScore(b) - quoteScore(a)); return qs[0]; }
+  const sents = splitSentences(p.passage || '').filter(s => s.length >= 30 && s.length <= 160);
+  return sents[0] || (p.quotes && p.quotes[0]) || (p.passage || '').slice(0, 120);
+}
 function pickTopStories(passnotes) {
-  const scored = passnotes.map(p => ({ p, s: matchScore(p) }));
-  scored.sort((a,b) => (b.s - a.s) || ((b.p.year||'').localeCompare(a.p.year||'')));
-  return scored.slice(0, 3);
+  const scored = passnotes.map(p => ({ p, s: matchScore(p) }))
+    .filter(x => x.s > 0)
+    .sort((a, b) => (b.s - a.s) || ((b.p.year || '').localeCompare(a.p.year || '')));
+  // 일치 높은 상위 풀에서 랜덤 3 (500명 다양화 — 매번 같은 3건 방지)
+  return shuffle(scored.slice(0, Math.min(12, scored.length))).slice(0, 3);
 }
 function pickClosingQuote(passnotes) {
   const Q8 = get(7);
@@ -785,7 +794,7 @@ function renderPage2(C) {
       const matched = id && hasExpanded(ts, id);
       return `<span class="story-tag ${matched ? 'matched' : ''}">#${escapeHtml(lbl || id)}</span>`;
     }).join('');
-    const quote = (p.quotes && p.quotes[0]) || (p.passage || '').slice(0, 100);
+    const quote = bestQuote(p);
     return `
       <div class="story-card">
         <div class="story-match">● 8개 중 ${s}개 일치</div>

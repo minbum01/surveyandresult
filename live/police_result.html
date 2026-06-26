@@ -761,6 +761,13 @@ function matchScore(p) {
   if (hasExpanded(ts, get(7))) hits++;
   return hits;
 }
+// 후기의 '가장 좋은 인용구' 선택 (첫 인용구 대신 키워드 점수 1등 + 길이 필터)
+function bestQuote(p) {
+  const qs = (p.quotes || []).filter(q => q && q.length >= 30 && q.length <= 160);
+  if (qs.length) { qs.sort((a, b) => quoteScore(b) - quoteScore(a)); return qs[0]; }
+  const sents = splitSentences(p.passage || '').filter(s => s.length >= 30 && s.length <= 160);
+  return sents[0] || (p.quotes && p.quotes[0]) || (p.passage || '').slice(0, 120);
+}
 function pickTopStories(passnotes) {
   // 전체 일치도 + 걱정·방식 가중 → 같은 프로필이라도 고민 맞는 합격자 우선
   const scored = passnotes.map(p => ({ p, s: matchScore(p), rank: matchScore(p) * 3 + concernScore(p) }));
@@ -833,7 +840,7 @@ function renderPage2(C) {
       const matched = id && hasExpanded(ts, id);
       return `<span class="story-tag ${matched ? 'matched' : ''}">#${escapeHtml(lbl || id)}</span>`;
     }).join('');
-    const quote = (p.quotes && p.quotes[0]) || (p.passage || '').slice(0, 100);
+    const quote = bestQuote(p);
     return `
       <div class="story-card">
         <div class="story-match">● 7개 중 ${s}개 일치</div>
