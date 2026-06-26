@@ -43,7 +43,7 @@
         const o = JSON.parse(global.__PRINT_CUR__ || '{}');
         return (o && typeof o === 'object') ? o : {};
       }
-      if (_remote != null) return _remote;
+      if (!global.__CUR_LOCAL__ && _remote != null) return _remote;  // ?local 강제 시 서버캐시 건너뛰고 localStorage
       const o = JSON.parse(localStorage.getItem(activeKey()) || '{}');
       return (o && typeof o === 'object') ? o : {};
     } catch { return {}; }
@@ -58,7 +58,8 @@
       const { data, error } = await global.supa
         .from('curation').select('data').eq('exam', EXAM()).maybeSingle();
       if (error) { console.warn('[Curation] loadRemote', error.message); return false; }
-      _remote = (data && data.data && typeof data.data === 'object') ? data.data : {};
+      // 행이 없거나 빈 데이터면 null → getStore가 localStorage로 폴백(빈 서버가 로컬 핀을 가리지 않게)
+      _remote = (data && data.data && typeof data.data === 'object' && Object.keys(data.data).length) ? data.data : null;
       try { global.dispatchEvent(new Event('curation:changed')); } catch (e) {}
       return true;
     } catch (e) { console.warn('[Curation] loadRemote', e); return false; }
