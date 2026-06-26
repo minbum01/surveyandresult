@@ -33,6 +33,8 @@ SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
 SERVICE_KEY  = os.environ.get("SUPABASE_SERVICE_KEY", "")
 STATION_ID   = os.environ.get("STATION_ID", "A")
 PRINTER      = os.environ.get("PRINTER", "")   # 특정 프린터명. 빈값=기본 프린터
+PRINTER_A    = os.environ.get("PRINTER_A", "") # 수동 picker용 프린터 A 이름
+PRINTER_B    = os.environ.get("PRINTER_B", "") # 수동 picker용 프린터 B 이름
 #  ── 한 PC에 프린터 2대(인스턴스 2개) ──
 #    창1: STATION_ID=A PRINTER="Canon ..."    창2: STATION_ID=B PRINTER="Epson ..."
 #    아래 PORT/PRINT_DATA/PDF_OUT 가 STATION_ID 별로 자동 분리되어 동시 인쇄해도 충돌 없음.
@@ -129,14 +131,15 @@ def render_pdf(page):
     shutil.rmtree(prof, ignore_errors=True)
     return os.path.exists(PDF_OUT) and os.path.getsize(PDF_OUT) > 1000
 
-def print_pdf():
-    target = ["-print-to", PRINTER] if PRINTER else ["-print-to-default"]
+def print_pdf(printer=None):
+    name = printer if printer is not None else PRINTER   # 명시 프린터 > 기본 PRINTER > 윈도우 기본
+    target = ["-print-to", name] if name else ["-print-to-default"]
     subprocess.run([SUMATRA] + target + ["-silent",
                     "-print-settings", PRINT_SETTINGS, PDF_OUT],
                    timeout=120, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
-def handle(job):
+def handle(job, printer=None):
     exam = job.get("exam") or "공무원"
     page = EXAM_PAGE.get(exam, "result.html")
     # 답변·큐레이션 스냅샷·출력번호 주입 (결과 페이지 ?print=1 가 이 파일을 읽음)
@@ -146,11 +149,11 @@ def handle(job):
                    "ticket": job.get("ticket")}, f, ensure_ascii=False)
     if not render_pdf(page):
         raise RuntimeError("render 실패")
-    print_pdf()
+    print_pdf(printer)
 
 
 # ── 수동 출력: 특정 작업 1건을 골라 인쇄 (picker가 호출) ──────
-def print_specific(job_id):
+def print_specific(job_id, printer=None, station_label=None):
     rows = rest("GET", f"print_jobs?id=eq.{int(job_id)}&select=*")
     if not rows:
         raise RuntimeError(f"작업 #{job_id} 없음")
@@ -158,9 +161,9 @@ def print_specific(job_id):
     with PRINT_LOCK:
         # 'printing'으로 먼저 표시 → 자동 스테이션이 같은 걸 못 가져가게(중복 출력 방지)
         rest("PATCH", f"print_jobs?id=eq.{int(job_id)}",
-             {"status": "printing", "station": STATION_ID})
+             {"status": "printing", "station": station_label or STATION_ID})
         try:
-            handle(job)
+            handle(job, printer)
             rpc("complete_job", {"p_id": int(job_id)})
         except Exception as e:
             rpc("fail_job", {"p_id": int(job_id), "p_err": str(e)[:300]})
@@ -184,33 +187,46 @@ PICKER_HTML = """<!doctype html><html lang=ko><head><meta charset=utf-8>
  .done{background:rgba(46,158,91,.16);color:#2e9e5b}.error{background:rgba(217,72,75,.18);color:#d9484b}
  .prof{color:#9aa3b2;font-size:13px;max-width:360px}
 </style></head><body>
-<header><h1>🖨️ 수동 출력 (이 PC에서 직접 골라 인쇄)</h1><span class=muted id=msg></span>
- <span class=sp></span><label class=muted><input type=checkbox id=auto checked> 자동새로고침</label>
+<header><h1>🖨️ 수동 출력</h1><span class=muted id=prn></span><span class=muted id=msg></span>
+ <span class=sp></span><label class=muted><input type=checkbox id=onlywait> 대기만</label>
+ <label class=muted><input type=checkbox id=auto checked> 자동새로고침</label>
  <button onclick=load()>새로고침</button></header>
-<table><thead><tr><th>#출력</th><th>태블릿</th><th>시험</th><th>프로필</th><th>상태</th><th>시각</th><th></th></tr></thead>
+<table><thead><tr><th>#출력</th><th>태블릿</th><th>시험</th><th>프로필</th><th>상태</th><th>시각</th><th>출력</th></tr></thead>
 <tbody id=rows><tr><td colspan=7 style=padding:40px;text-align:center;color:#9aa3b2>불러오는 중…</td></tr></tbody></table>
 <script>
 const $=id=>document.getElementById(id);
 const ST={pending:'대기',printing:'인쇄중',done:'완료',error:'오류'};
+let PRN={A:'',B:'',default:''}, TWO=false;
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 function prof(a){try{if(!Array.isArray(a))return'';return a.map(s=>Array.isArray(s)?s.map(x=>x.label||x.tagId).join('·'):'').filter(Boolean).slice(0,5).join(' / ')}catch(e){return''}}
 function fmt(s){if(!s)return'—';const d=new Date(s),p=n=>String(n).padStart(2,'0');return p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds())}
+async function cfg(){try{PRN=await (await fetch('/__printers')).json();TWO=!!(PRN.A&&PRN.B);
+  $('prn').textContent=TWO?('A: '+PRN.A+'   B: '+PRN.B):('프린터: '+(PRN.default||'윈도우 기본'));}catch(e){}}
+function actions(j){
+  if(TWO) return '<button class="p go" data-id='+j.id+' data-pr=A>🖨 A로</button> '
+                +'<button class="p go" data-id='+j.id+' data-pr=B>🖨 B로</button>';
+  return '<button class="p go" data-id='+j.id+' data-pr="">이 PC로 출력</button>';
+}
 async function load(){
- try{const r=await fetch('/__jobs');const d=await r.json();
+ try{const r=await fetch('/__jobs');let d=await r.json();
   if(!Array.isArray(d)){$('rows').innerHTML='<tr><td colspan=7 style=padding:30px;text-align:center;color:#d9484b>'+esc(d.error||'읽기 오류')+'</td></tr>';return}
-  if(!d.length){$('rows').innerHTML='<tr><td colspan=7 style=padding:40px;text-align:center;color:#9aa3b2>아직 인쇄 요청이 없습니다.</td></tr>';return}
-  $('rows').innerHTML=d.map(j=>'<tr><td class=tk>#'+(j.ticket??'—')+'</td><td>'+esc(j.device||'미상')+'</td><td>'+esc(j.exam||'')+'</td><td class=prof>'+esc(prof(j.answers))+'</td><td><span class="b '+j.status+'">'+(ST[j.status]||j.status)+'</span></td><td class=muted>'+fmt(j.created_at)+'</td><td><button class=p onclick=pr('+j.id+',this)>이 PC로 출력</button></td></tr>').join('');
+  if($('onlywait').checked) d=d.filter(j=>j.status==='pending'||j.status==='error');
+  if(!d.length){$('rows').innerHTML='<tr><td colspan=7 style=padding:40px;text-align:center;color:#9aa3b2>표시할 작업이 없습니다.</td></tr>';return}
+  $('rows').innerHTML=d.map(j=>'<tr><td class=tk>#'+(j.ticket??'—')+'</td><td>'+esc(j.device||'미상')+'</td><td>'+esc(j.exam||'')+'</td><td class=prof>'+esc(prof(j.answers))+'</td><td><span class="b '+j.status+'">'+(ST[j.status]||j.status)+'</span></td><td class=muted>'+fmt(j.created_at)+'</td><td>'+actions(j)+'</td></tr>').join('');
  }catch(e){$('msg').textContent='오류: '+e.message}
 }
-async function pr(id,btn){
- btn.disabled=true;const o=btn.textContent;btn.textContent='출력 중…';
- try{const r=await fetch('/__print',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});
-  const d=await r.json();if(d.ok){btn.textContent='완료 ✓ #'+(d.ticket??'')}else{btn.textContent='실패';alert('실패: '+(d.error||''))}
- }catch(e){btn.textContent='실패';alert(e.message)}
- setTimeout(load,1200);
+$('rows').addEventListener('click',e=>{const b=e.target.closest('.go');if(b)pr(b);});
+async function pr(btn){
+ const id=+btn.dataset.id, printer=btn.dataset.pr||'';
+ btn.disabled=true;btn.textContent='출력 중…';
+ try{const r=await fetch('/__print',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,printer})});
+  const d=await r.json();if(d.ok){btn.textContent='완료 ✓ #'+(d.ticket??'')}else{btn.textContent='실패';btn.disabled=false;alert('실패: '+(d.error||''))}
+ }catch(e){btn.textContent='실패';btn.disabled=false;alert(e.message)}
+ setTimeout(load,1500);
 }
 let t=null;function poll(){if(t)clearInterval(t);if($('auto').checked)t=setInterval(load,4000)}
-$('auto').onchange=poll;load();poll();
+$('auto').onchange=poll;$('onlywait').onchange=load;
+(async()=>{await cfg();load();poll();})();
 </script></body></html>"""
 
 
@@ -231,6 +247,9 @@ class PickerHandler(SimpleHTTPRequestHandler):
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.send_header("Content-Length", str(len(b)))
             self.end_headers(); self.wfile.write(b); return
+        if self.path.split("?")[0] == "/__printers":
+            self._json(200, {"A": PRINTER_A, "B": PRINTER_B, "default": PRINTER})
+            return
         if self.path.split("?")[0] == "/__jobs":
             try:
                 rows = rest("GET", "print_jobs?select=id,ticket,device,exam,status,"
@@ -246,7 +265,9 @@ class PickerHandler(SimpleHTTPRequestHandler):
             try:
                 ln = int(self.headers.get("Content-Length") or 0)
                 body = json.loads(self.rfile.read(ln) or b"{}")
-                tk = print_specific(body["id"])
+                pr = (body.get("printer") or "").strip().upper()   # ''|'A'|'B'
+                pname = (PRINTER_A or None) if pr == "A" else (PRINTER_B or None) if pr == "B" else None
+                tk = print_specific(body["id"], printer=pname, station_label=(pr or STATION_ID))
                 self._json(200, {"ok": True, "ticket": tk})
             except Exception as e:
                 self._json(500, {"ok": False, "error": str(e)})
