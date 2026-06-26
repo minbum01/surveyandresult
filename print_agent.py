@@ -12,7 +12,15 @@
       SUPABASE_URL          = https://xxxx.supabase.co
       SUPABASE_SERVICE_KEY  = service_role 키 (🔴 비공개! 이 PC에만)
       STATION_ID            = A   (또는 B)
+      AUTO_CLAIM            = 1(기본,자동큐) / 0(수동 picker 전용 폴백)
 실행:  set 환경변수 후  →  python print_agent.py
+      · 자동:  print_station.bat / print_station_2printers.bat
+      · 수동 폴백:  print_station_manual.bat  (브라우저에서 목록 보고 직접 출력)
+
+수동 출력 폴백(클라우드 자동분배가 말썽일 때):
+  - 에이전트가 로컬 http://127.0.0.1:<포트>/__pick 페이지를 띄움
+  - print_jobs 목록을 service_role로 읽어 표시 → [이 PC로 출력] 클릭 시 그 PC에서 렌더·인쇄
+  - 출력 전 status를 printing으로 선점 → 자동 스테이션과 중복 출력 방지
 설계: 클라우드_인쇄시스템_설계.md §5
 """
 import os, sys, json, time, subprocess, shutil, tempfile, threading, urllib.request
@@ -37,6 +45,11 @@ PRINT_DATA = os.path.join(ROOT, "live", f"_printdata_{_sid}.json")  # 인스턴�
 PDF_OUT    = os.path.join(ROOT, f"_agent_report_{_sid}.pdf")        # 인스턴스별 PDF
 PRINT_SETTINGS = os.environ.get("PRINT_SETTINGS", "noscale")
 POLL_SEC   = 1.5
+
+# 자동 큐 폴링 on/off. "0"이면 자동으로 안 가져가고 수동 picker로만 출력(폴백 모드).
+AUTO_CLAIM = os.environ.get("AUTO_CLAIM", "1") != "0"
+# 렌더/인쇄는 임시파일(PRINT_DATA/PDF_OUT) 공유 → 같은 인스턴스 내 동시실행 방지용 락
+PRINT_LOCK = threading.Lock()
 
 # 시험종류 → 결과 페이지
 EXAM_PAGE = {"공무원": "result.html", "경찰": "police_result.html", "소방": "result.html"}
@@ -75,12 +88,22 @@ def rpc(fn, args):
         txt = r.read().decode("utf-8")
         return json.loads(txt) if txt.strip() else None
 
+# ── Supabase REST (service_role) — 테이블 직접 read/patch (수동 picker용) ──
+def rest(method, path, body=None):
+    url = f"{SUPABASE_URL}/rest/v1/{path}"
+    data = json.dumps(body).encode("utf-8") if body is not None else None
+    req = urllib.request.Request(url, data=data, method=method, headers={
+        "apikey": SERVICE_KEY, "Authorization": f"Bearer {SERVICE_KEY}",
+        "Content-Type": "application/json", "Prefer": "return=representation",
+    })
+    with urllib.request.urlopen(req, timeout=20) as r:
+        txt = r.read().decode("utf-8")
+        return json.loads(txt) if txt.strip() else None
 
-# ── 로컬 정적 서버 (헤드리스 렌더용) ─────────────────────────
+
+# ── 로컬 정적 서버 (+ 수동 picker API) ───────────────────────
 def start_local_server():
-    class H(SimpleHTTPRequestHandler):
-        def log_message(self, *a): pass
-    httpd = ThreadingHTTPServer(("127.0.0.1", PORT), partial(H, directory=ROOT))
+    httpd = ThreadingHTTPServer(("127.0.0.1", PORT), partial(PickerHandler, directory=ROOT))
     threading.Thread(target=httpd.serve_forever, daemon=True).start()
     return httpd
 
@@ -126,6 +149,111 @@ def handle(job):
     print_pdf()
 
 
+# ── 수동 출력: 특정 작업 1건을 골라 인쇄 (picker가 호출) ──────
+def print_specific(job_id):
+    rows = rest("GET", f"print_jobs?id=eq.{int(job_id)}&select=*")
+    if not rows:
+        raise RuntimeError(f"작업 #{job_id} 없음")
+    job = rows[0]
+    with PRINT_LOCK:
+        # 'printing'으로 먼저 표시 → 자동 스테이션이 같은 걸 못 가져가게(중복 출력 방지)
+        rest("PATCH", f"print_jobs?id=eq.{int(job_id)}",
+             {"status": "printing", "station": STATION_ID})
+        try:
+            handle(job)
+            rpc("complete_job", {"p_id": int(job_id)})
+        except Exception as e:
+            rpc("fail_job", {"p_id": int(job_id), "p_err": str(e)[:300]})
+            raise
+    return job.get("ticket")
+
+
+# ── picker 페이지 (스테이션 PC 브라우저에서 목록 보고 직접 출력) ──
+PICKER_HTML = """<!doctype html><html lang=ko><head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1"><title>수동 출력 — 프린트대</title>
+<style>
+ body{margin:0;font-family:system-ui,'Malgun Gothic',sans-serif;background:#0f1115;color:#e7eaf0}
+ header{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid #262b36;position:sticky;top:0;background:#0f1115}
+ h1{font-size:16px;margin:0} .sp{flex:1} .muted{color:#9aa3b2;font-size:13px}
+ button{font:inherit;border:1px solid #262b36;background:#1f2530;color:#e7eaf0;border-radius:8px;padding:7px 12px;cursor:pointer}
+ button.p{background:#2f7de0;border-color:#2f7de0;color:#fff;font-weight:700}
+ table{width:100%;border-collapse:collapse} th,td{text-align:left;padding:9px 12px;border-bottom:1px solid #262b36;font-size:14px}
+ th{color:#9aa3b2;font-size:12px;text-transform:uppercase} .tk{font-weight:800;font-size:16px}
+ .b{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700}
+ .pending{background:rgba(201,162,39,.16);color:#c9a227}.printing{background:rgba(47,125,224,.16);color:#2f7de0}
+ .done{background:rgba(46,158,91,.16);color:#2e9e5b}.error{background:rgba(217,72,75,.18);color:#d9484b}
+ .prof{color:#9aa3b2;font-size:13px;max-width:360px}
+</style></head><body>
+<header><h1>🖨️ 수동 출력 (이 PC에서 직접 골라 인쇄)</h1><span class=muted id=msg></span>
+ <span class=sp></span><label class=muted><input type=checkbox id=auto checked> 자동새로고침</label>
+ <button onclick=load()>새로고침</button></header>
+<table><thead><tr><th>#출력</th><th>태블릿</th><th>시험</th><th>프로필</th><th>상태</th><th>시각</th><th></th></tr></thead>
+<tbody id=rows><tr><td colspan=7 style=padding:40px;text-align:center;color:#9aa3b2>불러오는 중…</td></tr></tbody></table>
+<script>
+const $=id=>document.getElementById(id);
+const ST={pending:'대기',printing:'인쇄중',done:'완료',error:'오류'};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function prof(a){try{if(!Array.isArray(a))return'';return a.map(s=>Array.isArray(s)?s.map(x=>x.label||x.tagId).join('·'):'').filter(Boolean).slice(0,5).join(' / ')}catch(e){return''}}
+function fmt(s){if(!s)return'—';const d=new Date(s),p=n=>String(n).padStart(2,'0');return p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds())}
+async function load(){
+ try{const r=await fetch('/__jobs');const d=await r.json();
+  if(!Array.isArray(d)){$('rows').innerHTML='<tr><td colspan=7 style=padding:30px;text-align:center;color:#d9484b>'+esc(d.error||'읽기 오류')+'</td></tr>';return}
+  if(!d.length){$('rows').innerHTML='<tr><td colspan=7 style=padding:40px;text-align:center;color:#9aa3b2>아직 인쇄 요청이 없습니다.</td></tr>';return}
+  $('rows').innerHTML=d.map(j=>'<tr><td class=tk>#'+(j.ticket??'—')+'</td><td>'+esc(j.device||'미상')+'</td><td>'+esc(j.exam||'')+'</td><td class=prof>'+esc(prof(j.answers))+'</td><td><span class="b '+j.status+'">'+(ST[j.status]||j.status)+'</span></td><td class=muted>'+fmt(j.created_at)+'</td><td><button class=p onclick=pr('+j.id+',this)>이 PC로 출력</button></td></tr>').join('');
+ }catch(e){$('msg').textContent='오류: '+e.message}
+}
+async function pr(id,btn){
+ btn.disabled=true;const o=btn.textContent;btn.textContent='출력 중…';
+ try{const r=await fetch('/__print',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});
+  const d=await r.json();if(d.ok){btn.textContent='완료 ✓ #'+(d.ticket??'')}else{btn.textContent='실패';alert('실패: '+(d.error||''))}
+ }catch(e){btn.textContent='실패';alert(e.message)}
+ setTimeout(load,1200);
+}
+let t=null;function poll(){if(t)clearInterval(t);if($('auto').checked)t=setInterval(load,4000)}
+$('auto').onchange=poll;load();poll();
+</script></body></html>"""
+
+
+class PickerHandler(SimpleHTTPRequestHandler):
+    def log_message(self, *a): pass
+
+    def _json(self, code, obj):
+        b = json.dumps(obj, ensure_ascii=False).encode("utf-8")
+        self.send_response(code)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(b)))
+        self.end_headers(); self.wfile.write(b)
+
+    def do_GET(self):
+        if self.path.split("?")[0] == "/__pick":
+            b = PICKER_HTML.encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(b)))
+            self.end_headers(); self.wfile.write(b); return
+        if self.path.split("?")[0] == "/__jobs":
+            try:
+                rows = rest("GET", "print_jobs?select=id,ticket,device,exam,status,"
+                                   "created_at,answers&order=created_at.desc&limit=60")
+                self._json(200, rows or [])
+            except Exception as e:
+                self._json(500, {"error": str(e)})
+            return
+        return super().do_GET()
+
+    def do_POST(self):
+        if self.path.split("?")[0] == "/__print":
+            try:
+                ln = int(self.headers.get("Content-Length") or 0)
+                body = json.loads(self.rfile.read(ln) or b"{}")
+                tk = print_specific(body["id"])
+                self._json(200, {"ok": True, "ticket": tk})
+            except Exception as e:
+                self._json(500, {"ok": False, "error": str(e)})
+            return
+        self.send_response(404); self.end_headers()
+
+
 def main():
     miss = [k for k, v in {"SUPABASE_URL": SUPABASE_URL, "SUPABASE_SERVICE_KEY": SERVICE_KEY}.items() if not v]
     if miss:
@@ -134,7 +262,19 @@ def main():
     if not SUMATRA: print("⚠ tools/SumatraPDF.exe 없음"); sys.exit(1)
 
     start_local_server()
-    print(f"[station {STATION_ID}] 시작 · 프린터={PRINTER or '기본'} · 렌더서버 :{PORT} · 큐 폴링 {POLL_SEC}s")
+    pick_url = f"http://127.0.0.1:{PORT}/__pick"
+    print(f"[station {STATION_ID}] 시작 · 프린터={PRINTER or '기본'} · 렌더서버 :{PORT}")
+    print(f"[station {STATION_ID}] 수동 출력 페이지: {pick_url}")
+
+    if not AUTO_CLAIM:
+        # 폴백(수동) 모드: 자동으로 큐를 가져가지 않음. 위 picker 페이지에서 직접 출력.
+        print(f"[station {STATION_ID}] 자동 큐 OFF — 수동 출력 모드. 위 주소를 브라우저에서 여세요.")
+        try:
+            while True: time.sleep(3600)
+        except KeyboardInterrupt:
+            print("종료"); return
+
+    print(f"[station {STATION_ID}] 자동 큐 폴링 {POLL_SEC}s (자동+수동 둘 다 가능)")
     while True:
         try:
             job = rpc("claim_next_job", {"p_station": STATION_ID})
@@ -143,7 +283,8 @@ def main():
             jid = job.get("id"); tk = job.get("ticket")
             print(f"[station {STATION_ID}] 작업 #{jid} ticket={tk} exam={job.get('exam')} 처리중…")
             try:
-                handle(job)
+                with PRINT_LOCK:                 # 수동 picker와 동시 인쇄 충돌 방지
+                    handle(job)
                 rpc("complete_job", {"p_id": jid})
                 print(f"[station {STATION_ID}] #{jid} 완료(출력)")
             except Exception as e:
