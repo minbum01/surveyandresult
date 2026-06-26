@@ -17,6 +17,11 @@
   'use strict';
 
   const STORE_KEY = 'admin_curation_v2';
+  // 시험별 저장소 분리: 경찰은 별도 키, 공무원(기본)은 기존 키 그대로(영향 0).
+  //   페이지에서 window.CURRENT_EXAM = '경찰' 설정 시 경찰 키 사용.
+  function activeKey() {
+    return (global.CURRENT_EXAM === '경찰') ? STORE_KEY + '_경찰' : STORE_KEY;
+  }
 
   // 관리자 AREAS_DEFAULT와 동일 — store.areas가 없을 때의 matchKeys 폴백
   const AREAS_DEFAULT = {
@@ -34,7 +39,7 @@
       // 인쇄모드(헤드리스)에서는 주입된 큐레이션을 사용 (localStorage 공유 불가)
       const raw = (global.__PRINT_CUR__ != null)
         ? global.__PRINT_CUR__
-        : localStorage.getItem(STORE_KEY);
+        : localStorage.getItem(activeKey());
       const o = JSON.parse(raw || '{}');
       return (o && typeof o === 'object') ? o : {};
     } catch { return {}; }
@@ -129,7 +134,7 @@
   function onChange(cb) {
     if (typeof cb !== 'function') return;
     global.addEventListener('storage', (e) => {
-      if (e.key === STORE_KEY) {
+      if (e.key === activeKey()) {
         try { cb(); } catch (err) { console.error('[Curation] onChange', err); }
       }
     });
