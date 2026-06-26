@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>경찰 후기 확정 — 전형×성별 검수</title>
+<script>window.CURRENT_EXAM = '경찰';</script>
+<style>
+  :root{ --navy:#13235b; --blue:#1f4fe0; --ink:#1c2333; --ink-soft:#41506b; --ink-mute:#8a96ad;
+         --bd:#dfe4ee; --bd-soft:#eef1f7; --card:#fff; --bg:#f4f6fb; --ok:#13884b; --no:#c0392b; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:'Pretendard','맑은 고딕',system-ui,sans-serif; background:var(--bg); color:var(--ink); }
+  header{ position:sticky; top:0; z-index:10; background:#fff; border-bottom:1px solid var(--bd); padding:10px 18px; }
+  .row{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  h1{ font-size:15px; margin:0; color:var(--navy); font-weight:800; }
+  .exam-badge{ font-size:11px; font-weight:800; color:#fff; background:#2E6B3E; padding:3px 9px; border-radius:20px; }
+  select,button{ font-family:inherit; font-size:13px; }
+  select{ padding:6px 9px; border:1px solid var(--bd); border-radius:6px; background:#fff; }
+  .btn{ border:1px solid var(--blue); background:var(--blue); color:#fff; padding:7px 14px; border-radius:6px; font-weight:700; cursor:pointer; }
+  .btn.ghost{ background:#fff; color:var(--blue); }
+  .btn.sm{ padding:5px 10px; font-size:12px; }
+  .pill{ font-size:11.5px; font-weight:700; color:var(--ink-soft); background:var(--bd-soft); padding:4px 9px; border-radius:20px; }
+  .combo-title{ font-weight:800; font-size:16px; color:var(--navy); }
+  .progress-bar{ height:5px; background:var(--bd-soft); border-radius:3px; overflow:hidden; flex:1; min-width:120px; }
+  .progress-fill{ height:100%; background:var(--ok); }
+  main{ max-width:880px; margin:0 auto; padding:16px; }
+  .hint{ font-size:12px; color:var(--ink-mute); margin:2px 0 12px; }
+  .card{ background:var(--card); border:1px solid var(--bd); border-left:5px solid var(--ok); border-radius:8px; padding:13px 15px; margin-bottom:10px; cursor:pointer; transition:.08s; position:relative; }
+  .card.rejected{ border-left-color:var(--no); opacity:.5; background:#fbf2f2; }
+  .card-top{ display:flex; align-items:flex-start; gap:10px; }
+  .card-idx{ font-weight:800; font-size:12px; color:var(--ink-mute); width:20px; flex-shrink:0; }
+  .state{ font-weight:800; font-size:11px; padding:2px 9px; border-radius:20px; flex-shrink:0; }
+  .state.ok{ color:var(--ok); border:1px solid var(--ok); }
+  .state.no{ color:var(--no); border:1px solid var(--no); }
+  .title{ font-weight:800; font-size:13px; color:var(--navy); line-height:1.4; flex:1; }
+  .profile{ font-weight:700; font-size:11.5px; color:var(--blue); margin:5px 0 0 30px; }
+  .passage{ font-size:12.5px; color:var(--ink); line-height:1.72; margin:8px 0 0 30px; white-space:pre-wrap; }
+  .quotes{ margin:8px 0 0 30px; }
+  .q{ font-size:12px; color:var(--blue); line-height:1.55; padding:3px 0 3px 10px; border-left:2px solid var(--blue); margin-bottom:4px; }
+  .src{ display:inline-block; margin:8px 0 0 30px; font-size:11.5px; font-weight:700; color:var(--blue); text-decoration:none; }
+  .src:hover{ text-decoration:underline; }
+  .badge{ font-size:9.5px; font-weight:800; color:#fff; background:var(--ok); padding:1px 6px; border-radius:3px; vertical-align:middle; margin-left:5px; }
+  .tags{ display:flex; flex-wrap:wrap; gap:5px; margin:8px 0 0 30px; }
+  .tag{ font-size:10px; font-weight:700; padding:2px 8px; border-radius:3px; border:1px solid var(--bd); color:var(--ink-mute); }
+  .tag.m{ border-color:var(--blue); color:var(--blue); background:#f3f6ff; }
+  .score{ position:absolute; top:13px; right:15px; font-size:10.5px; font-weight:700; color:var(--ink-mute); }
+  footer{ position:sticky; bottom:0; background:#fff; border-top:1px solid var(--bd); padding:10px 18px; }
+  .empty{ text-align:center; color:var(--ink-mute); padding:40px; }
+  kbd{ font-size:10px; background:var(--bd-soft); border:1px solid var(--bd); border-radius:3px; padding:1px 5px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="row">
+    <h1>경찰 후기 확정 검수</h1>
+    <span class="exam-badge">경찰</span>
+    <select id="area"></select>
+    <select id="combo" style="max-width:340px;"></select>
+    <span class="pill" id="rev-pill">0/0 검토</span>
+    <div class="progress-bar"><div class="progress-fill" id="prog" style="width:0%"></div></div>
+    <button class="btn ghost sm" id="export">📤 백업 내보내기</button>
+  </div>
+</header>
+<main>
+  <div class="row" style="justify-content:space-between; margin-bottom:4px;">
+    <span class="combo-title" id="combo-title">—</span>
+    <span class="pill" id="combo-state"></span>
+  </div>
+  <div class="hint">기본은 <b>전체 확정(초록)</b> — 빼고 싶은 후기만 클릭해 <b>제외(빨강)</b>. 단축키: <kbd>1~9,0</kbd> 토글 · <kbd>Enter</kbd> 저장+다음 · <kbd>←/→</kbd> 이동</div>
+  <div id="cards"></div>
+</main>
+<footer>
+  <div class="row">
+    <button class="btn ghost sm" id="all-ok">전체 확정</button>
+    <button class="btn ghost sm" id="all-no">전체 제외</button>
+    <span class="pill" id="save-stat">핀 0 · 제외 0</span>
+    <span style="flex:1"></span>
+    <button class="btn ghost" id="prev">← 이전</button>
+    <button class="btn" id="save-next">저장 &amp; 다음 →</button>
+  </div>
+</footer>
+
+<script>
+const STORE_KEY = 'admin_curation_v2_경찰';      // 경찰 전용 저장소 (결과페이지 curation_sync.js 와 동일 키)
+// 결과페이지(curation_sync.js)가 읽는 경찰 area matchKeys — 이 페이지만 써도 매칭 정합 유지되게 seed
+const AREAS_META = {
+  'no.01': { name: '같은 전형으로 합격한 분의 기록', matchKeys: ['Q3','Q4'] },
+  'no.02': { name: '먼저 걸은 사람의 한마디',        matchKeys: ['Q5','Q7','Q8'] },
+  'no.06': { name: '나와 같은 전형으로 붙은 분들',    matchKeys: ['Q3','Q4'] },
+  'no.07': { name: '그 고민, 이렇게 넘었습니다',      matchKeys: ['Q8'] },
+  'no.08': { name: '합격자의 첫 한 달',              matchKeys: ['Q3'] },
+  'no.09': { name: '포기하고 싶던 순간, 버틴 한마디', matchKeys: ['Q3'] },
+  'no.10': { name: '끝까지 가게 한 한 줄',           matchKeys: ['Q1','Q2','Q3','Q4','Q5','Q6','Q7','Q8'] },
+};
+let DATA = null, area = 'no.01', ci = 0;        // ci = combo index (현재 영역 내)
+let state = {};                                  // id -> 'ok'|'no' (현재 조합)
+
+const norm = v => Array.isArray(v) ? [...v].filter(Boolean).sort().join(',') : (v==null?'':String(v));
+function loadStore(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY)||'{}')||{}; }catch{ return {}; } }
+function saveStore(s){ localStorage.setItem(STORE_KEY, JSON.stringify(s)); try{ dispatchEvent(new Event('curation:changed')); }catch(e){} }
+function ensure(s){
+  s.version=s.version||3; s.pins=s.pins||{}; s.excludesCombo=s.excludesCombo||{}; s.excludesGlobal=s.excludesGlobal||[]; s.reviewed=s.reviewed||{};
+  // 경찰 areas seed (없거나 비면) — 결과페이지가 공무원 폴백 쓰지 않도록
+  if(!s.areas || !s.areas['no.01']) s.areas = JSON.parse(JSON.stringify(AREAS_META));
+  return s;
+}
+const keysOf = a => DATA.areas[a].keys;
+const combosOf = a => DATA.areas[a].combos;
+const comboKey = (a,combo) => keysOf(a).map(k=>norm(combo[k])).join('|');
+const comboLabel = combo => keysOf(area).map(k=>combo[k]).join(' × ');
+
+function init(){
+  // 첫 로드 시 areas seed 보장
+  saveStore(ensure(loadStore()));
+  fetch('police_curate_candidates.json').then(r=>r.json()).then(d=>{
+    DATA=d;
+    const aSel=document.getElementById('area');
+    aSel.innerHTML=Object.keys(d.areas).map(a=>`<option value="${a}">${a} · ${d.areas[a].label} (${d.areas[a].combos.length}조합)</option>`).join('');
+    aSel.onchange=()=>{ area=aSel.value; ci=0; renderCombo(); };
+    document.getElementById('combo').onchange=e=>{ ci=+e.target.value; renderCombo(); };
+    document.getElementById('save-next').onclick=()=>{ persist(); next(); };
+    document.getElementById('prev').onclick=()=>{ persist(); ci=Math.max(0,ci-1); renderCombo(); };
+    document.getElementById('all-ok').onclick=()=>{ setAll('ok'); };
+    document.getElementById('all-no').onclick=()=>{ setAll('no'); };
+    document.getElementById('export').onclick=exportStore;
+    renderCombo();
+  }).catch(e=>{ document.getElementById('cards').innerHTML=`<div class="empty">로드 실패: ${e.message}<br>로컬 서버(8181)에서 열고, 먼저 <code>python build_police_candidates.py</code> 를 돌려 candidates JSON을 만드세요.</div>`; });
+}
+
+function curItems(){ return combosOf(area)[ci].items; }
+function curCombo(){ return combosOf(area)[ci].combo; }
+
+function renderCombo(){
+  const combos=combosOf(area);
+  const store=ensure(loadStore());
+  const cSel=document.getElementById('combo');
+  cSel.innerHTML=combos.map((c,i)=>{
+    const done=store.reviewed[area]&&store.reviewed[area][comboKey(area,c.combo)];
+    return `<option value="${i}">${done?'✓ ':''}${keysOf(area).map(k=>c.combo[k]).join(' × ')} (${c.items.length})</option>`;
+  }).join('');
+  cSel.value=ci;
+  document.getElementById('combo-title').textContent=comboLabel(curCombo());
+  const done=combos.filter(c=>store.reviewed[area]&&store.reviewed[area][comboKey(area,c.combo)]).length;
+  document.getElementById('rev-pill').textContent=`${done}/${combos.length} 검토`;
+  document.getElementById('prog').style.width=(combos.length?done/combos.length*100:0)+'%';
+  const ck=comboKey(area,curCombo());
+  document.getElementById('combo-state').textContent=(store.reviewed[area]&&store.reviewed[area][ck])?'검토됨':'미검토';
+  const pinned=new Set(((store.pins[area]||[]).filter(p=>keysOf(area).every(k=>norm(p.answers&&p.answers[k])===norm(curCombo()[k]))).map(p=>p.id)));
+  const excl=new Set((store.excludesCombo[area]&&store.excludesCombo[area][ck])||[]);
+  state={};
+  for(const it of curItems()){
+    state[it.id]= excl.has(it.id)?'no':(pinned.size? (pinned.has(it.id)?'ok':'no') : 'ok');
+  }
+  renderCards();
+}
+
+function renderCards(){
+  const wrap=document.getElementById('cards');
+  wrap.innerHTML=curItems().map((it,i)=>{
+    const st=state[it.id];
+    return `<div class="card ${st==='no'?'rejected':''}" data-id="${it.id}">
+      <div class="score">점수 ${it.score}</div>
+      <div class="card-top">
+        <span class="card-idx">${i+1}</span>
+        <span class="state ${st==='ok'?'ok':'no'}">${st==='ok'?'✓ 확정':'✕ 제외'}</span>
+        <span class="title">${esc(it.title)}${it.short?'<span class="badge">단기합격</span>':''}</span>
+      </div>
+      <div class="profile">${esc(it.profile)}${it.year?' · '+esc(String(it.year)):''}</div>
+      ${it.passage?`<div class="passage">${esc(it.passage)}</div>`:''}
+      ${it.quotes&&it.quotes.length?`<div class="quotes">${it.quotes.map(q=>`<div class="q">"${esc(q)}"</div>`).join('')}</div>`:''}
+      ${it.url?`<a class="src" href="${esc(it.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">원문 보기 ↗</a>`:''}
+      <div class="tags">${it.tags.map(t=>`<span class="tag ${t.matched?'m':''}">#${esc(t.tag)}${t.matched?'':' (미매칭)'}</span>`).join('')}</div>
+    </div>`;
+  }).join('');
+  wrap.querySelectorAll('.card').forEach(el=>el.onclick=()=>toggle(el.dataset.id));
+  updateStat();
+}
+function toggle(id){ state[id]=state[id]==='ok'?'no':'ok'; renderCards(); }
+function setAll(v){ for(const it of curItems()) state[it.id]=v; renderCards(); }
+function updateStat(){
+  const ok=Object.values(state).filter(v=>v==='ok').length;
+  document.getElementById('save-stat').textContent=`핀 ${ok} · 제외 ${curItems().length-ok}`;
+}
+
+function persist(){
+  const store=ensure(loadStore());
+  const combo=curCombo(), ck=comboKey(area,combo), mk=keysOf(area);
+  store.pins[area]=store.pins[area]||[];
+  store.pins[area]=store.pins[area].filter(p=>!mk.every(k=>norm(p.answers&&p.answers[k])===norm(combo[k])));
+  const answers={}; mk.forEach(k=>answers[k]=combo[k]);
+  for(const it of curItems()) if(state[it.id]==='ok')
+    store.pins[area].push({id:it.id, memo:'', answers, matchKeys:mk, pinnedAt:''});
+  store.excludesCombo[area]=store.excludesCombo[area]||{};
+  store.excludesCombo[area][ck]=curItems().filter(it=>state[it.id]==='no').map(it=>it.id);
+  store.reviewed[area]=store.reviewed[area]||{};
+  store.reviewed[area][ck]=true;
+  saveStore(store);
+}
+function next(){
+  const combos=combosOf(area), store=ensure(loadStore());
+  for(let step=1;step<=combos.length;step++){
+    const j=(ci+step)%combos.length;
+    if(!(store.reviewed[area]&&store.reviewed[area][comboKey(area,combos[j].combo)])){ ci=j; renderCombo(); return; }
+  }
+  ci=Math.min(combos.length-1,ci+1); renderCombo();
+}
+function exportStore(){
+  const store=ensure(loadStore());
+  const total=Object.values(store.pins).reduce((a,v)=>a+v.length,0);
+  const payload={version:2, exportedAt:new Date().toISOString(), auto:false, totalPins:total, store};
+  const blob=new Blob([JSON.stringify(payload)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='경찰_curation.json'; a.click();
+}
+function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='SELECT') return;
+  if(e.key==='Enter'){ persist(); next(); e.preventDefault(); }
+  else if(e.key==='ArrowRight'){ persist(); ci=Math.min(combosOf(area).length-1,ci+1); renderCombo(); }
+  else if(e.key==='ArrowLeft'){ persist(); ci=Math.max(0,ci-1); renderCombo(); }
+  else if(/^[0-9]$/.test(e.key)){ const idx=e.key==='0'?9:(+e.key-1); const it=curItems()[idx]; if(it) toggle(it.id); }
+});
+init();
+</script>
+</body>
+</html>

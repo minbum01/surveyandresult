@@ -36,6 +36,8 @@ body{ font-family:var(--sans); background:var(--paper); color:var(--navy); -webk
 
 /* A4 가로 1면 (고정) */
 .sheet{ width:297mm; height:210mm; background:var(--card); position:relative; overflow:hidden; box-shadow:0 14px 40px -22px rgba(15,27,61,.35); }
+.print-ticket{ position:absolute; top:8px; right:12px; z-index:50; font-family:'Courier New',monospace; font-weight:800; font-size:13px; color:var(--blue); letter-spacing:.04em; }
+.print-ticket:empty{ display:none; }
 .sheet-inner{ width:1280px; height:905px; transform:scale(0.876969); transform-origin:top left; }
 .grid-1{ display:grid; grid-template-columns:486px 1fr; height:905px; }
 
@@ -222,6 +224,7 @@ body.preview-embed .sheets{ gap:14px; }
 <!-- ════════ SHEET 1 (A4 가로) ════════ -->
 <div class="sheet sheet-1">
   <div id="loading" class="loading">합격수기 매칭 중…</div>
+  <div id="print-ticket" class="print-ticket"></div>
   <div class="sheet-inner grid-1">
 
     <!-- LEFT: 블루 히어로 패널 -->
@@ -241,7 +244,7 @@ body.preview-embed .sheets{ gap:14px; }
       </div>
 
       <div class="panel-passage">
-        <div class="id-label">같은 길을 걸은 분의 기록</div>
+        <div class="id-label">같은 전형으로 합격한 분의 기록</div>
         <p class="passage-value" id="passage-value">—</p>
         <div class="passage-source" id="passage-source">—</div>
       </div>
@@ -262,28 +265,28 @@ body.preview-embed .sheets{ gap:14px; }
     <!-- RIGHT: 화이트 분석면 -->
     <section class="planner">
       <div class="planner-head">
-        <span class="planner-title">같은 길을 걸은 합격생들의 기록</span>
+        <span class="planner-title">같은 전형으로 합격한 분들의 기록</span>
         <span class="planner-page">SHEET 01 / 02</span>
       </div>
 
       <div class="sec">
-        <div class="sec-head"><i class="mark"></i><span class="sec-title">같은 출발점에서 시작한 분들</span></div>
+        <div class="sec-head"><i class="mark"></i><span class="sec-title">나와 같은 전형으로 붙은 분들</span></div>
         <div class="sec-body cards-row" id="sec06-body"><div class="empty-msg">— 로딩 중 —</div></div>
       </div>
       <div class="sec">
-        <div class="sec-head"><i class="mark"></i><span class="sec-title">흔들렸을 때 다잡은 한 마디</span></div>
+        <div class="sec-head"><i class="mark"></i><span class="sec-title">그 고민, 이렇게 넘었습니다</span></div>
         <div class="sec-body quote-block" id="sec07-body"><div class="empty-msg">— 로딩 중 —</div></div>
       </div>
       <div class="sec">
-        <div class="sec-head"><i class="mark"></i><span class="sec-title">첫 한 달 풍경</span></div>
+        <div class="sec-head"><i class="mark"></i><span class="sec-title">합격자의 첫 한 달</span></div>
         <div class="sec-body excerpt-block" id="sec08-body"><div class="empty-msg">— 로딩 중 —</div></div>
       </div>
       <div class="sec">
-        <div class="sec-head"><i class="mark"></i><span class="sec-title">포기 직전, 다시 책상 앞</span></div>
+        <div class="sec-head"><i class="mark"></i><span class="sec-title">포기하고 싶던 순간, 버틴 한마디</span></div>
         <div class="sec-body quote-block" id="sec09-body"><div class="empty-msg">— 로딩 중 —</div></div>
       </div>
       <div class="sec">
-        <div class="sec-head"><i class="mark"></i><span class="sec-title">꾸준함을 말하는 한 줄</span></div>
+        <div class="sec-head"><i class="mark"></i><span class="sec-title">끝까지 가게 한 한 줄</span></div>
         <div class="sec-body quote-block" id="sec10-body"><div class="empty-msg">— 로딩 중 —</div></div>
       </div>
     </section>
@@ -302,18 +305,18 @@ body.preview-embed .sheets{ gap:14px; }
 
     <!-- no.11 — 유사 후기 3 -->
     <div class="sec sec-wide">
-      <div class="sec-head"><i class="mark"></i><span class="sec-title">나와 가장 가까운 합격수기</span></div>
+      <div class="sec-head"><i class="mark"></i><span class="sec-title">나와 가장 닮은 경찰 합격수기</span></div>
       <div class="stories-section" id="stories-section"></div>
     </div>
 
     <!-- 하단 3분할 -->
     <div class="bottom-grid">
       <div class="insight-card">
-        <div class="sec-head"><i class="mark"></i><span class="sec-title">합격자가 가장 후회한 것</span></div>
+        <div class="sec-head"><i class="mark"></i><span class="sec-title">다시 준비한다면 꼭 할 것</span></div>
         <div id="regret-body">— 로딩 중 —</div>
       </div>
       <div class="insight-card">
-        <div class="sec-head"><i class="mark"></i><span class="sec-title">합격자의 첫 달</span></div>
+        <div class="sec-head"><i class="mark"></i><span class="sec-title">경찰 합격자의 첫 달 루틴</span></div>
         <div class="first-month-list" id="firstmonth-body"><div class="empty-msg">— 로딩 중 —</div></div>
       </div>
       <div class="insight-card hard-subject">
@@ -390,11 +393,11 @@ try { if (new URLSearchParams(location.search).get('preview')) document.body.cla
 const TAG_EXPANSION = {
   // 상황 (slot0)
   '전업수험생': ['전업수험생'],
-  '직장병행': ['직장병행'],
-  '재학수험생': ['재학수험생'],
+  '직장병행': ['직장병행','직장휴직'],
+  '재학수험생': ['재학수험생','학업병행','통학병행','휴학','복학수험생'],
   '육아병행': ['육아병행'],
-  '퇴직수험생': ['퇴직'],
-  '아르바이트병행': ['아르바이트'],
+  '퇴직수험생': ['퇴직','퇴사후도전','현직퇴사후재도전'],
+  '아르바이트병행': ['아르바이트','아르바이트병행'],
   // 성별 (slot3)
   '남성': ['남성'],
   '여성': ['여성'],
@@ -481,18 +484,15 @@ function emptyHtml(msg) { return `<div class="empty-msg">${msg}</div>`; }
 
 // ─── 페르소나 좌측 ───
 function pickPassage(allPassnotes) {
-  const Q1 = get(0), Q4 = get(3), Q3 = get(2);
+  // 경찰: 상황(Q1) 태그가 데이터에 거의 없어 전형(Q3)×성별(Q4) 축으로 매칭 (핀 축과 동일)
+  const Q4 = get(3), Q3 = get(2);
   const matchQ = (ts, qid) => hasExpanded(ts, qid);
   const matchJob = (p) => jobMatch(p, Q3);
   const filterBy = (cond) => allPassnotes.filter(p => p.passage && cond(p));
   const tries = [
-    ['Q1×Q3×Q4', (p) => { const ts = new Set(p.tags); return matchQ(ts,Q1) && matchJob(p) && matchQ(ts,Q4); }],
-    ['Q1×Q4', (p) => { const ts = new Set(p.tags); return matchQ(ts,Q1) && matchQ(ts,Q4); }],
-    ['Q1×Q3', (p) => { const ts = new Set(p.tags); return matchQ(ts,Q1) && matchJob(p); }],
     ['Q3×Q4', (p) => { const ts = new Set(p.tags); return matchJob(p) && matchQ(ts,Q4); }],
-    ['Q1만', (p) => matchQ(new Set(p.tags || []), Q1)],
-    ['Q4만', (p) => matchQ(new Set(p.tags || []), Q4)],
     ['Q3만', matchJob],
+    ['Q4만', (p) => matchQ(new Set(p.tags || []), Q4)],
   ];
   let strict = [], level = '';
   for (const [lbl, cond] of tries) {
@@ -505,10 +505,12 @@ function pickPassage(allPassnotes) {
     let s = 0;
     for (const k of kw) if (p.passage.includes(k)) s += 1;
     if (p.passage.length >= 180 && p.passage.length <= 350) s += 3;
+    s += concernScore(p);                  // 걱정·방식 가중 → 같은 전형이라도 고민 맞는 후기 우선
     return { p, s };
   });
   scored.sort((a, b) => b.s - a.s);
-  return { passnote: scored[0].p, level, count: strict.length };
+  const chosen = pickFreshRand(scored, TOP_POOL);   // 상위권 중 랜덤 + 중복제거
+  return chosen ? { passnote: chosen.p, level, count: strict.length } : null;
 }
 
 const PERSONA_PREFER = ['루틴','마음','스스로','처음','지나니까','됐','된다','됩니다','되었','믿','버텼','꾸준','하루하루','매일','용기','다행','다잡','놓지','선택','시작','포기하지','막막','희망','확신','확실'];
@@ -520,6 +522,48 @@ const Q8_QUOTE_KW = {
   '멘탈관리':['멘탈','마음','심리','불안','걱정','평정','다잡','마인드','흔들리','안정','자신감','감정','컨디션'],
   '슬럼프극복':['슬럼프','번아웃','무기력','포기','위기','극복','버티','버텼','버텨','견디','한계','다잡','다시','일어서'],
 };
+// ─── 걱정(Q8)·방식(Q7) 가중 — 같은 전형 풀에서도 사용자 고민에 맞는 후기를 위로 (돌려쓰기 방지) ───
+const Q7_TEXT_KW = {
+  '인강병행':['인강','강의','풀커리'], '기출반복':['기출','문제풀이'],
+  '회독반복':['회독','반복'], '독학위주':['독학','단권화'], '스터디병행':['스터디'],
+};
+function concernScore(p) {
+  const text = (p.passage || '') + ' ' + ((p.quotes || []).join(' '));
+  const Q8 = get(7), Q7 = getMulti(6);
+  let s = 0;
+  const q8kw = (Q8 && Q8_QUOTE_KW[Q8]) || [];
+  let q8hits = 0;
+  for (const k of q8kw) if (text.includes(k)) q8hits++;
+  s += Math.min(q8hits, 4) * 4;            // 걱정 강하게 가중 (히트 상한 4)
+  for (const q7 of Q7) {
+    const kw = Q7_TEXT_KW[q7] || [];
+    if (kw.some(k => text.includes(k))) s += 2;   // 방식 일치 보너스
+  }
+  return s;
+}
+// ─── 상위권 중 랜덤 + 영역 간 중복제거 ───
+//  500명이 같은 후기 안 보게(상위 N 중 무작위) + 한 리포트 안에서 같은 후기 재등장 방지(USED_IDS).
+//  입력 배열 원소는 모두 .p (passnote) 를 가짐. 호출 전 점수 내림차순 정렬 가정.
+const TOP_POOL = 12;
+let USED_IDS = new Set();                          // render() 시작 시 리셋
+function pickFreshRand(scored, topN) {
+  if (!scored || !scored.length) return null;
+  let pool = scored.filter(x => x.p && !USED_IDS.has(x.p.id));
+  if (!pool.length) pool = scored;                 // 다 쓰였으면 재사용 허용(빈칸보단 나음)
+  pool = pool.slice(0, Math.min(topN || TOP_POOL, pool.length));
+  const picked = pool[Math.floor(Math.random() * pool.length)];
+  if (picked && picked.p) USED_IDS.add(picked.p.id);
+  return picked;
+}
+function sampleFreshRand(scored, topN, k) {
+  let pool = (scored || []).filter(x => x.p && !USED_IDS.has(x.p.id));
+  if (pool.length < k) pool = (scored || []);
+  pool = pool.slice(0, Math.min(topN || TOP_POOL, pool.length));
+  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); const t=pool[i]; pool[i]=pool[j]; pool[j]=t; }
+  const out = pool.slice(0, k);
+  out.forEach(x => { if (x.p) USED_IDS.add(x.p.id); });
+  return out;
+}
 function quoteScore(q) {
   if (!q) return -1;
   let s = 0;
@@ -564,24 +608,31 @@ function pickQuote(allPassnotes) {
     if (strictQ8.length > 0) cands = strictQ8;
   }
   cands.sort((a,b) => b.s - a.s);
-  return cands.length ? { passnote: cands[0].p, quote: cands[0].q, level } : null;
+  const chosen = pickFreshRand(cands, TOP_POOL);
+  return chosen ? { passnote: chosen.p, quote: chosen.q, level } : null;
 }
 
 // ─── 우측 분석 ───
 function renderNo06(passnotes) {
-  const Q1 = get(0), Q4 = get(3);
+  // 경찰: 전형(Q3)×성별(Q4) 축 (핀 축과 동일)
+  const Q3 = get(2), Q4 = get(3);
   const KW_VIBE = ['처음','막막','시작','다행','됐','됩니다','버텼','꾸준','하루하루','놓지','마음'];
-  const cands = passnotes.filter(p => { const ts = new Set(p.tags || []); return hasExpanded(ts, Q1) && hasExpanded(ts, Q4) && p.passage; });
+  // 폴백 체인: 전형×성별 → 전형 → 전체 (여성·경찰간부 빈칸 방지)
+  let cands = passnotes.filter(p => { const ts = new Set(p.tags || []); return jobMatch(p, Q3) && hasExpanded(ts, Q4) && p.passage; });
+  if (!cands.length) cands = passnotes.filter(p => jobMatch(p, Q3) && p.passage);
+  if (!cands.length) cands = passnotes.filter(p => p.passage);
   const scored = cands.map(p => {
     let s = 0;
     for (const k of KW_VIBE) if (p.passage.includes(k)) s += 1;
     if (p.passage.length >= 130 && p.passage.length <= 280) s += 3;
+    s += concernScore(p);                  // 걱정·방식 가중
     return { p, s };
   });
   scored.sort((a, b) => b.s - a.s);
-  const top2 = scored.slice(0, 2);
+  const showN = (window.Curation && Curation.displayCount) ? Curation.displayCount('no.06') : 1;
+  const top2 = sampleFreshRand(scored, TOP_POOL, showN);   // 상위권 중 랜덤 + 중복제거
   if (top2.length === 0) {
-    document.getElementById('sec06-body').innerHTML = emptyHtml('Q1×Q4 매칭 후기 없음');
+    document.getElementById('sec06-body').innerHTML = emptyHtml('전형×성별 매칭 후기 없음');
     return { matched: 0 };
   }
   document.getElementById('sec06-body').innerHTML = top2.map(({p}) => {
@@ -609,7 +660,7 @@ function renderNo07(passnotes) {
     }
   }
   quotes.sort((a,b) => b.s - a.s);
-  const best = quotes[0];
+  const best = pickFreshRand(quotes, TOP_POOL);
   if (!best) {
     document.getElementById('sec07-body').innerHTML = emptyHtml(`${Q8} 주제 인용구 없음`);
     return { matched: cands.length, picked: 0 };
@@ -618,22 +669,25 @@ function renderNo07(passnotes) {
   return { matched: cands.length, picked: 1, kw: best.kw };
 }
 function renderNo08(passnotes) {
-  const Q1 = get(0), Q3 = get(2);
+  // 경찰: content 필드가 없어(0건) passage 에서 "첫 달/처음에" 문장 추출 · 전형(Q3) 축
+  const Q3 = get(2);
   const FM_KW = ['첫 달','첫달','처음에는','처음 시작','처음으로','시작했을 때','초반에','시작 무렵','처음 한 달'];
-  const cands = passnotes.filter(p => { const ts = new Set(p.tags || []); return hasExpanded(ts, Q1) && jobMatch(p, Q3) && p.content; });
+  let cands = passnotes.filter(p => jobMatch(p, Q3) && p.passage);
+  if (!cands.length) cands = passnotes.filter(p => p.passage);   // 경찰간부 등 빈칸 방지
   const sents = [];
   for (const p of cands) {
-    for (const s of splitSentences(p.content)) {
+    for (const s of splitSentences(p.passage)) {
       const matchKW = FM_KW.find(k => s.includes(k));
       if (!matchKW) continue;
       if (s.length < 30 || s.length > 200) continue;
       let score = (s.length >= 60 && s.length <= 150) ? 3 : 1;
       if (matchKW === '첫 달' || matchKW === '첫달') score += 3;
+      score += concernScore(p);            // 걱정·방식 가중
       sents.push({ text: s, p, kw: matchKW, score });
     }
   }
   sents.sort((a,b) => b.score - a.score);
-  const best = sents[0];
+  const best = pickFreshRand(sents, TOP_POOL);
   if (!best) {
     document.getElementById('sec08-body').innerHTML = emptyHtml('"첫 달/처음에" 문장 없음');
     return { matched: cands.length, picked: 0 };
@@ -642,9 +696,11 @@ function renderNo08(passnotes) {
   return { matched: cands.length, picked: 1, kw: best.kw };
 }
 function renderNo09(passnotes) {
-  const Q1 = get(0);
+  // 경찰: 전형(Q3) 축 (핀 축과 동일). 슬럼프/극복 인용은 전형 풀 안에서 키워드로 선정
+  const Q3 = get(2);
   const SLUMP_KW = ['포기하지','포기하려','버텼','버텨','버티','그래도','다잡','마음을 다','놓지','다시 책','다시 시작','한계'];
-  const cands = passnotes.filter(p => { const ts = new Set(p.tags || []); return hasExpanded(ts, Q1) && p.quotes && p.quotes.length; });
+  let cands = passnotes.filter(p => jobMatch(p, Q3) && p.quotes && p.quotes.length);
+  if (!cands.length) cands = passnotes.filter(p => p.quotes && p.quotes.length);   // 경찰간부 등 빈칸 방지
   const quotes = [];
   for (const p of cands) {
     for (const q of (p.quotes || [])) {
@@ -652,11 +708,12 @@ function renderNo09(passnotes) {
       if (m.length === 0) continue;
       let s = m.length * 2;
       if (q.length >= 50 && q.length <= 130) s += 3;
+      s += concernScore(p);                // 걱정·방식 가중
       quotes.push({ q, p, s, kw: m[0] });
     }
   }
   quotes.sort((a,b) => b.s - a.s);
-  const best = quotes[0];
+  const best = pickFreshRand(quotes, TOP_POOL);
   if (!best) {
     document.getElementById('sec09-body').innerHTML = emptyHtml('포기/극복 인용구 없음');
     return { matched: cands.length, picked: 0 };
@@ -692,7 +749,7 @@ function renderNo10(passnotes) {
     }
   }
   quotes.sort((a,b) => b.s - a.s);
-  const best = quotes[0];
+  const best = pickFreshRand(quotes, TOP_POOL);
   if (!best) {
     document.getElementById('sec10-body').innerHTML = emptyHtml('꾸준함 인용구 없음');
     return { matched: top.length, picked: 0 };
@@ -716,9 +773,10 @@ function matchScore(p) {
   return hits;
 }
 function pickTopStories(passnotes) {
-  const scored = passnotes.map(p => ({ p, s: matchScore(p) }));
-  scored.sort((a,b) => (b.s - a.s) || ((b.p.year||'').localeCompare(a.p.year||'')));
-  return scored.slice(0, 3);
+  // 전체 일치도 + 걱정·방식 가중 → 같은 프로필이라도 고민 맞는 합격자 우선
+  const scored = passnotes.map(p => ({ p, s: matchScore(p), rank: matchScore(p) * 3 + concernScore(p) }));
+  scored.sort((a,b) => (b.rank - a.rank) || ((b.p.year||'').localeCompare(a.p.year||'')));
+  return sampleFreshRand(scored, 16, 3);   // 상위 16 중 랜덤 3 + 중복제거 (s=일치수 표시용)
 }
 function pickClosingQuote(passnotes) {
   const Q8 = get(7);
@@ -736,7 +794,7 @@ function pickClosingQuote(passnotes) {
   let final = cands;
   if (q8kw.length > 0) { const strict = cands.filter(c => c.hitQ8); if (strict.length > 0) final = strict; }
   final.sort((a,b) => b.s - a.s);
-  return final[0] || null;
+  return pickFreshRand(final, TOP_POOL) || null;
 }
 function profileShort(p) {
   const ts = new Set(p.tags || []);
@@ -796,15 +854,27 @@ function renderPage2(C) {
       </div>`;
   }).join('');
 
-  // no.12 — 후회 (Q3 직렬별)
+  // no.12 — 다시 준비한다면 꼭 할 것 (전략, 합격자 passage 기반 · 걱정 카테고리 우선)
   const q3 = get(2);
-  const regrets = REGRET_BY_Q3[q3] || REGRET_BY_Q3['_default'];
-  document.getElementById('regret-body').innerHTML = regrets.map(r => `
-    <div class="regret-item">
-      <div class="regret-stat">${r.stat}</div>
+  const CONCERN_CAT = {'체력시험':'체력','슬럼프극복':'멘탈','멘탈관리':'멘탈','형사법':'공부법','영어약자':'공부법','면접':'공부법'};
+  const wantCat = CONCERN_CAT[get(7)] || null;
+  let strat = (STATS && Array.isArray(STATS.strategy)) ? STATS.strategy.slice() : [];
+  strat.sort((a,b) => ((b.cat===wantCat)?1:0) - ((a.cat===wantCat)?1:0));
+  const picks = strat.slice(0, 3);
+  if (picks.length) {
+    document.getElementById('regret-body').innerHTML = picks.map(r => `
+      <div class="regret-item">
+        <div class="regret-stat">${escapeHtml(r.cat || '전략')}</div>
+        <div class="regret-text">"${escapeHtml(r.text)}"</div>
+        <div class="regret-tip">— ${escapeHtml(r.title || '합격수기')} 중</div>
+      </div>`).join('');
+  } else {
+    const regrets = REGRET_BY_Q3[q3] || REGRET_BY_Q3['_default'];
+    document.getElementById('regret-body').innerHTML = regrets.map(r => `
+      <div class="regret-item"><div class="regret-stat">${r.stat}</div>
       <div class="regret-text">${r.text}</div>
-      <div class="regret-tip"><strong>합격자 권장:</strong> ${r.tip}</div>
-    </div>`).join('');
+      <div class="regret-tip"><strong>합격자 권장:</strong> ${r.tip}</div></div>`).join('');
+  }
 
   // no.13 — 첫 달 (Q1×Q3)
   const fm = FIRSTMONTH_BY_Q1Q3['_default'];
@@ -814,17 +884,26 @@ function renderPage2(C) {
       <div class="fm-content"><strong>${it.strong}</strong><br><span class="fm-pct">${it.sub}</span></div>
     </div>`).join('');
 
-  // no.14 — 어려운 과목 (Q3별)
-  const hard = HARD_SUBJECT_BY_Q3[q3] || HARD_SUBJECT_BY_Q3['_default'];
-  document.getElementById('hardsubject-title').textContent = hard.title;
-  const maxPct = Math.max(...hard.bars.map(b => b[1]));
-  document.getElementById('hardsubject-body').innerHTML = hard.bars.map(([name, pct]) => `
-    <div class="subject-row">
-      <div class="subject-name">${name}</div>
-      <div class="subject-bar-track"><div class="subject-bar-fill ${pct === maxPct ? 'top' : ''}" style="width:${pct}%;"></div></div>
-      <div class="subject-pct">${pct}%</div>
-    </div>`).join('');
-  document.getElementById('hardsubject-tip').innerHTML = `💡 ${hard.tip}`;
+  // no.14 — 합격자들이 들은 강의 (해커스 강사, 숫자 미노출 · 경채는 범죄학 강조)
+  const courseSet = (q3 === '경채' && STATS && STATS.courses_경채) ? STATS.courses_경채
+                  : (STATS && STATS.courses) || null;
+  document.getElementById('hardsubject-title').textContent = '합격자들이 들은 강의';
+  if (courseSet && Object.keys(courseSet).length) {
+    const order = (q3 === '경채') ? ['범죄학','형사법','경찰학','헌법','영어'] : ['형사법','경찰학','헌법','범죄학','영어'];
+    const subs = order.filter(s => courseSet[s] && courseSet[s].length);
+    document.getElementById('hardsubject-body').innerHTML = subs.map((s, i) => {
+      const names = courseSet[s].slice(0, 2).join(' · ');
+      return `<div class="subject-row">
+        <div class="subject-name">${escapeHtml(s)}</div>
+        <div class="subject-bar-track"><div class="subject-bar-fill ${i===0?'top':''}" style="width:100%;"></div></div>
+        <div class="subject-pct" style="min-width:74px;text-align:right;font-weight:800;color:#13235b">${escapeHtml(names)}</div>
+      </div>`;
+    }).join('');
+    document.getElementById('hardsubject-tip').innerHTML = '💡 합격자 다수가 들은 커리큘럼 — <strong>해커스 경찰 패스</strong>로 한 번에';
+  } else {
+    document.getElementById('hardsubject-body').innerHTML = emptyHtml('강의 데이터 집계 중');
+    document.getElementById('hardsubject-tip').innerHTML = '';
+  }
 
   // no.15 — CTA 닫는 인용구
   const cq = pickClosingQuote(C('no.15'));
@@ -838,22 +917,29 @@ function renderPage2(C) {
 }
 
 // ─── 메인 ───
+let STATS = null;             // 2면 집계(강사·전략) 캐시
 function loadAndRender() {
   document.getElementById('loading').classList.remove('hidden');
   if (location.protocol === 'file:') {
     document.getElementById('loading').textContent = '⚠ 로컬 서버에서 열어주세요';
     return;
   }
-  fetch('../police_reviews_data.json').then(r => r.json()).then(data => {
-    render(data);
-    document.getElementById('loading').classList.add('hidden');
-  }).catch(e => { document.getElementById('loading').textContent = '데이터 로드 실패: ' + e.message; });
+  // 2면 통계는 한 번만 로드(없어도 본문은 렌더)
+  const statsP = STATS ? Promise.resolve(STATS)
+    : fetch('police_stats.json').then(r => r.ok ? r.json() : null).catch(() => null);
+  Promise.all([fetch('../police_reviews_data.json').then(r => r.json()), statsP])
+    .then(([data, stats]) => {
+      if (stats) STATS = stats;
+      render(data);
+      document.getElementById('loading').classList.add('hidden');
+    }).catch(e => { document.getElementById('loading').textContent = '데이터 로드 실패: ' + e.message; });
 }
 
 let LOADED = null;            // 마지막 로드 데이터 캐시 (실시간 재렌더용)
 function render(data) {
   LOADED = data;
   const ps = data.passnotes;
+  USED_IDS = new Set();        // 매 렌더마다 영역 간 중복제거 초기화
 
   // 관리자 큐레이션(핀/제외) 적용: 영역별 후보 풀을 감싼다
   const combo = (window.Curation) ? Curation.comboFromAnswers(A) : null;
@@ -867,7 +953,7 @@ function render(data) {
     const t = (passResult.passnote.title || '').trim();
     document.getElementById('passage-source').textContent = t ? `— ${t} 중` : '— 합격수기 중';
   } else {
-    document.getElementById('passage-value').textContent = '같은 길을 걸은 분의 합격수기를 모으는 중입니다.';
+    document.getElementById('passage-value').textContent = '같은 전형으로 합격한 분의 수기를 모으는 중입니다.';
     document.getElementById('passage-source').textContent = '';
   }
 
@@ -908,12 +994,12 @@ function renderDebug({passResult, quoteResult, r6, r7, r8, r9, r10}) {
 
   const fmt = (r, suffix='') => `매칭 ${r.matched || 0}건 → ${r.picked ? '★' + (r.kw ? ` #${r.kw}` : '') + suffix : '없음'}`;
   const areas = [
-    ['no.02', '동일경로 후기 (Q1×Q3×Q4)', passResult ? `★ ${passResult.level} / 후보 ${passResult.count}건` : '없음'],
-    ['no.04', '패턴 인용구 (Q5×Q7×Q8)', quoteResult ? `★ ${quoteResult.level}` : '없음'],
-    ['no.06', '같은 출발점 (Q1×Q4)', fmt(r6, ` · ${r6.picked||0}장`)],
-    ['no.07', '다잡은 한 마디 (Q8)', fmt(r7)],
-    ['no.08', '첫 한 달 (Q1×Q3)', fmt(r8)],
-    ['no.09', '포기 직전 (Q1+슬럼프)', fmt(r9)],
+    ['no.01', '동일경로 후기 (전형×성별)', passResult ? `★ ${passResult.level} / 후보 ${passResult.count}건` : '없음'],
+    ['no.02', '패턴 인용구 (시간×방식×걱정)', quoteResult ? `★ ${quoteResult.level}` : '없음'],
+    ['no.06', '같은 출발점 (전형×성별)', fmt(r6, ` · ${r6.picked||0}장`)],
+    ['no.07', '다잡은 한 마디 (걱정)', fmt(r7)],
+    ['no.08', '첫 한 달 (전형·passage)', fmt(r8)],
+    ['no.09', '포기 직전 (전형+슬럼프)', fmt(r9)],
     ['no.10', '꾸준함 (Q1~Q8)', fmt(r10, r10.hits ? ` · ${r10.hits}/8` : '')],
   ];
   document.getElementById('dbg-areas').innerHTML = areas.map(([code, name, info]) =>
@@ -987,8 +1073,12 @@ if (_printMode) {
     .then(pd => {
       if (Array.isArray(pd.ans) && pd.ans.length >= 8) A = pd.ans;
       if (pd.cur != null) window.__PRINT_CUR__ = pd.cur;
+      if (pd.ticket != null) { const el = document.getElementById('print-ticket'); if (el) el.textContent = '#' + pd.ticket; }  // 출력번호 배지
       syncSelectorsFromA();
-      loadAndRender();
+      const go = () => loadAndRender();
+      if (pd.cur == null && window.Curation && Curation.loadRemote) {
+        Curation.loadRemote().then(go).catch(go);   // 스냅샷 없으면 서버 큐레이션 폴백
+      } else { go(); }
     })
     .catch(() => loadAndRender());
 } else {
@@ -1001,11 +1091,19 @@ if (_printMode) {
 // ── 무창 인쇄: 현재 답변+큐레이션을 인쇄서버로 전송 (크롬 인쇄창 안 뜸) ──
 function sendPrint(btn){
   const old = btn.textContent;
-  const t0 = performance.now();
   btn.disabled = true; btn.textContent = '인쇄 전송 중…';
+  // 클라우드 인쇄 큐 우선(Supabase, 서버/배포 터미널) → 출력번호 표시. 없으면 로컬 /print 폴백.
+  if (window.enqueuePrint) {
+    window.enqueuePrint('경찰', A, null)
+      .then(ticket => { btn.textContent = '출력 #' + ticket + ' 접수 ✓'; })
+      .catch(e => { btn.textContent = '실패: ' + ((e && e.message) || e); })
+      .finally(() => { setTimeout(() => { btn.textContent = old; btn.disabled = false; }, 5000); });
+    return;
+  }
+  const t0 = performance.now();
   fetch('/print', {
     method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ ans: A, cur: localStorage.getItem('admin_curation_v2') })
+    body: JSON.stringify({ ans: A, cur: localStorage.getItem('admin_curation_v2_경찰') })
   }).then(r => r.json())
     .then(d => {
       const sec = ((performance.now() - t0) / 1000).toFixed(1);
