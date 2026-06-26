@@ -34,15 +34,44 @@
     'no.10': { name: '꾸준함 한 줄',   matchKeys: ['Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8'] },
   };
 
+  let _remote = null;   // Supabase에서 불러온 큐레이션(메모리 캐시)
+
   function getStore() {
     try {
-      // 인쇄모드(헤드리스)에서는 주입된 큐레이션을 사용 (localStorage 공유 불가)
-      const raw = (global.__PRINT_CUR__ != null)
-        ? global.__PRINT_CUR__
-        : localStorage.getItem(activeKey());
-      const o = JSON.parse(raw || '{}');
+      // 1) 인쇄모드(헤드리스) 주입본  2) Supabase 캐시  3) localStorage(폴백/관리자 로컬)
+      if (global.__PRINT_CUR__ != null) {
+        const o = JSON.parse(global.__PRINT_CUR__ || '{}');
+        return (o && typeof o === 'object') ? o : {};
+      }
+      if (_remote != null) return _remote;
+      const o = JSON.parse(localStorage.getItem(activeKey()) || '{}');
       return (o && typeof o === 'object') ? o : {};
     } catch { return {}; }
+  }
+
+  const EXAM = () => global.CURRENT_EXAM || '공무원';
+
+  // Supabase에서 이 시험의 큐레이션을 읽어 캐시 → 결과페이지 재렌더(curation:changed)
+  async function loadRemote() {
+    if (!global.supa) return false;
+    try {
+      const { data, error } = await global.supa
+        .from('curation').select('data').eq('exam', EXAM()).maybeSingle();
+      if (error) { console.warn('[Curation] loadRemote', error.message); return false; }
+      _remote = (data && data.data && typeof data.data === 'object') ? data.data : {};
+      try { global.dispatchEvent(new Event('curation:changed')); } catch (e) {}
+      return true;
+    } catch (e) { console.warn('[Curation] loadRemote', e); return false; }
+  }
+
+  // 큐레이션 전체를 Supabase에 저장(관리자). 로그인(authenticated) 필요.
+  async function saveRemote(store) {
+    if (!global.supa) return { ok: false, error: 'supa 없음' };
+    try {
+      const { error } = await global.supa
+        .from('curation').upsert({ exam: EXAM(), data: store, updated_at: new Date().toISOString() });
+      return error ? { ok: false, error: error.message } : { ok: true };
+    } catch (e) { return { ok: false, error: String(e) }; }
   }
 
   function areaDef(area) {
@@ -155,5 +184,7 @@
     displayCount,
     pinnedRandom,
     onChange,
+    loadRemote,
+    saveRemote,
   };
 })(window);

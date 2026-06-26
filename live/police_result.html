@@ -210,6 +210,8 @@ body.preview-embed .layout-row{ display:block; max-width:none; margin:0; }
 body.preview-embed .sheets{ gap:14px; }
 </style>
 <script>window.CURRENT_EXAM = '경찰';</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supa.js"></script>
 <script src="curation_sync.js"></script>
 </head>
 <body>
@@ -993,6 +995,7 @@ if (_printMode) {
   loadAndRender();
   // 관리자 페이지에서 핀/제외가 바뀌면(다른 탭) 즉시 재렌더 — 바로바로 연동
   if (window.Curation) Curation.onChange(() => { if (LOADED) render(LOADED); });
+  if (window.Curation && Curation.loadRemote) Curation.loadRemote();
 }
 
 // ── 무창 인쇄: 현재 답변+큐레이션을 인쇄서버로 전송 (크롬 인쇄창 안 뜸) ──

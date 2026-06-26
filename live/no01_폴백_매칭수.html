@@ -1087,6 +1087,9 @@ body.preview-open { padding-right: 460px; }
   letter-spacing: 0.04em;
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supa.js"></script>
+<script src="curation_sync.js"></script>
 </head>
 <body>
 
@@ -1308,6 +1311,8 @@ body.preview-open { padding-right: 460px; }
   <button class="term-toggle" id="preview-toggle" onclick="togglePreview()" title="현재 조합 결과(result.html)를 옆에서 실시간으로 보기">👁 결과 미리보기</button>
   <button class="term-toggle" onclick="exportPins()" title="현재 핀+메모를 JSON 파일로 내려받기">📥 핀 내보내기</button>
   <button class="term-toggle" onclick="document.getElementById('pin-import-input').click()" title="JSON 파일 불러와서 핀 복원/병합">📤 핀 가져오기</button>
+  <button class="term-toggle" onclick="pushToServer()" title="현재 핀을 Supabase(서버)에 저장 → 라이브 사이트에 반영" style="background:#1F4FE0;color:#fff;border-color:#1F4FE0;">☁ 서버 저장</button>
+  <button class="term-toggle" onclick="pullFromServer()" title="서버에 저장된 큐레이션을 이 브라우저로 불러오기(덮어쓰기)">⬇ 서버 불러오기</button>
   <button class="term-toggle" id="term-toggle" onclick="toggleTerms()">UI 용어 표시</button>
   <input type="file" id="pin-import-input" accept=".json,application/json" style="display:none;" onchange="importPins(this.files[0])">
 </div>
@@ -3048,6 +3053,36 @@ function toggleTerms() {
 }
 
 // ─────────── 핀 내보내기 / 가져오기 (v2 store 통째) ───────────
+// ── Supabase(서버) 저장/불러오기 ──
+async function ensureAuth() {
+  if (!window.supa) { alert('Supabase 미연결(supa.js 확인)'); return false; }
+  const { data: { session } } = await supa.auth.getSession();
+  if (session) return true;
+  const email = prompt('관리자 이메일'); if (!email) return false;
+  const pw = prompt('비밀번호'); if (!pw) return false;
+  const { error } = await supa.auth.signInWithPassword({ email: email.trim(), password: pw });
+  if (error) { alert('로그인 실패: ' + error.message); return false; }
+  return true;
+}
+async function pushToServer() {
+  if (!(await ensureAuth())) return;
+  const store = getStore();
+  const cnt = Object.values(store.pins || {}).reduce((s, a) => s + a.length, 0);
+  if (!confirm(`현재 핀 ${cnt}건을 서버(${window.CURRENT_EXAM || '공무원'})에 저장합니다. 진행?`)) return;
+  const r = await Curation.saveRemote(store);
+  alert(r.ok ? `☁ 서버 저장 완료 (핀 ${cnt}건)\n→ 라이브 사이트에 반영됨` : '실패: ' + r.error);
+}
+async function pullFromServer() {
+  if (!window.supa) { alert('Supabase 미연결'); return; }
+  const exam = window.CURRENT_EXAM || '공무원';
+  const { data, error } = await supa.from('curation').select('data').eq('exam', exam).maybeSingle();
+  if (error) { alert('실패: ' + error.message); return; }
+  if (!data || !data.data) { alert('서버에 저장된 큐레이션이 없습니다.'); return; }
+  if (!confirm('서버 큐레이션으로 이 브라우저를 덮어씁니다. 진행?')) return;
+  localStorage.setItem(STORE_KEY, JSON.stringify(data.data));
+  location.reload();
+}
+
 function exportPins() {
   const store = getStore();
   const totalAreas = Object.keys(store.pins).length;
