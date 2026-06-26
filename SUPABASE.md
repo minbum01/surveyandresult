@@ -60,3 +60,9 @@ anon public key      = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 
 ## 📒 진행 로그
 - 2026-06-26: URL=zxjhgcumweqaxcemoiga / anon·관리자이메일 입력, 스키마·RLS 점검 통과, supa.js 연결.
+
+## 🔌 큐레이션 ↔ Supabase 연동 완료 (2026-06-26)
+- 결과페이지(result/police_result): supabase-js+supa.js 로드, `Curation.loadRemote()`로 **서버에서 핀 읽어 랜덤 출력**
+- 관리자(no01): **☁ 서버 저장**(로그인 후 upsert) / **⬇ 서버 불러오기** 버튼 추가
+- 라이브(Vercel) 재배포 확인됨
+- **[나] 할 일: 관리자에서 `☁ 서버 저장` 1번 클릭(로그인=minbum01@gmail.com+비번) → 라이브에 핀 반영됨**
