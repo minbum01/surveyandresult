@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>합격수기 탐색</title>
+  <script>
+  /* 이 태블릿의 기기 라벨 등록: 시작 주소에 ?d=A (또는 B/C)를 한 번만 박아두면
+     localStorage에 저장돼 이후 모든 페이지(설문·결과·인쇄)에 자동으로 따라붙는다. */
+  try { var _d = new URLSearchParams(location.search).get('d'); if (_d) localStorage.setItem('device_id', _d); } catch(e){}
+  </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
