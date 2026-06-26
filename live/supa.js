@@ -43,13 +43,16 @@
 
   // ── 인쇄 큐 등록 (결과페이지 공용) ──
   // 결과 도달 후 '출력' 클릭 → Supabase print_jobs 큐에 등록 → 메인컴 print_agent가 받아 인쇄.
-  // 반환: 출력번호(ticket, int). 실패 시 throw.
-  global.enqueuePrint = async function (exam, answers, cur) {
+  // 반환: { ticket, device, seq, label }  (label = 'C-3' 형식, 기기-기기별순번). 실패 시 throw.
+  global.enqueuePrint = async function (exam, answers, cur, seed) {
     if (!global.supa) throw new Error('Supabase 미연결(supa.js 키 확인)');
     const { data, error } = await global.supa.rpc('enqueue_print', {
-      p_exam: exam, p_answers: answers, p_cur: cur, p_device: global.DEVICE_ID || null
+      p_exam: exam, p_answers: answers, p_cur: cur, p_device: global.DEVICE_ID || null,
+      p_seed: (seed == null ? null : Number(seed))
     });
     if (error) throw new Error(error.message);
-    return data; // 출력번호
+    // 구버전 함수(int 반환) 호환: 숫자면 객체로 감싼다.
+    if (data != null && typeof data === 'object') return data;
+    return { ticket: data, device: global.DEVICE_ID || '', seq: null, label: '#' + data };
   };
 })(window);

@@ -19,8 +19,10 @@ create table if not exists print_jobs (
   exam       text not null,
   answers    jsonb not null,                   -- passNoteAnswers (8슬롯 / 경찰 answersByQ)
   cur        jsonb,                            -- (선택) 인쇄 시점 큐레이션 스냅샷
-  ticket     int,                              -- 출력번호(표시용)
+  ticket     int,                              -- 전체 공통 출력번호(표시용)
   device     text,                             -- 어느 스탠바이미(태블릿)가 보냈는지
+  device_seq int,                              -- 그 기기에서 몇 번째 문서인지 (라벨 = device-device_seq, 예: C-3)
+  seed       bigint,                            -- 결정적 렌더 시드(화면=종이=재인쇄 동일하게 후기선택 고정)
   status     text not null default 'pending',  -- pending|printing|done|error
   station    text,                             -- 어느 프린트 스테이션(에이전트)이 처리했는지
   error      text,
@@ -37,21 +39,36 @@ create table if not exists stations (
   busy_job  bigint
 );
 
--- 출력번호 시퀀스
+-- 출력번호 시퀀스 (전체 공통)
 create sequence if not exists print_ticket_seq;
+
+-- 기기별 순번 카운터 (리셋 없이 계속 증가 — 라벨 C-3 의 '3')
+create table if not exists device_counters (
+  device text primary key,                     -- 'A' | 'B' | 'C' ...
+  n      int  not null default 0
+);
 
 -- ---------- RPC (함수) ----------
 
--- 결과 페이지(anon)가 인쇄 등록 → 출력번호 반환. 테이블 직접 접근 없이 이걸로만.
-create or replace function enqueue_print(p_exam text, p_answers jsonb, p_cur jsonb, p_device text default null)
-returns int
+-- 결과 페이지(anon)가 인쇄 등록 → {ticket,device,seq,label} 반환. 테이블 직접 접근 없이 이걸로만.
+--   label = device-seq (예: 'C-3') → 스탠바이미/picker/관리자 공통 식별자.
+create or replace function enqueue_print(p_exam text, p_answers jsonb, p_cur jsonb, p_device text default null, p_seed bigint default null)
+returns jsonb
 language plpgsql security definer
 as $$
-declare t int;
+declare
+  t   int;
+  s   int;
+  dev text := coalesce(nullif(p_device, ''), '?');
 begin
   t := nextval('print_ticket_seq');
-  insert into print_jobs(exam, answers, cur, ticket, device) values (p_exam, p_answers, p_cur, t, p_device);
-  return t;
+  -- 기기별 순번 원자적 증가 (동시 출력에도 충돌 없음)
+  insert into device_counters(device, n) values (dev, 1)
+    on conflict (device) do update set n = device_counters.n + 1
+    returning n into s;
+  insert into print_jobs(exam, answers, cur, ticket, device, device_seq, seed)
+    values (p_exam, p_answers, p_cur, t, dev, s, p_seed);
+  return jsonb_build_object('ticket', t, 'device', dev, 'seq', s, 'label', dev || '-' || s);
 end; $$;
 
 -- 스테이션이 다음 작업을 원자적으로 선점 (2대가 같은 걸 못 가져감)
@@ -119,7 +136,7 @@ create policy jobs_admin_read on print_jobs for select to authenticated using (t
 create policy stations_read   on stations  for select to authenticated using (true);
 
 -- anon이 호출 가능한 함수만 grant
-grant execute on function enqueue_print(text,jsonb,jsonb,text) to anon, authenticated;
+grant execute on function enqueue_print(text,jsonb,jsonb,text,bigint) to anon, authenticated;
 grant execute on function requeue_job(bigint) to authenticated;
 -- claim_next_job / complete_job / fail_job 은 service_role(스테이션)만 — anon/authenticated grant 안 함
 

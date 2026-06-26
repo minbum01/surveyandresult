@@ -146,8 +146,10 @@
     if (!ids.size) return null;
     const cands = (Array.isArray(pool) ? pool : []).filter(p => ids.has(p.id));
     if (!cands.length) return null;
+    // 시드 RNG(window.RND)가 있으면 그걸 써서 결정적으로 — 화면=종이=재인쇄 동일
+    const rnd = (typeof window !== 'undefined' && window.RND) ? window.RND : Math.random;
     for (let i = cands.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
+      const j = Math.floor(rnd() * (i + 1));
       const t = cands[i]; cands[i] = cands[j]; cands[j] = t;
     }
     return cands.slice(0, count || 1);

@@ -143,10 +143,14 @@ def handle(job, printer=None):
     exam = job.get("exam") or "공무원"
     page = EXAM_PAGE.get(exam, "result.html")
     # 답변·큐레이션 스냅샷·출력번호 주입 (결과 페이지 ?print=1 가 이 파일을 읽음)
+    #   label = 기기별 라벨(C-3). 종이에 찍혀 사람↔종이 매칭에 쓰임.
+    dev, seq = job.get("device"), job.get("device_seq")
+    label = f"{dev}-{seq}" if (dev and seq is not None) else None
     os.makedirs(os.path.dirname(PRINT_DATA), exist_ok=True)
     with open(PRINT_DATA, "w", encoding="utf-8") as f:
         json.dump({"ans": job.get("answers"), "cur": job.get("cur"),
-                   "ticket": job.get("ticket")}, f, ensure_ascii=False)
+                   "ticket": job.get("ticket"), "label": label,
+                   "seed": job.get("seed")}, f, ensure_ascii=False)   # 시드로 후기선택 고정
     if not render_pdf(page):
         raise RuntimeError("render 실패")
     print_pdf(printer)
@@ -188,16 +192,19 @@ PICKER_HTML = """<!doctype html><html lang=ko><head><meta charset=utf-8>
  .prof{color:#9aa3b2;font-size:13px;max-width:360px}
 </style></head><body>
 <header><h1>🖨️ 수동 출력</h1><span class=muted id=prn></span><span class=muted id=msg></span>
- <span class=sp></span><label class=muted><input type=checkbox id=onlywait> 대기만</label>
+ <span class=sp></span>
+ <input id=q placeholder="번호 검색 예: C-3" style="font:inherit;background:#1f2530;color:#e7eaf0;border:1px solid #262b36;border-radius:8px;padding:7px 12px;width:150px">
+ <label class=muted><input type=checkbox id=onlywait> 대기만</label>
  <label class=muted><input type=checkbox id=auto checked> 자동새로고침</label>
  <button onclick=load()>새로고침</button></header>
-<table><thead><tr><th>#출력</th><th>태블릿</th><th>시험</th><th>프로필</th><th>상태</th><th>시각</th><th>출력</th></tr></thead>
+<table><thead><tr><th>번호</th><th>태블릿</th><th>시험</th><th>프로필</th><th>상태</th><th>시각</th><th>출력</th></tr></thead>
 <tbody id=rows><tr><td colspan=7 style=padding:40px;text-align:center;color:#9aa3b2>불러오는 중…</td></tr></tbody></table>
 <script>
 const $=id=>document.getElementById(id);
 const ST={pending:'대기',printing:'인쇄중',done:'완료',error:'오류'};
 let PRN={A:'',B:'',default:''}, TWO=false;
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function lab(j){return (j.device&&j.device_seq!=null)?(j.device+'-'+j.device_seq):('#'+(j.ticket==null?'—':j.ticket))}
 function prof(a){try{if(!Array.isArray(a))return'';return a.map(s=>Array.isArray(s)?s.map(x=>x.label||x.tagId).join('·'):'').filter(Boolean).slice(0,5).join(' / ')}catch(e){return''}}
 function fmt(s){if(!s)return'—';const d=new Date(s),p=n=>String(n).padStart(2,'0');return p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds())}
 async function cfg(){try{PRN=await (await fetch('/__printers')).json();TWO=!!(PRN.A&&PRN.B);
@@ -211,8 +218,10 @@ async function load(){
  try{const r=await fetch('/__jobs');let d=await r.json();
   if(!Array.isArray(d)){$('rows').innerHTML='<tr><td colspan=7 style=padding:30px;text-align:center;color:#d9484b>'+esc(d.error||'읽기 오류')+'</td></tr>';return}
   if($('onlywait').checked) d=d.filter(j=>j.status==='pending'||j.status==='error');
+  const q=($('q').value||'').trim().toLowerCase();
+  if(q) d=d.filter(j=>lab(j).toLowerCase().includes(q)||String(j.device||'').toLowerCase().includes(q));
   if(!d.length){$('rows').innerHTML='<tr><td colspan=7 style=padding:40px;text-align:center;color:#9aa3b2>표시할 작업이 없습니다.</td></tr>';return}
-  $('rows').innerHTML=d.map(j=>'<tr><td class=tk>#'+(j.ticket??'—')+'</td><td>'+esc(j.device||'미상')+'</td><td>'+esc(j.exam||'')+'</td><td class=prof>'+esc(prof(j.answers))+'</td><td><span class="b '+j.status+'">'+(ST[j.status]||j.status)+'</span></td><td class=muted>'+fmt(j.created_at)+'</td><td>'+actions(j)+'</td></tr>').join('');
+  $('rows').innerHTML=d.map(j=>'<tr><td class=tk>'+esc(lab(j))+'</td><td>'+esc(j.device||'미상')+'</td><td>'+esc(j.exam||'')+'</td><td class=prof>'+esc(prof(j.answers))+'</td><td><span class="b '+j.status+'">'+(ST[j.status]||j.status)+'</span></td><td class=muted>'+fmt(j.created_at)+'</td><td>'+actions(j)+'</td></tr>').join('');
  }catch(e){$('msg').textContent='오류: '+e.message}
 }
 $('rows').addEventListener('click',e=>{const b=e.target.closest('.go');if(b)pr(b);});
@@ -225,7 +234,7 @@ async function pr(btn){
  setTimeout(load,1500);
 }
 let t=null;function poll(){if(t)clearInterval(t);if($('auto').checked)t=setInterval(load,4000)}
-$('auto').onchange=poll;$('onlywait').onchange=load;
+$('auto').onchange=poll;$('onlywait').onchange=load;$('q').oninput=load;
 (async()=>{await cfg();load();poll();})();
 </script></body></html>"""
 
@@ -252,7 +261,7 @@ class PickerHandler(SimpleHTTPRequestHandler):
             return
         if self.path.split("?")[0] == "/__jobs":
             try:
-                rows = rest("GET", "print_jobs?select=id,ticket,device,exam,status,"
+                rows = rest("GET", "print_jobs?select=id,ticket,device,device_seq,exam,status,"
                                    "created_at,answers&order=created_at.desc&limit=60")
                 self._json(200, rows or [])
             except Exception as e:

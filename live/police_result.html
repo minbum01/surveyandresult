@@ -225,6 +225,17 @@ body.preview-embed .sheets{ gap:14px; }
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supa.js"></script>
 <script src="curation_sync.js"></script>
+<script>
+/* ── 결정적 렌더 시드 (화면=종이=재인쇄 동일) — result.html 과 동일 ── */
+(function (g) {
+  function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; var t=Math.imul(a^a>>>15,1|a);
+    t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+  function fresh(){ try{ var u=new Uint32Array(1); crypto.getRandomValues(u); return u[0]>>>0; }
+    catch(e){ return ((Date.now()>>>0) ^ 0x9e3779b9) >>> 0; } }
+  g.__setSeed = function (s) { g.__SEED__ = (s>>>0); g.RND = mulberry32(g.__SEED__); };
+  g.__setSeed(fresh());
+})(window);
+</script>
 </head>
 <body>
 
@@ -545,7 +556,7 @@ function pickFreshRand(scored, topN) {
   let pool = scored.filter(x => x.p && !USED_IDS.has(x.p.id));
   if (!pool.length) pool = scored;                 // 다 쓰였으면 재사용 허용(빈칸보단 나음)
   pool = pool.slice(0, Math.min(topN || TOP_POOL, pool.length));
-  const picked = pool[Math.floor(Math.random() * pool.length)];
+  const picked = pool[Math.floor(window.RND() * pool.length)];
   if (picked && picked.p) USED_IDS.add(picked.p.id);
   return picked;
 }
@@ -553,7 +564,7 @@ function sampleFreshRand(scored, topN, k) {
   let pool = (scored || []).filter(x => x.p && !USED_IDS.has(x.p.id));
   if (pool.length < k) pool = (scored || []);
   pool = pool.slice(0, Math.min(topN || TOP_POOL, pool.length));
-  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); const t=pool[i]; pool[i]=pool[j]; pool[j]=t; }
+  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(window.RND()*(i+1)); const t=pool[i]; pool[i]=pool[j]; pool[j]=t; }
   const out = pool.slice(0, k);
   out.forEach(x => { if (x.p) USED_IDS.add(x.p.id); });
   return out;
@@ -931,6 +942,8 @@ function scrubBlockedNames() {
 }
 function render(data) {
   LOADED = data;
+  // 렌더마다 시드를 처음으로 리셋 → 몇 번을 다시 그려도(서버 큐레이션 로드/핀 변경/인쇄) 동일한 후기 선택
+  if (window.__SEED__ != null) window.__setSeed(window.__SEED__);
   const ps = (data.passnotes || []).filter(p => !hasBlockedName(p));
   USED_IDS = new Set();        // 매 렌더마다 영역 간 중복제거 초기화
 
@@ -1062,6 +1075,7 @@ if (_printMode) {
   fetch(_pdFile + '?_=' + Date.now())
     .then(r => r.json())
     .then(pd => {
+      if (pd.seed != null) window.__setSeed(pd.seed);          // 저장된 시드로 고정 → 화면과 동일 출력
       if (Array.isArray(pd.ans) && pd.ans.length >= 8) A = pd.ans;
       if (pd.cur != null) window.__PRINT_CUR__ = pd.cur;
       if (pd.label != null || pd.ticket != null) { const el = document.getElementById('print-ticket'); if (el) el.textContent = pd.label || ('#' + pd.ticket); }  // 출력번호 배지 (라벨 C-3 우선)
@@ -1085,7 +1099,7 @@ function sendPrint(btn){
   btn.disabled = true; btn.textContent = '인쇄 전송 중…';
   // 클라우드 인쇄 큐 우선(Supabase, 서버/배포 터미널) → 출력번호 표시. 없으면 로컬 /print 폴백.
   if (window.enqueuePrint) {
-    window.enqueuePrint('경찰', A, null)
+    window.enqueuePrint('경찰', A, null, window.__SEED__)
       .then(r => { const label = (r && r.label) || ('#' + (r && r.ticket));
                    btn.textContent = '출력 접수 ✓  ' + label + ' — 프린트대에 "' + label + '" 라고 말하세요'; })
       .catch(e => { btn.textContent = '실패: ' + ((e && e.message) || e); })
