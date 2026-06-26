@@ -123,6 +123,15 @@ body{ font-family:var(--sans); background:var(--paper); color:var(--navy); -webk
 .excerpt-text{ font-weight:500; font-size:12.5px; line-height:1.68; color:var(--ink-soft); -webkit-line-clamp:3; display:-webkit-box; -webkit-box-orient:vertical; overflow:hidden; }
 .excerpt-source{ font-weight:600; font-size:9.5px; color:var(--ink-mute); margin-top:8px; }
 
+/* no.07 내 약점은 이렇게 보완했다 / no.10 내 직렬 팁 — 2~3 카드 */
+.weak-block,.tip-block{ display:flex; flex-direction:column; gap:8px; }
+.weak-item,.tip-item{ background:var(--card); border:1px solid var(--bd); border-left:4px solid var(--blue); padding:9px 13px; }
+.weak-kw,.tip-subj{ font-weight:800; font-size:9.5px; color:var(--blue); }
+.tip-subj{ color:var(--navy); }
+.weak-text,.tip-text{ font-weight:600; font-size:12px; line-height:1.55; color:var(--navy); margin-top:4px; -webkit-line-clamp:2; display:-webkit-box; -webkit-box-orient:vertical; overflow:hidden; }
+.weak-text{ color:var(--ink-soft); font-weight:500; }
+.weak-src,.tip-src{ font-weight:600; font-size:9px; color:var(--ink-mute); margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
 /* ════════ SHEET 2 ════════ */
 .page-2{ position:relative; height:905px; padding:30px 44px 24px; background:var(--card); display:flex; flex-direction:column; }
 .p2-head{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:15px; padding-bottom:10px; border-bottom:2px solid var(--blue); }
@@ -275,20 +284,12 @@ body.preview-embed .sheets{ gap:14px; }
         <div class="sec-body cards-row" id="sec06-body"><div class="empty-msg">— 로딩 중 —</div></div>
       </div>
       <div class="sec">
-        <div class="sec-head"><i class="mark"></i><span class="sec-title">흔들렸을 때 다잡은 한 마디</span></div>
-        <div class="sec-body quote-block" id="sec07-body"><div class="empty-msg">— 로딩 중 —</div></div>
+        <div class="sec-head"><i class="mark"></i><span class="sec-title">내 약점은 이렇게 보완했다!</span></div>
+        <div class="sec-body weak-block" id="sec07-body"><div class="empty-msg">— 로딩 중 —</div></div>
       </div>
       <div class="sec">
-        <div class="sec-head"><i class="mark"></i><span class="sec-title">첫 한 달 풍경</span></div>
-        <div class="sec-body excerpt-block" id="sec08-body"><div class="empty-msg">— 로딩 중 —</div></div>
-      </div>
-      <div class="sec">
-        <div class="sec-head"><i class="mark"></i><span class="sec-title">포기 직전, 다시 책상 앞</span></div>
-        <div class="sec-body quote-block" id="sec09-body"><div class="empty-msg">— 로딩 중 —</div></div>
-      </div>
-      <div class="sec">
-        <div class="sec-head"><i class="mark"></i><span class="sec-title">꾸준함을 말하는 한 줄</span></div>
-        <div class="sec-body quote-block" id="sec10-body"><div class="empty-msg">— 로딩 중 —</div></div>
+        <div class="sec-head"><i class="mark"></i><span class="sec-title">내 직렬 팁</span></div>
+        <div class="sec-body tip-block" id="sec10-body"><div class="empty-msg">— 로딩 중 —</div></div>
       </div>
     </section>
 
@@ -601,121 +602,83 @@ function renderNo06(passnotes, combo) {
   }).join('');
   return { matched: cands.length, picked: top2.length };
 }
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+// no.07 — 내 약점은 이렇게 보완했다! (Q8 고민 + 극복서사, 리뷰당 1개로 2~3 사례)
 function renderNo07(passnotes) {
   const Q8 = get(7);
   const q8kw = (Q8 && Q8_QUOTE_KW[Q8]) || [];
   if (!Q8 || q8kw.length === 0) {
-    document.getElementById('sec07-body').innerHTML = emptyHtml('Q8 답변 미선택');
-    return { matched: 0 };
+    document.getElementById('sec07-body').innerHTML = emptyHtml('Q8(고민) 답변 미선택');
+    return { matched: 0, picked: 0 };
   }
+  const OVERCOME = ['보완','극복','늘었','올랐','해결','넘었','잡았','채웠','메웠','도움','방법','이렇게','덕분','효과'];
   const cands = passnotes.filter(p => { const ts = new Set(p.tags || []); return hasExpanded(ts, Q8) && p.quotes && p.quotes.length; });
   const quotes = [];
   for (const p of cands) {
     for (const q of (p.quotes || [])) {
       const m = q8kw.filter(k => q.includes(k));
       if (m.length === 0) continue;
-      let s = m.length * 2;
-      if (q.length >= 50 && q.length <= 130) s += 3;
+      let s = m.length * 2 + OVERCOME.filter(k => q.includes(k)).length * 2;   // 보완 서사 가점
+      if (q.length >= 40 && q.length <= 140) s += 3;
       quotes.push({ q, p, s, kw: m[0] });
     }
   }
-  quotes.sort((a,b) => b.s - a.s);
-  const pool07 = quotes.slice(0, Math.min(25, quotes.length));   // 상위권 풀에서 랜덤(500명 다양화)
-  const best = pool07[Math.floor(Math.random() * pool07.length)];
-  if (!best) {
-    document.getElementById('sec07-body').innerHTML = emptyHtml(`${Q8} 주제 인용구 없음`);
+  quotes.sort((a, b) => b.s - a.s);
+  const byRev = new Map();                                  // 리뷰당 최고 인용 1개
+  for (const x of quotes) if (!byRev.has(x.p.id)) byRev.set(x.p.id, x);
+  const win = [...byRev.values()].slice(0, Math.min(15, byRev.size));   // 상위권에서 셔플 → 다양화
+  const picks = shuffle(win).slice(0, 3);
+  if (!picks.length) {
+    document.getElementById('sec07-body').innerHTML = emptyHtml(`${Q8} 보완 사례 없음`);
     return { matched: cands.length, picked: 0 };
   }
-  document.getElementById('sec07-body').innerHTML = `<div class="quote-keyword">#${escapeHtml(best.kw)}</div><div class="quote-text">${escapeHtml(best.q)}</div><div class="quote-source">— ${escapeHtml(best.p.title || '')}</div>`;
-  return { matched: cands.length, picked: 1, kw: best.kw };
+  document.getElementById('sec07-body').innerHTML = picks.map(x =>
+    `<div class="weak-item"><span class="weak-kw">#${escapeHtml(x.kw)}</span><div class="weak-text">${escapeHtml(x.q)}</div><div class="weak-src">— ${escapeHtml(x.p.title || '')}</div></div>`
+  ).join('');
+  return { matched: cands.length, picked: picks.length, kw: picks[0].kw };
 }
-function renderNo08(passnotes) {
-  const Q1 = get(0), Q3 = get(2);
-  const FM_KW = ['첫 달','첫달','처음에는','처음 시작','처음으로','시작했을 때','초반에','시작 무렵','처음 한 달'];
-  // content 필드는 슬림화로 제거됨 → passage 폴백
-  const cands = passnotes.filter(p => { const ts = new Set(p.tags || []); return hasExpanded(ts, Q1) && jobMatch(p, Q3) && (p.content || p.passage); });
-  const sents = [];
-  for (const p of cands) {
-    for (const s of splitSentences(p.content || p.passage)) {
-      const matchKW = FM_KW.find(k => s.includes(k));
-      if (!matchKW) continue;
-      if (s.length < 30 || s.length > 200) continue;
-      let score = (s.length >= 60 && s.length <= 150) ? 3 : 1;
-      if (matchKW === '첫 달' || matchKW === '첫달') score += 3;
-      sents.push({ text: s, p, kw: matchKW, score });
-    }
-  }
-  sents.sort((a,b) => b.score - a.score);
-  const pool08 = sents.slice(0, Math.min(25, sents.length));     // 상위권 풀에서 랜덤(500명 다양화)
-  const best = pool08[Math.floor(Math.random() * pool08.length)];
-  if (!best) {
-    document.getElementById('sec08-body').innerHTML = emptyHtml('"첫 달/처음에" 문장 없음');
-    return { matched: cands.length, picked: 0 };
-  }
-  document.getElementById('sec08-body').innerHTML = `<div class="excerpt-text">${escapeHtml(best.text)}</div><div class="excerpt-source">— ${escapeHtml(best.p.title || '')}</div>`;
-  return { matched: cands.length, picked: 1, kw: best.kw };
-}
-function renderNo09(passnotes) {
-  const Q1 = get(0);
-  const SLUMP_KW = ['포기하지','포기하려','버텼','버텨','버티','그래도','다잡','마음을 다','놓지','다시 책','다시 시작','한계'];
-  const cands = passnotes.filter(p => { const ts = new Set(p.tags || []); return hasExpanded(ts, Q1) && p.quotes && p.quotes.length; });
-  const quotes = [];
-  for (const p of cands) {
-    for (const q of (p.quotes || [])) {
-      const m = SLUMP_KW.filter(k => q.includes(k));
-      if (m.length === 0) continue;
-      let s = m.length * 2;
-      if (q.length >= 50 && q.length <= 130) s += 3;
-      quotes.push({ q, p, s, kw: m[0] });
-    }
-  }
-  quotes.sort((a,b) => b.s - a.s);
-  const pool09 = quotes.slice(0, Math.min(25, quotes.length));   // 상위권 풀에서 랜덤(500명 다양화)
-  const best = pool09[Math.floor(Math.random() * pool09.length)];
-  if (!best) {
-    document.getElementById('sec09-body').innerHTML = emptyHtml('포기/극복 인용구 없음');
-    return { matched: cands.length, picked: 0 };
-  }
-  document.getElementById('sec09-body').innerHTML = `<div class="quote-keyword">#${escapeHtml(best.kw)}</div><div class="quote-text">${escapeHtml(best.q)}</div><div class="quote-source">— ${escapeHtml(best.p.title || '')}</div>`;
-  return { matched: cands.length, picked: 1, kw: best.kw };
-}
+
+// no.10 — 내 직렬 팁 (Q3 직렬의 전공과목 공부 팁, 2~3개)
+const SUBJECT_BY_JOB = {
+  '행정직': ['행정법','행정학'],
+  '세무직': ['세법','회계학','회계','관세법'],
+  '공안직': ['형법','형사소송법','형소법','교정학','형사정책'],
+  '교육직': ['교육학'],
+  '기술직': ['전공','기계','전기','토목','전산','건축','화학','물리','정보보호'],
+  '간호보건직': ['간호','보건','공중보건'],
+  '사회복지직': ['사회복지','사회복지학'],
+  '기타직렬': [],
+};
 function renderNo10(passnotes) {
-  const STEADY_KW = ['꾸준','매일','하루하루','스스로','한 발','조금씩','놓지'];
-  const Q7 = getMulti(6);
-  const scored = passnotes.map(p => {
-    const ts = new Set(p.tags || []);
-    let s = 0;
-    if (hasExpanded(ts, get(0))) s++;
-    if (hasExpanded(ts, get(1))) s++;
-    if (hasExpanded(ts, get(2))) s++;
-    if (hasExpanded(ts, get(3))) s++;
-    if (hasExpanded(ts, get(4))) s++;
-    if (hasExpanded(ts, get(5))) s++;
-    if (Q7.length === 0 || Q7.some(q => hasExpanded(ts, q))) s++;
-    if (hasExpanded(ts, get(7))) s++;
-    return { p, s };
-  }).filter(x => x.s >= 5);
-  scored.sort((a,b) => b.s - a.s);
-  const top = scored.slice(0, 60);
-  const quotes = [];
-  for (const x of top) {
-    for (const q of (x.p.quotes || [])) {
-      const m = STEADY_KW.filter(k => q.includes(k));
-      if (m.length === 0) continue;
-      let s = m.length * 2 + (x.s / 8) * 3;
-      if (q.length >= 40 && q.length <= 110) s += 3;
-      quotes.push({ q, p: x.p, s, kw: m[0], hits: x.s });
+  const Q3 = get(2);
+  const subjKW = SUBJECT_BY_JOB[Q3] || [];
+  const ADVICE = ['회독','기출','단권화','정리','이해','암기','강의','인강','복습','문제풀이','반복','개념','오답','공부법'];
+  const cands = passnotes.filter(p => jobMatch(p, Q3) && p.passage);
+  const tips = [];
+  for (const p of cands) {
+    for (const s of splitSentences(p.passage)) {
+      if (s.length < 22 || s.length > 110) continue;
+      const subj = subjKW.find(k => s.includes(k));
+      if (subjKW.length && !subj) continue;                // 과목 있는 직렬은 과목 언급 필수
+      const adv = ADVICE.filter(k => s.includes(k));
+      if (adv.length === 0) continue;
+      tips.push({ text: s, p, subj: subj || '전공', sc: adv.length + (subj ? 3 : 0) });
     }
   }
-  quotes.sort((a,b) => b.s - a.s);
-  const pool10 = quotes.slice(0, Math.min(25, quotes.length));   // 상위권 풀에서 랜덤(500명 다양화)
-  const best = pool10[Math.floor(Math.random() * pool10.length)];
-  if (!best) {
-    document.getElementById('sec10-body').innerHTML = emptyHtml('꾸준함 인용구 없음');
-    return { matched: top.length, picked: 0 };
+  tips.sort((a, b) => b.sc - a.sc);
+  const byRev = new Map();
+  for (const t of tips) if (!byRev.has(t.p.id)) byRev.set(t.p.id, t);
+  const win = [...byRev.values()].slice(0, Math.min(15, byRev.size));
+  const picks = shuffle(win).slice(0, 3);
+  if (!picks.length) {
+    document.getElementById('sec10-body').innerHTML = emptyHtml('직렬 전공 팁 없음');
+    return { matched: cands.length, picked: 0 };
   }
-  document.getElementById('sec10-body').innerHTML = `<div class="quote-keyword">#${escapeHtml(best.kw)}</div><div class="quote-text">${escapeHtml(best.q)}</div><div class="quote-source">— ${escapeHtml(best.p.title || '')}</div>`;
-  return { matched: top.length, picked: 1, kw: best.kw, hits: best.hits };
+  document.getElementById('sec10-body').innerHTML = picks.map(t =>
+    `<div class="tip-item"><span class="tip-subj">#${escapeHtml(t.subj)}</span><div class="tip-text">${escapeHtml(t.text)}</div><div class="tip-src">— ${escapeHtml(t.p.title || '')}</div></div>`
+  ).join('');
+  return { matched: cands.length, picked: picks.length };
 }
 
 // ════════════ PAGE 2 (no.11~15) ════════════
@@ -917,18 +880,16 @@ function render(data) {
   }
 
   const r6  = renderNo06(C('no.06'), combo);
-  const r7  = renderNo07(C('no.07'));
-  const r8  = renderNo08(C('no.08'));
-  const r9  = renderNo09(C('no.09'));
-  const r10 = renderNo10(C('no.10'));
+  const r7  = renderNo07(C('no.07'));      // 내 약점은 이렇게 보완했다! (Q8, 2~3 사례)
+  const r10 = renderNo10(C('no.10'));      // 내 직렬 팁 (Q3 전공과목)
 
   // ── PAGE 2 (no.11~15) ──
   renderPage2(C);
 
-  renderDebug({passResult, quoteResult, r6, r7, r8, r9, r10});
+  renderDebug({passResult, quoteResult, r6, r7, r10});
 }
 
-function renderDebug({passResult, quoteResult, r6, r7, r8, r9, r10}) {
+function renderDebug({passResult, quoteResult, r6, r7, r10}) {
   const rows = [];
   for (let i = 0; i < 8; i++) {
     const labels = (A[i] || []).map(x => x.label).join(', ') || '—';
@@ -941,10 +902,8 @@ function renderDebug({passResult, quoteResult, r6, r7, r8, r9, r10}) {
     ['no.02', '동일경로 후기 (Q1×Q3×Q4)', passResult ? `★ ${passResult.level} / 후보 ${passResult.count}건` : '없음'],
     ['no.04', '패턴 인용구 (Q5×Q7×Q8)', quoteResult ? `★ ${quoteResult.level}` : '없음'],
     ['no.06', '같은 출발점 (Q1×Q4)', fmt(r6, ` · ${r6.picked||0}장`)],
-    ['no.07', '다잡은 한 마디 (Q8)', fmt(r7)],
-    ['no.08', '첫 한 달 (Q1×Q3)', fmt(r8)],
-    ['no.09', '포기 직전 (Q1+슬럼프)', fmt(r9)],
-    ['no.10', '꾸준함 (Q1~Q8)', fmt(r10, r10.hits ? ` · ${r10.hits}/8` : '')],
+    ['no.07', '약점 보완 사례 (Q8)', fmt(r7, ` · ${r7.picked||0}건`)],
+    ['no.10', '내 직렬 팁 (Q3 전공)', fmt(r10, ` · ${r10.picked||0}건`)],
   ];
   document.getElementById('dbg-areas').innerHTML = areas.map(([code, name, info]) =>
     `<div class="debug-area-row"><span class="area-code">${code}</span><span class="area-name">${name}</span><span class="area-info">${info}</span></div>`

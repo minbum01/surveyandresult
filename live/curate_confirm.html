@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>후기 확정 — 조합별 상위10 검수</title>
+<style>
+  :root{ --navy:#13235b; --blue:#1f4fe0; --ink:#1c2333; --ink-soft:#41506b; --ink-mute:#8a96ad;
+         --bd:#dfe4ee; --bd-soft:#eef1f7; --card:#fff; --bg:#f4f6fb; --ok:#13884b; --no:#c0392b; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:'Pretendard','맑은 고딕',system-ui,sans-serif; background:var(--bg); color:var(--ink); }
+  header{ position:sticky; top:0; z-index:10; background:#fff; border-bottom:1px solid var(--bd); padding:10px 18px; }
+  .row{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  h1{ font-size:15px; margin:0; color:var(--navy); font-weight:800; }
+  select,button{ font-family:inherit; font-size:13px; }
+  select{ padding:6px 9px; border:1px solid var(--bd); border-radius:6px; background:#fff; }
+  .btn{ border:1px solid var(--blue); background:var(--blue); color:#fff; padding:7px 14px; border-radius:6px; font-weight:700; cursor:pointer; }
+  .btn.ghost{ background:#fff; color:var(--blue); }
+  .btn.sm{ padding:5px 10px; font-size:12px; }
+  .pill{ font-size:11.5px; font-weight:700; color:var(--ink-soft); background:var(--bd-soft); padding:4px 9px; border-radius:20px; }
+  .combo-title{ font-weight:800; font-size:16px; color:var(--navy); }
+  .progress-bar{ height:5px; background:var(--bd-soft); border-radius:3px; overflow:hidden; flex:1; min-width:120px; }
+  .progress-fill{ height:100%; background:var(--ok); }
+  main{ max-width:880px; margin:0 auto; padding:16px; }
+  .hint{ font-size:12px; color:var(--ink-mute); margin:2px 0 12px; }
+  .card{ background:var(--card); border:1px solid var(--bd); border-left:5px solid var(--ok); border-radius:8px; padding:13px 15px; margin-bottom:10px; cursor:pointer; transition:.08s; position:relative; }
+  .card.rejected{ border-left-color:var(--no); opacity:.5; background:#fbf2f2; }
+  .card-top{ display:flex; align-items:flex-start; gap:10px; }
+  .card-idx{ font-weight:800; font-size:12px; color:var(--ink-mute); width:20px; flex-shrink:0; }
+  .state{ font-weight:800; font-size:11px; padding:2px 9px; border-radius:20px; flex-shrink:0; }
+  .state.ok{ color:var(--ok); border:1px solid var(--ok); }
+  .state.no{ color:var(--no); border:1px solid var(--no); }
+  .title{ font-weight:800; font-size:13px; color:var(--navy); line-height:1.4; flex:1; }
+  .profile{ font-weight:700; font-size:11.5px; color:var(--blue); margin:5px 0 0 30px; }
+  .passage{ font-size:12.5px; color:var(--ink); line-height:1.72; margin:8px 0 0 30px; white-space:pre-wrap; }
+  .quotes{ margin:8px 0 0 30px; }
+  .q{ font-size:12px; color:var(--blue); line-height:1.55; padding:3px 0 3px 10px; border-left:2px solid var(--blue); margin-bottom:4px; }
+  .src{ display:inline-block; margin:8px 0 0 30px; font-size:11.5px; font-weight:700; color:var(--blue); text-decoration:none; }
+  .src:hover{ text-decoration:underline; }
+  .badge{ font-size:9.5px; font-weight:800; color:#fff; background:var(--ok); padding:1px 6px; border-radius:3px; vertical-align:middle; margin-left:5px; }
+  .badge.rej{ background:var(--no); }
+  .divider{ text-align:center; font-weight:800; font-size:11px; color:var(--no); margin:14px 0 8px; padding-top:10px; border-top:2px dashed var(--no); }
+  .tags{ display:flex; flex-wrap:wrap; gap:5px; margin:8px 0 0 30px; }
+  .tag{ font-size:10px; font-weight:700; padding:2px 8px; border-radius:3px; border:1px solid var(--bd); color:var(--ink-mute); }
+  .tag.m{ border-color:var(--blue); color:var(--blue); background:#f3f6ff; }
+  .score{ position:absolute; top:13px; right:15px; font-size:10.5px; font-weight:700; color:var(--ink-mute); }
+  footer{ position:sticky; bottom:0; background:#fff; border-top:1px solid var(--bd); padding:10px 18px; }
+  .empty{ text-align:center; color:var(--ink-mute); padding:40px; }
+  kbd{ font-size:10px; background:var(--bd-soft); border:1px solid var(--bd); border-radius:3px; padding:1px 5px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="row">
+    <h1>후기 확정 검수</h1>
+    <select id="area"></select>
+    <select id="combo" style="max-width:340px;"></select>
+    <span class="pill" id="rev-pill">0/0 검토</span>
+    <div class="progress-bar"><div class="progress-fill" id="prog" style="width:0%"></div></div>
+    <button class="btn sm" id="bulk">🚀 남은 조합 전체 자동확정</button>
+    <button class="btn ghost sm" id="rebulk">♻️ 전체 재확정(덮어쓰기)</button>
+    <button class="btn ghost sm" id="export">📤 백업 내보내기</button>
+  </div>
+</header>
+<main>
+  <div class="row" style="justify-content:space-between; margin-bottom:4px;">
+    <span class="combo-title" id="combo-title">—</span>
+    <span class="pill" id="combo-state"></span>
+  </div>
+  <div class="hint">기본은 <b>전체 확정(초록)</b> — 빼고 싶은 후기만 클릭해 <b>제외(빨강)</b>. 단축키: <kbd>1~9,0</kbd> 토글 · <kbd>Enter</kbd> 저장+다음 · <kbd>←/→</kbd> 이동</div>
+  <div id="cards"></div>
+</main>
+<footer>
+  <div class="row">
+    <button class="btn ghost sm" id="all-ok">전체 확정</button>
+    <button class="btn ghost sm" id="all-no">전체 제외</button>
+    <span class="pill" id="save-stat">핀 0 · 제외 0</span>
+    <span style="flex:1"></span>
+    <button class="btn ghost" id="prev">← 이전</button>
+    <button class="btn" id="save-next">저장 &amp; 다음 →</button>
+  </div>
+</footer>
+
+<script>
+const STORE_KEY = 'admin_curation_v2';          // 공무원 (CURRENT_EXAM 미설정)
+let DATA = null, area = 'no.01', ci = 0;        // ci = combo index (현재 영역 내)
+let state = {};                                  // id -> 'ok'|'no' (현재 조합)
+
+const norm = v => Array.isArray(v) ? [...v].filter(Boolean).sort().join(',') : (v==null?'':String(v));
+function loadStore(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY)||'{}')||{}; }catch{ return {}; } }
+function saveStore(s){ localStorage.setItem(STORE_KEY, JSON.stringify(s)); try{ dispatchEvent(new Event('curation:changed')); }catch(e){} }
+function ensure(s){ s.version=s.version||3; s.pins=s.pins||{}; s.excludesCombo=s.excludesCombo||{}; s.excludesGlobal=s.excludesGlobal||[]; s.reviewed=s.reviewed||{}; return s; }
+const keysOf = a => DATA.areas[a].keys;
+const combosOf = a => DATA.areas[a].combos;
+const comboKey = (a,combo) => keysOf(a).map(k=>norm(combo[k])).join('|');
+const comboLabel = combo => keysOf(area).map(k=>combo[k]).join(' × ');
+
+function init(){
+  fetch('curate_candidates.json').then(r=>r.json()).then(d=>{
+    DATA=d;
+    const aSel=document.getElementById('area');
+    aSel.innerHTML=Object.keys(d.areas).map(a=>`<option value="${a}">${a} · ${d.areas[a].label} (${d.areas[a].combos.length}조합)</option>`).join('');
+    aSel.onchange=()=>{ area=aSel.value; ci=0; renderCombo(); };
+    document.getElementById('combo').onchange=e=>{ ci=+e.target.value; renderCombo(); };
+    document.getElementById('save-next').onclick=()=>{ persist(); next(); };
+    document.getElementById('prev').onclick=()=>{ persist(); ci=Math.max(0,ci-1); renderCombo(); };
+    document.getElementById('all-ok').onclick=()=>{ setAll('ok'); };
+    document.getElementById('all-no').onclick=()=>{ setAll('no'); };
+    document.getElementById('export').onclick=exportStore;
+    document.getElementById('bulk').onclick=()=>bulkConfirm(false);
+    document.getElementById('rebulk').onclick=()=>bulkConfirm(true);
+    renderCombo();
+  }).catch(e=>{ document.getElementById('cards').innerHTML=`<div class="empty">로드 실패: ${e.message}<br>로컬 서버(8181)에서 열어주세요.</div>`; });
+}
+
+function curItems(){ return combosOf(area)[ci].items; }
+function curCombo(){ return combosOf(area)[ci].combo; }
+
+function renderCombo(){
+  const combos=combosOf(area);
+  // combo 셀렉트
+  const store=ensure(loadStore());
+  const cSel=document.getElementById('combo');
+  cSel.innerHTML=combos.map((c,i)=>{
+    const done=store.reviewed[area]&&store.reviewed[area][comboKey(area,c.combo)];
+    return `<option value="${i}">${done?'✓ ':''}${keysOf(area).map(k=>c.combo[k]).join(' × ')} (${c.items.length})</option>`;
+  }).join('');
+  cSel.value=ci;
+  document.getElementById('combo-title').textContent=comboLabel(curCombo());
+  // 진행률
+  const done=combos.filter(c=>store.reviewed[area]&&store.reviewed[area][comboKey(area,c.combo)]).length;
+  document.getElementById('rev-pill').textContent=`${done}/${combos.length} 검토`;
+  document.getElementById('prog').style.width=(combos.length?done/combos.length*100:0)+'%';
+  const ck=comboKey(area,curCombo());
+  document.getElementById('combo-state').textContent=(store.reviewed[area]&&store.reviewed[area][ck])?'검토됨':'미검토';
+  // 상태 초기화: 기존 핀/제외 반영, 없으면 전체 확정 기본
+  const pinned=new Set(((store.pins[area]||[]).filter(p=>keysOf(area).every(k=>norm(p.answers&&p.answers[k])===norm(curCombo()[k]))).map(p=>p.id)));
+  const excl=new Set((store.excludesCombo[area]&&store.excludesCombo[area][ck])||[]);
+  state={};
+  for(const it of curItems()){
+    // 기존 결정(핀/제외) 우선, 없으면 자동제외(reject) 따름
+    state[it.id]= excl.has(it.id)?'no':(pinned.size? (pinned.has(it.id)?'ok':'no') : (it.reject?'no':'ok'));
+  }
+  renderCards();
+}
+
+function renderCards(){
+  const wrap=document.getElementById('cards');
+  const items=curItems();
+  const firstRej=items.findIndex(it=>it.reject);   // 자동제외 구분선 위치
+  wrap.innerHTML=items.map((it,i)=>{
+    const st=state[it.id];
+    const divider=(i===firstRej && firstRej>0)?`<div class="divider">↓ 자동 제외 (눈으로 확인 후 살릴 건 클릭)</div>`:'';
+    return `${divider}<div class="card ${st==='no'?'rejected':''}" data-id="${it.id}">
+      <div class="score">점수 ${it.score}</div>
+      <div class="card-top">
+        <span class="card-idx">${i+1}</span>
+        <span class="state ${st==='ok'?'ok':'no'}">${st==='ok'?'✓ 확정':'✕ 제외'}</span>
+        <span class="title">${esc(it.title)}${it.short?'<span class="badge">단기합격</span>':''}${it.reject?`<span class="badge rej">자동제외: ${esc(it.reject)}</span>`:''}</span>
+      </div>
+      <div class="profile">${esc(it.profile)}${it.year?' · '+esc(String(it.year)):''}</div>
+      ${it.passage?`<div class="passage">${esc(it.passage)}</div>`:''}
+      ${it.quotes&&it.quotes.length?`<div class="quotes">${it.quotes.map(q=>`<div class="q">"${esc(q)}"</div>`).join('')}</div>`:''}
+      ${it.url?`<a class="src" href="${esc(it.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">원문 보기 ↗</a>`:''}
+      <div class="tags">${it.tags.map(t=>`<span class="tag ${t.matched?'m':''}">#${esc(t.tag)}${t.matched?'':' (미매칭)'}</span>`).join('')}</div>
+    </div>`;
+  }).join('');
+  wrap.querySelectorAll('.card').forEach(el=>el.onclick=()=>toggle(el.dataset.id));
+  updateStat();
+}
+function toggle(id){ state[id]=state[id]==='ok'?'no':'ok'; renderCards(); }
+function setAll(v){ for(const it of curItems()) state[it.id]=v; renderCards(); }
+function updateStat(){
+  const ok=Object.values(state).filter(v=>v==='ok').length;
+  document.getElementById('save-stat').textContent=`핀 ${ok} · 제외 ${curItems().length-ok}`;
+}
+
+function persist(){
+  const store=ensure(loadStore());
+  const combo=curCombo(), ck=comboKey(area,combo), mk=keysOf(area);
+  store.pins[area]=store.pins[area]||[];
+  // 이 조합의 기존 핀 제거 후 재작성
+  store.pins[area]=store.pins[area].filter(p=>!mk.every(k=>norm(p.answers&&p.answers[k])===norm(combo[k])));
+  const answers={}; mk.forEach(k=>answers[k]=combo[k]);
+  for(const it of curItems()) if(state[it.id]==='ok')
+    store.pins[area].push({id:it.id, memo:'', answers, matchKeys:mk, pinnedAt:''});
+  store.excludesCombo[area]=store.excludesCombo[area]||{};
+  store.excludesCombo[area][ck]=curItems().filter(it=>state[it.id]==='no').map(it=>it.id);
+  store.reviewed[area]=store.reviewed[area]||{};
+  store.reviewed[area][ck]=true;
+  saveStore(store);
+}
+function next(){
+  const combos=combosOf(area), store=ensure(loadStore());
+  // 다음 미검토 조합으로
+  for(let step=1;step<=combos.length;step++){
+    const j=(ci+step)%combos.length;
+    if(!(store.reviewed[area]&&store.reviewed[area][comboKey(area,combos[j].combo)])){ ci=j; renderCombo(); return; }
+  }
+  ci=Math.min(combos.length-1,ci+1); renderCombo();
+}
+function bulkConfirm(overwrite){
+  if(!DATA) return;
+  const msg = overwrite
+    ? '⚠️ 전체 재확정: 이미 검토한 조합까지 포함해 모든 조합을 현재 자동제외 기준으로 다시 확정(덮어쓰기)합니다. 진행할까요?'
+    : '남은(미검토) 조합 전부를 자동제외 기준대로 확정합니다.\n생존=핀 / 자동제외=제외. 이미 검토한 조합은 보존됩니다.\n진행할까요?';
+  if(!confirm(msg)) return;
+  const store=ensure(loadStore());
+  let nc=0, np=0, ne=0;
+  for(const a of Object.keys(DATA.areas)){
+    const mk=DATA.areas[a].keys;
+    store.pins[a]=store.pins[a]||[]; store.excludesCombo[a]=store.excludesCombo[a]||{}; store.reviewed[a]=store.reviewed[a]||{};
+    for(const c of DATA.areas[a].combos){
+      const ck=mk.map(k=>norm(c.combo[k])).join('|');
+      if(!overwrite && store.reviewed[a][ck]) continue;     // 기본: 이미 검토 → 보존 / 재확정: 덮어씀
+      const answers={}; mk.forEach(k=>answers[k]=c.combo[k]);
+      store.pins[a]=store.pins[a].filter(p=>!mk.every(k=>norm(p.answers&&p.answers[k])===norm(c.combo[k])));
+      const rej=[];
+      for(const it of c.items){
+        if(it.reject){ rej.push(it.id); ne++; }
+        else { store.pins[a].push({id:it.id,memo:'',answers,matchKeys:mk,pinnedAt:''}); np++; }
+      }
+      store.excludesCombo[a][ck]=rej; store.reviewed[a][ck]=true; nc++;
+    }
+  }
+  saveStore(store);
+  alert(`${overwrite?'전체 재확정(덮어쓰기)':'전체 자동확정'} 완료\n조합 ${nc}개 · 핀 ${np}건 · 제외 ${ne}건`);
+  renderCombo();
+}
+function exportStore(){
+  const store=ensure(loadStore());
+  const total=Object.values(store.pins).reduce((a,v)=>a+v.length,0);
+  const payload={version:2, exportedAt:new Date().toISOString(), auto:false, totalPins:total, store};
+  const blob=new Blob([JSON.stringify(payload)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='공무원_curation.json'; a.click();
+}
+function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='SELECT') return;
+  if(e.key==='Enter'){ persist(); next(); e.preventDefault(); }
+  else if(e.key==='ArrowRight'){ persist(); ci=Math.min(combosOf(area).length-1,ci+1); renderCombo(); }
+  else if(e.key==='ArrowLeft'){ persist(); ci=Math.max(0,ci-1); renderCombo(); }
+  else if(/^[0-9]$/.test(e.key)){ const idx=e.key==='0'?9:(+e.key-1); const it=curItems()[idx]; if(it) toggle(it.id); }
+});
+init();
+</script>
+</body>
+</html>
