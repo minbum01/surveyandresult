@@ -1067,6 +1067,8 @@ if (_printMode) {
   if (window.Curation) Curation.onChange(() => { if (LOADED) render(LOADED); });
   // 서버(Supabase) 큐레이션 불러오기 → 로드되면 curation:changed로 재렌더
   if (window.Curation && Curation.loadRemote) Curation.loadRemote();
+  // 출력 RPC 워밍업: 페이지 로드 즉시 device_counters 조회로 연결 미리 수립
+  if (window.supa) window.supa.from('device_counters').select('device').limit(1).then(function(){}).catch(function(){});
 }
 
 // ── 출력: 결과를 인쇄 큐로 보냄 ──
@@ -1145,7 +1147,7 @@ async function dimPrintAndReturn(btn){
   try{
     if (window.supa && window.enqueuePrint){
       var _timeout = new Promise(function(_, rej){
-        setTimeout(function(){ rej(new Error('서버 응답 없음 (10초 초과)')); }, 10000);
+        setTimeout(function(){ rej(new Error('서버 응답 없음 (20초 초과)')); }, 20000);
       });
       var r = await Promise.race([
         window.enqueuePrint(window.CURRENT_EXAM || '공무원', A, null, window.__SEED__),
