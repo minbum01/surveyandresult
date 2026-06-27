@@ -1066,9 +1066,12 @@ if (_printMode) {
   // 관리자 페이지에서 핀/제외가 바뀌면(다른 탭) 즉시 재렌더 — 바로바로 연동
   if (window.Curation) Curation.onChange(() => { if (LOADED) render(LOADED); });
   // 서버(Supabase) 큐레이션 불러오기 → 로드되면 curation:changed로 재렌더
-  if (window.Curation && Curation.loadRemote) Curation.loadRemote();
-  // 출력 RPC 워밍업: 페이지 로드 즉시 device_counters 조회로 연결 미리 수립
-  if (window.supa) window.supa.from('device_counters').select('device').limit(1).then(function(){}).catch(function(){});
+  if (window.Curation && Curation.loadRemote) {
+    Promise.race([
+      Curation.loadRemote(),
+      new Promise(function(res){ setTimeout(res, 5000); })
+    ]).catch(function(){});
+  }
 }
 
 // ── 출력: 결과를 인쇄 큐로 보냄 ──
