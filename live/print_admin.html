@@ -116,19 +116,29 @@ async function loadStations(){
   }).join('') || '<div class="st">스테이션 heartbeat 없음 (print_agent 미실행)</div>';
 }
 
-// 참여 집계: 총 출력 건수 + 기기별 건수 (오늘 하루 행사 기준)
+// 참여 집계: 총 출력 건수 + 기기별 건수
+//   ⚠ 과거엔 print_jobs 최대 1만 행을 통째로 읽어 클라에서 셈 → 폴링/실시간마다 반복돼 DB 과부하·다운 유발.
+//   → DB 집계 RPC(print_stats) 한 번으로 대체. RPC 미생성 시 행 전송 없는 count(head)로 총계만(폴백).
 async function loadStats(){
-  const { data, error } = await supa.from('print_jobs').select('device').limit(10000);
-  if(error){ $('summary').innerHTML = ''; return; }
-  const total = data.length; const by = {};
-  data.forEach(r => { const d = r.device || '미상'; by[d] = (by[d]||0) + 1; });
-  const chips = Object.keys(by).sort().map(d => `<div class="st">기기 <b>${esc(d)}</b> · ${by[d]}명</div>`).join('');
-  $('summary').innerHTML = `<div class="st total">📊 총 참여 <b>${total}</b>명</div>` + chips;
+  try{
+    const { data, error } = await supa.rpc('print_stats');
+    if(!error && data){
+      const total = data.total || 0, by = data.by_device || {};
+      const chips = Object.keys(by).sort().map(d => `<div class="st">기기 <b>${esc(d)}</b> · ${by[d]}명</div>`).join('');
+      $('summary').innerHTML = `<div class="st total">📊 총 참여 <b>${total}</b>명</div>` + chips;
+      return;
+    }
+  }catch(e){}
+  // 폴백: 행 전송 없이 총계만 (count head) — print_stats RPC 적용 전에도 가볍게 동작
+  const { count } = await supa.from('print_jobs').select('id', { count:'exact', head:true });
+  $('summary').innerHTML = `<div class="st total">📊 총 참여 <b>${count||0}</b>명</div>`;
 }
 
 async function loadJobs(){
+  // 무거운 cur(큐레이션 스냅샷)은 목록에서 제외 → 전송량·DB부하 급감. cur은 보기/직접출력 클릭 시 1건만 조회.
   const { data, error } = await supa.from('print_jobs')
-    .select('*').order('created_at',{ascending:false}).limit(60);
+    .select('id,exam,answers,ticket,device,device_seq,seed,status,station,error,created_at,print_count')
+    .order('created_at',{ascending:false}).limit(60);
   if(error){ $('rows').innerHTML = `<tr><td colspan="9" class="empty">읽기 오류: ${error.message}</td></tr>`; return; }
   if(!data.length){ $('rows').innerHTML = '<tr><td colspan="9" class="empty">아직 인쇄 요청이 없습니다.</td></tr>'; return; }
   JOBS = {}; data.forEach(j => { JOBS[j.id] = j; });   // 보기/직접출력에서 작업데이터 조회용
@@ -156,11 +166,18 @@ async function loadJobs(){
 //   서버에 파일 저장 0 — 작업에 박힌 데이터로 매번 동일하게 다시 그림.
 let JOBS = {};
 function pageFor(exam){ return exam === '경찰' ? 'police_result.html' : 'result.html'; }
-function openResult(j, auto){
-  const payload = { ans:j.answers, cur:(j.cur==null?null:j.cur), seed:j.seed,
+async function openResult(j, auto){
+  const w = window.open('about:blank', '_blank');     // 동기 open → 팝업차단 회피(아래 await 전에 먼저 연다)
+  let cur = j.cur;
+  if (cur === undefined){                             // 목록은 cur 미포함(경량) → 클릭 시 그 1건만 조회
+    try { const { data } = await supa.from('print_jobs').select('cur').eq('id', j.id).maybeSingle(); cur = data ? data.cur : null; }
+    catch(e){ cur = null; }
+  }
+  const payload = { ans:j.answers, cur:(cur==null?null:cur), seed:j.seed,
                     ticket:j.ticket, label:label(j), date:j.created_at };
   localStorage.setItem('admin_print_payload', JSON.stringify(payload));
-  window.open(pageFor(j.exam) + '?print=1&src=local' + (auto?'&auto=1':''), '_blank');
+  const url = pageFor(j.exam) + '?print=1&src=local' + (auto?'&auto=1':'');
+  if (w) w.location.href = url; else window.open(url, '_blank');
 }
 function viewJob(id){ const j = JOBS[id]; if(j) openResult(j, false); }
 async function directPrint(id){
@@ -185,10 +202,14 @@ async function refresh(){ if(!supa) return; await Promise.all([loadStations(), l
 //   ⚠ Supabase 대시보드에서 두 테이블을 realtime publication에 넣어야 이벤트가 옴.
 //     supabase/migration_realtime.sql 참고.
 let chan=null;
+// 실시간 이벤트 폭주(등록/claim/완료/print_count 업데이트가 초당 여러 건) 시 무거운 재조회가
+// 매 건마다 도는 걸 막는다 → 1.2초 디바운스로 합쳐 1회만 실행 (DB 부하 핵심 차단).
+let _reloadT=null;
+function scheduleReload(){ clearTimeout(_reloadT); _reloadT=setTimeout(()=>{ loadJobs(); loadStats(); }, 1200); }
 function startRealtime(){
   if(chan || !supa) return;
   chan = supa.channel('print-monitor')
-    .on('postgres_changes', {event:'*', schema:'public', table:'print_jobs'}, ()=>{ loadJobs(); loadStats(); })
+    .on('postgres_changes', {event:'*', schema:'public', table:'print_jobs'}, scheduleReload)
     .on('postgres_changes', {event:'*', schema:'public', table:'stations'},   loadStations)
     .subscribe((status)=>{
       $('conn').textContent = (status==='SUBSCRIBED') ? '🟢 실시간 연결됨'
@@ -201,7 +222,7 @@ function stopRealtime(){ if(chan){ supa.removeChannel(chan); chan=null; } }
 // ── 백업 폴링: 실시간이 끊겨도 갱신되도록 + 스테이션 생존표시(🟢/⚪)는
 //   DB 이벤트 없이 시간만으로 바뀌므로 주기적 재평가가 항상 필요 ──
 let timer=null;
-function startPoll(){ stopPoll(); if($('auto').checked) timer=setInterval(refresh, 5000); }
+function startPoll(){ stopPoll(); if($('auto').checked) timer=setInterval(refresh, 15000); }  // 5초→15초 (실시간이 주, 폴링은 백업)
 function stopPoll(){ if(timer){ clearInterval(timer); timer=null; } }
 
 function enterBoard(){
