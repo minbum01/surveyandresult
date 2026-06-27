@@ -1079,7 +1079,11 @@ async function sendPrint(btn){
     try {
       // cur=null → 인쇄 시 프린트대 컴퓨터가 서버 큐레이션을 그대로 사용
       // window.__SEED__ → 화면에 보인 후기 선택을 그대로 고정(종이/재인쇄 동일)
-      const r = await window.enqueuePrint(window.CURRENT_EXAM || '공무원', A, null, window.__SEED__);
+      const _t = new Promise((_, rej) => setTimeout(() => rej(new Error('서버 응답 없음 (10초 초과)')), 10000));
+      const r = await Promise.race([
+        window.enqueuePrint(window.CURRENT_EXAM || '공무원', A, null, window.__SEED__),
+        _t
+      ]);
       const label = (r && r.label) || ('#' + (r && r.ticket));
       btn.textContent = `출력 접수 ✓  ${label} — 프린트대에 "${label}" 라고 말하세요`;
     } catch (e) {
@@ -1140,7 +1144,13 @@ async function dimPrintAndReturn(btn){
   var label = '';
   try{
     if (window.supa && window.enqueuePrint){
-      var r = await window.enqueuePrint(window.CURRENT_EXAM || '공무원', A, null, window.__SEED__);
+      var _timeout = new Promise(function(_, rej){
+        setTimeout(function(){ rej(new Error('서버 응답 없음 (10초 초과)')); }, 10000);
+      });
+      var r = await Promise.race([
+        window.enqueuePrint(window.CURRENT_EXAM || '공무원', A, null, window.__SEED__),
+        _timeout
+      ]);
       label = (r && (r.label || (r.ticket != null ? '#' + r.ticket : ''))) || '';
     } else {
       await fetch('/print', { method:'POST', headers:{'Content-Type':'application/json'},
