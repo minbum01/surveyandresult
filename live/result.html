@@ -1074,38 +1074,29 @@ if (_printMode) {
 // ── 출력: 결과를 인쇄 큐로 보냄 ──
 //  · 행사(클라우드): Supabase print_jobs 큐에 등록 → 프린트대 컴퓨터(print_agent)가 받아 인쇄 → 출력번호 표시
 //  · 폴백(단일 PC, supa 없음): 같은 PC의 print_server.py(/print)로 직접 무창 인쇄
+async function callPrintAPI(exam, answers, seed, device) {
+  const r = await fetch('/api/print', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ exam: exam || '공무원', answers, seed, device }),
+  });
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.error || '출력 서버 오류');
+  return data;
+}
+
 async function sendPrint(btn){
   const old = btn.textContent;
   btn.disabled = true; btn.textContent = '출력 전송 중…';
-  if (window.supa && window.enqueuePrint) {
-    try {
-      // cur=null → 인쇄 시 프린트대 컴퓨터가 서버 큐레이션을 그대로 사용
-      // window.__SEED__ → 화면에 보인 후기 선택을 그대로 고정(종이/재인쇄 동일)
-      const _t = new Promise((_, rej) => setTimeout(() => rej(new Error('서버 응답 없음 (10초 초과)')), 10000));
-      const r = await Promise.race([
-        window.enqueuePrint(window.CURRENT_EXAM || '공무원', A, null, window.__SEED__),
-        _t
-      ]);
-      const label = (r && r.label) || ('#' + (r && r.ticket));
-      btn.textContent = `출력 접수 ✓  ${label} — 프린트대에 "${label}" 라고 말하세요`;
-    } catch (e) {
-      btn.textContent = '실패: ' + (e.message || e);
-    } finally {
-      setTimeout(() => { btn.textContent = old; btn.disabled = false; }, 6000);
-    }
-    return;
+  try {
+    const r = await callPrintAPI(window.CURRENT_EXAM, A, window.__SEED__, window.DEVICE_ID);
+    const label = (r && r.label) || ('#' + (r && r.ticket));
+    btn.textContent = `출력 접수 ✓  ${label} — 프린트대에 "${label}" 라고 말하세요`;
+  } catch (e) {
+    btn.textContent = '실패: ' + (e.message || e);
+  } finally {
+    setTimeout(() => { btn.textContent = old; btn.disabled = false; }, 6000);
   }
-  const t0 = performance.now();
-  fetch('/print', {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ ans: A, cur: localStorage.getItem('admin_curation_v2') })
-  }).then(r => r.json())
-    .then(d => {
-      const sec = ((performance.now() - t0) / 1000).toFixed(1);
-      btn.textContent = d.ok ? ('인쇄됨 ✓ ' + sec + '초') : ('실패: ' + (d.error||''));
-    })
-    .catch(() => { btn.textContent = '실패 (서버 확인)'; })
-    .finally(() => { setTimeout(() => { btn.textContent = old; btn.disabled = false; }, 4000); });
 }
 
 // ── 라이브 미리보기: 관리자(부모 창)가 답변/재렌더 신호를 보냄 ──
@@ -1145,21 +1136,10 @@ async function dimPrintAndReturn(btn){
   btn.disabled = true; btn.textContent = '출력 중…';
   var label = '';
   try{
-    if (window.supa && window.enqueuePrint){
-      var _timeout = new Promise(function(_, rej){
-        setTimeout(function(){ rej(new Error('서버 응답 없음 (20초 초과)')); }, 20000);
-      });
-      var r = await Promise.race([
-        window.enqueuePrint(window.CURRENT_EXAM || '공무원', A, null, window.__SEED__),
-        _timeout
-      ]);
-      label = (r && (r.label || (r.ticket != null ? '#' + r.ticket : ''))) || '';
-    } else {
-      await fetch('/print', { method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ ans: A, cur: localStorage.getItem('admin_curation_v2') }) });
-    }
+    var r = await callPrintAPI(window.CURRENT_EXAM, A, window.__SEED__, window.DEVICE_ID);
+    label = (r && (r.label || (r.ticket != null ? '#' + r.ticket : ''))) || '';
   }catch(e){
-    console.error('[출력오류]', e && (e.message || String(e)), '| supa:', !!window.supa, '| device:', window.DEVICE_ID);
+    console.error('[출력오류]', e && (e.message || String(e)));
     btn.textContent = '출력 실패 — 잠시 후 이동'; btn.disabled = false;
     await new Promise(function(res){ setTimeout(res, 2000); });
   }
