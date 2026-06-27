@@ -1133,7 +1133,7 @@ try { if (window.parent && window.parent !== window) window.parent.postMessage({
     setTimeout(function(){
       var g = document.getElementById('dim-gate');
       if (g) { g.classList.add('show'); g.setAttribute('aria-hidden','false'); document.body.classList.add('gate-locked'); }
-    }, 4000);
+    }, 10000);
   }catch(e){}
 })();
 
