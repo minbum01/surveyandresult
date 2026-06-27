@@ -54,15 +54,18 @@
   // Supabase에서 이 시험의 큐레이션을 읽어 캐시 → 결과페이지 재렌더(curation:changed)
   async function loadRemote() {
     if (!global.supa) return false;
+    const ac = new AbortController();
+    const timer = setTimeout(() => ac.abort(), 5000);
     try {
       const { data, error } = await global.supa
-        .from('curation').select('data').eq('exam', EXAM()).maybeSingle();
+        .from('curation').select('data').eq('exam', EXAM()).abortSignal(ac.signal).maybeSingle();
+      clearTimeout(timer);
       if (error) { console.warn('[Curation] loadRemote', error.message); return false; }
       // 행이 없거나 빈 데이터면 null → getStore가 localStorage로 폴백(빈 서버가 로컬 핀을 가리지 않게)
       _remote = (data && data.data && typeof data.data === 'object' && Object.keys(data.data).length) ? data.data : null;
       try { global.dispatchEvent(new Event('curation:changed')); } catch (e) {}
       return true;
-    } catch (e) { console.warn('[Curation] loadRemote', e); return false; }
+    } catch (e) { clearTimeout(timer); console.warn('[Curation] loadRemote', e); return false; }
   }
 
   // 큐레이션 전체를 Supabase에 저장(관리자). 로그인(authenticated) 필요.
