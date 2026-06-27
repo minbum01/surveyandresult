@@ -1156,7 +1156,11 @@ async function dimPrintAndReturn(btn){
       await fetch('/print', { method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ ans: A, cur: localStorage.getItem('admin_curation_v2') }) });
     }
-  }catch(e){ /* 실패해도 다음 사람을 위해 설문으로 복귀 */ }
+  }catch(e){
+    console.error('[출력오류]', e && (e.message || String(e)), '| supa:', !!window.supa, '| device:', window.DEVICE_ID);
+    btn.textContent = '출력 실패 — 잠시 후 이동'; btn.disabled = false;
+    await new Promise(function(res){ setTimeout(res, 2000); });
+  }
   var dest = (window.__withDevice ? window.__withDevice('index.html') : 'index.html');
   // 접수된 내 번호를 버튼 위에 크게 표시(프린트대 매칭용) → 잠시 후 다음 사람을 위해 자동 복귀
   var numEl = document.getElementById('dim-number'), subEl = document.getElementById('dim-sub');
