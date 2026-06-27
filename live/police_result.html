@@ -220,7 +220,7 @@ body.preview-embed .dev-toolbar,
 body.preview-embed .loading{ display:none !important; }
 body.preview-embed .layout-row{ display:block; max-width:none; margin:0; }
 body.preview-embed .sheets{ gap:14px; }
-/* ── 3초 후 딤 게이트(행사 키오스크): 화면을 가려 다 읽지 못하게 하고 출력 유도 ── */
+/* ── 10초 후 딤 게이트(행사 키오스크): 화면을 가려 다 읽지 못하게 하고 출력 유도 ── */
 #dim-gate{ position:fixed; inset:0; z-index:9999; display:none;
   align-items:center; justify-content:center; flex-direction:column;
   background:rgba(10,16,30,.72);
@@ -230,6 +230,8 @@ body.preview-embed .sheets{ gap:14px; }
 #dim-gate .dg-inner{ text-align:center; color:#fff; padding:24px; }
 #dim-gate .dg-title{ font-size:clamp(22px,4vw,34px); font-weight:900; letter-spacing:-.03em; margin-bottom:12px; }
 #dim-gate .dg-sub{ font-size:clamp(13px,2vw,16px); color:rgba(255,255,255,.7); margin-bottom:30px; line-height:1.65; }
+#dim-gate .dg-number{ font-size:clamp(44px,10vw,80px); font-weight:900; letter-spacing:.02em;
+  color:#fff; line-height:1; margin:-4px 0 28px; text-shadow:0 8px 34px rgba(43,95,255,.6); }
 #dim-gate .dg-print{ font-family:inherit; cursor:pointer; border:none;
   background:linear-gradient(135deg,#3B7FFF,#2B5FFF); color:#fff;
   font-size:clamp(17px,2.6vw,22px); font-weight:800; letter-spacing:-.01em;
@@ -386,10 +388,7 @@ body.gate-locked{ overflow:hidden; }
         <div class="cta-quote" id="cta-quote">— 로딩 중 —</div>
         <div class="cta-source" id="cta-source">—</div>
       </div>
-      <div class="cta-buttons">
-        <button class="btn-ghost" onclick="sendPrint(this)">리포트 출력</button>
-        <button class="btn-mark">무료 학습 상담 신청</button>
-      </div>
+      <!-- (리포트 출력 / 무료 학습 상담 신청 버튼 제거됨) -->
     </div>
 
   </div>
@@ -1201,7 +1200,7 @@ window.addEventListener('message', (e) => {
 // 부모(관리자) 프레임에 "준비됨" 통지 → 관리자가 초기 답변을 주입
 try { if (window.parent && window.parent !== window) window.parent.postMessage({ type: 'previewReady' }, '*'); } catch (_) {}
 
-// ── 3초 후 딤 게이트: 화면을 가려 더 읽지 못하게 하고 출력 유도 ──
+// ── 10초 후 딤 게이트: 화면을 가려 더 읽지 못하게 하고 출력 유도 ──
 //    인쇄(?print=1)·관리자 미리보기(?preview=1)·iframe 임베드에선 동작 안 함.
 (function(){
   try{
@@ -1211,7 +1210,7 @@ try { if (window.parent && window.parent !== window) window.parent.postMessage({
     setTimeout(function(){
       var g = document.getElementById('dim-gate');
       if (g) { g.classList.add('show'); g.setAttribute('aria-hidden','false'); document.body.classList.add('gate-locked'); }
-    }, 3000);
+    }, 10000);
   }catch(e){}
 })();
 
@@ -1219,24 +1218,37 @@ try { if (window.parent && window.parent !== window) window.parent.postMessage({
 async function dimPrintAndReturn(btn){
   if (btn.disabled) return;
   btn.disabled = true; btn.textContent = '출력 중…';
+  var label = '';
   try{
     if (window.supa && window.enqueuePrint){
-      await window.enqueuePrint(window.CURRENT_EXAM || '경찰', A, null, window.__SEED__);
+      var r = await window.enqueuePrint(window.CURRENT_EXAM || '경찰', A, null, window.__SEED__);
+      label = (r && (r.label || (r.ticket != null ? '#' + r.ticket : ''))) || '';
     } else {
       await fetch('/print', { method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ ans: A, cur: localStorage.getItem('admin_curation_v2_경찰') }) });
     }
   }catch(e){ /* 실패해도 다음 사람을 위해 설문으로 복귀 */ }
   var dest = (window.__withDevice ? window.__withDevice('police_survey.html') : 'police_survey.html');
-  location.replace(dest);
+  // 접수된 내 번호를 버튼 위에 크게 표시(프린트대 매칭용) → 잠시 후 다음 사람을 위해 자동 복귀
+  var numEl = document.getElementById('dim-number'), subEl = document.getElementById('dim-sub');
+  if (label && numEl){
+    numEl.textContent = label; numEl.style.display = 'block';
+    if (subEl) subEl.innerHTML = '프린트대에 <b>이 번호</b>를 말씀해 주세요.<br>잠시 후 처음 화면으로 돌아갑니다.';
+    btn.disabled = false; btn.textContent = '다음 사람 ▶';
+    btn.onclick = function(){ location.replace(dest); };
+    setTimeout(function(){ location.replace(dest); }, 7000);
+  } else {
+    location.replace(dest);
+  }
 }
 </script>
 
-<!-- 3초 후 화면을 가리고 출력 유도 (행사 키오스크) -->
+<!-- 10초 후 화면을 가리고 출력 유도 (행사 키오스크) -->
 <div id="dim-gate" aria-hidden="true">
   <div class="dg-inner">
     <div class="dg-title">결과가 준비됐어요</div>
-    <div class="dg-sub">자세한 내용은 인쇄된 리포트로 확인하세요.<br>아래 버튼을 누르면 리포트가 출력됩니다.</div>
+    <div class="dg-sub" id="dim-sub">자세한 내용은 인쇄된 리포트로 확인하세요.<br>아래 버튼을 누르면 리포트가 출력됩니다.</div>
+    <div class="dg-number" id="dim-number" style="display:none"></div>
     <button class="dg-print" id="dim-print-btn" onclick="dimPrintAndReturn(this)">출력하기</button>
   </div>
 </div>
