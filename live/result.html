@@ -220,7 +220,7 @@ body.preview-embed .dev-toolbar,
 body.preview-embed .loading{ display:none !important; }
 body.preview-embed .layout-row{ display:block; max-width:none; margin:0; }
 body.preview-embed .sheets{ gap:14px; }
-/* ── 7초 후 딤 게이트(행사 키오스크): 화면을 가려 다 읽지 못하게 하고 출력 유도 ── */
+/* ── 5.5초 후 딤 게이트(행사 키오스크): 화면을 가려 다 읽지 못하게 하고 출력 유도 ── */
 #dim-gate{ position:fixed; inset:0; z-index:9999; display:none;
   align-items:center; justify-content:center; flex-direction:column;
   background:rgba(10,16,30,.72);
@@ -1119,7 +1119,7 @@ window.addEventListener('message', (e) => {
 // 부모(관리자) 프레임에 "준비됨" 통지 → 관리자가 초기 답변을 주입
 try { if (window.parent && window.parent !== window) window.parent.postMessage({ type: 'previewReady' }, '*'); } catch (_) {}
 
-// ── 7초 후 딤 게이트: 화면을 가려 더 읽지 못하게 하고 출력 유도 ──
+// ── 5.5초 후 딤 게이트: 화면을 가려 더 읽지 못하게 하고 출력 유도 ──
 //    인쇄(?print=1)·관리자 미리보기(?preview=1)·iframe 임베드에선 동작 안 함.
 (function(){
   try{
@@ -1129,7 +1129,7 @@ try { if (window.parent && window.parent !== window) window.parent.postMessage({
     setTimeout(function(){
       var g = document.getElementById('dim-gate');
       if (g) { g.classList.add('show'); g.setAttribute('aria-hidden','false'); document.body.classList.add('gate-locked'); }
-    }, 7000);
+    }, 5500);
   }catch(e){}
 })();
 
@@ -1162,7 +1162,7 @@ async function dimPrintAndReturn(btn){
 }
 </script>
 
-<!-- 7초 후 화면을 가리고 출력 유도 (행사 키오스크) -->
+<!-- 5.5초 후 화면을 가리고 출력 유도 (행사 키오스크) -->
 <div id="dim-gate" aria-hidden="true">
   <div class="dg-inner">
     <div class="dg-title">결과가 준비됐어요</div>
