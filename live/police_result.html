@@ -220,8 +220,54 @@ body.preview-embed .dev-toolbar,
 body.preview-embed .loading{ display:none !important; }
 body.preview-embed .layout-row{ display:block; max-width:none; margin:0; }
 body.preview-embed .sheets{ gap:14px; }
+/* ── 3초 후 딤 게이트(행사 키오스크): 화면을 가려 다 읽지 못하게 하고 출력 유도 ── */
+#dim-gate{ position:fixed; inset:0; z-index:9999; display:none;
+  align-items:center; justify-content:center; flex-direction:column;
+  background:rgba(10,16,30,.72);
+  -webkit-backdrop-filter:blur(16px) saturate(.8); backdrop-filter:blur(16px) saturate(.8);
+  opacity:0; transition:opacity .55s ease; }
+#dim-gate.show{ display:flex; opacity:1; }
+#dim-gate .dg-inner{ text-align:center; color:#fff; padding:24px; }
+#dim-gate .dg-title{ font-size:clamp(22px,4vw,34px); font-weight:900; letter-spacing:-.03em; margin-bottom:12px; }
+#dim-gate .dg-sub{ font-size:clamp(13px,2vw,16px); color:rgba(255,255,255,.7); margin-bottom:30px; line-height:1.65; }
+#dim-gate .dg-print{ font-family:inherit; cursor:pointer; border:none;
+  background:linear-gradient(135deg,#3B7FFF,#2B5FFF); color:#fff;
+  font-size:clamp(17px,2.6vw,22px); font-weight:800; letter-spacing:-.01em;
+  padding:18px 60px; border-radius:999px; box-shadow:0 14px 40px -8px rgba(43,95,255,.6);
+  transition:transform .2s ease, box-shadow .2s ease; }
+#dim-gate .dg-print:hover{ transform:translateY(-2px); box-shadow:0 18px 48px -8px rgba(43,95,255,.7); }
+#dim-gate .dg-print:active{ transform:scale(.97); }
+#dim-gate .dg-print[disabled]{ opacity:.6; cursor:default; }
+body.gate-locked{ overflow:hidden; }
+@media print{ #dim-gate{ display:none !important; } }
 </style>
 <script>window.CURRENT_EXAM = '경찰';</script>
+<script>
+/* 기기 라벨(?d) 고정: ?d=A 가 한 번 들어오면 localStorage에 저장하고, 이후 URL에
+   없어도 다시 붙여 계속 살려둔다. 내부 이동은 __withDevice()로 d 를 이어붙인다. */
+(function(){
+  try{
+    var sp = new URLSearchParams(location.search);
+    var d = sp.get('d');
+    if (d) { localStorage.setItem('device_id', d); }
+    else {
+      d = localStorage.getItem('device_id');
+      var embedded = (window.parent && window.parent !== window);
+      if (d && !sp.get('print') && !sp.get('preview') && !embedded) {
+        sp.set('d', d);
+        history.replaceState(null, '', location.pathname + '?' + sp.toString() + location.hash);
+      }
+    }
+    window.__withDevice = function(url){
+      try{
+        var dd = localStorage.getItem('device_id');
+        if (!dd || /[?&]d=/.test(url)) return url;
+        return url + (url.indexOf('?') >= 0 ? '&' : '?') + 'd=' + encodeURIComponent(dd);
+      }catch(e){ return url; }
+    };
+  }catch(e){}
+})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supa.js"></script>
 <script src="curation_sync.js"></script>
@@ -910,12 +956,12 @@ function loadAndRender() {
   document.getElementById('loading').classList.remove('hidden');
   if (location.protocol === 'file:') {
     document.getElementById('loading').textContent = '⚠ 로컬 서버에서 열어주세요';
-    return;
+    return Promise.resolve();
   }
   // 2면 통계는 한 번만 로드(없어도 본문은 렌더)
   const statsP = STATS ? Promise.resolve(STATS)
     : fetch('police_stats.json').then(r => r.ok ? r.json() : null).catch(() => null);
-  Promise.all([fetch('../police_reviews_data.json').then(r => r.json()), statsP])
+  return Promise.all([fetch('../police_reviews_data.json').then(r => r.json()), statsP])
     .then(([data, stats]) => {
       if (stats) STATS = stats;
       render(data);
@@ -1068,24 +1114,43 @@ document.getElementById('demo-select').addEventListener('change', (e) => {
   syncSelectorsFromA();
   loadAndRender();
 });
-// ── 인쇄모드(?print=1): 헤드리스 크롬이 답변·큐레이션을 주입받아 렌더 ──
-const _printMode = new URLSearchParams(location.search).get('print');
+// ── 인쇄모드(?print=1) ──
+//   · 에이전트(헤드리스):  ?print=1&pd=_printdata_X.json  → PDF로 굽기(인쇄창 없음)
+//   · 어드민 직접출력:     ?print=1&src=local&auto=1       → localStorage 작업데이터로 렌더 후 브라우저 인쇄창
+const _sp = new URLSearchParams(location.search);
+const _printMode = _sp.get('print');
 if (_printMode) {
-  const _pdFile = new URLSearchParams(location.search).get('pd') || '_printdata.json';
-  fetch(_pdFile + '?_=' + Date.now())
-    .then(r => r.json())
-    .then(pd => {
-      if (pd.seed != null) window.__setSeed(pd.seed);          // 저장된 시드로 고정 → 화면과 동일 출력
-      if (Array.isArray(pd.ans) && pd.ans.length >= 8) A = pd.ans;
-      if (pd.cur != null) window.__PRINT_CUR__ = pd.cur;
-      if (pd.label != null || pd.ticket != null) { const el = document.getElementById('print-ticket'); if (el) el.textContent = pd.label || ('#' + pd.ticket); }  // 출력번호 배지 (라벨 C-3 우선)
-      syncSelectorsFromA();
-      const go = () => loadAndRender();
-      if (pd.cur == null && window.Curation && Curation.loadRemote) {
-        Curation.loadRemote().then(go).catch(go);   // 스냅샷 없으면 서버 큐레이션 폴백
-      } else { go(); }
-    })
-    .catch(() => loadAndRender());
+  const _auto = _sp.get('auto');     // 렌더가 끝나면 브라우저 인쇄창 자동 호출(어드민 직접출력)
+  const _apply = async (pd) => {
+    pd = pd || {};
+    if (pd.seed != null) window.__setSeed(pd.seed);          // 저장된 시드로 고정 → 화면과 동일 출력
+    if (Array.isArray(pd.ans) && pd.ans.length >= 8) A = pd.ans;
+    if (pd.cur != null) {
+      window.__PRINT_CUR__ = (typeof pd.cur === 'string') ? pd.cur : JSON.stringify(pd.cur);  // 큐레이션 스냅샷(문자열/객체 허용)
+    } else if (window.Curation && Curation.loadRemote) {
+      try { await Curation.loadRemote(); } catch (e) {}      // 스냅샷 없으면 서버 큐레이션 폴백
+    }
+    if (pd.date) {                                            // 출력일자 동결(늦게 뽑아도 원래 날짜)
+      const dt = new Date(pd.date);
+      if (!isNaN(dt)) document.getElementById('rpt-date').textContent =
+        `${dt.getFullYear()}.${String(dt.getMonth()+1).padStart(2,'0')}.${String(dt.getDate()).padStart(2,'0')}`;
+    }
+    if (pd.label != null || pd.ticket != null) { const el = document.getElementById('print-ticket'); if (el) el.textContent = pd.label || ('#' + pd.ticket); }  // 출력번호 배지 (라벨 C-3 우선)
+    syncSelectorsFromA();
+    await loadAndRender();
+    if (_auto) {
+      try { if (document.fonts && document.fonts.ready) await document.fonts.ready; } catch (_) {}
+      setTimeout(() => { try { window.print(); } catch (_) {} }, 350);
+    }
+  };
+  if (_sp.get('src') === 'local') {
+    let pd = {};
+    try { pd = JSON.parse(localStorage.getItem('admin_print_payload') || '{}'); } catch (e) {}
+    _apply(pd);
+  } else {
+    const _pdFile = _sp.get('pd') || '_printdata.json';
+    fetch(_pdFile + '?_=' + Date.now()).then(r => r.json()).then(_apply).catch(() => loadAndRender());
+  }
 } else {
   loadAndRender();
   // 관리자 페이지에서 핀/제외가 바뀌면(다른 탭) 즉시 재렌더 — 바로바로 연동
@@ -1135,6 +1200,45 @@ window.addEventListener('message', (e) => {
 });
 // 부모(관리자) 프레임에 "준비됨" 통지 → 관리자가 초기 답변을 주입
 try { if (window.parent && window.parent !== window) window.parent.postMessage({ type: 'previewReady' }, '*'); } catch (_) {}
+
+// ── 3초 후 딤 게이트: 화면을 가려 더 읽지 못하게 하고 출력 유도 ──
+//    인쇄(?print=1)·관리자 미리보기(?preview=1)·iframe 임베드에선 동작 안 함.
+(function(){
+  try{
+    var sp = new URLSearchParams(location.search);
+    if (sp.get('print') || sp.get('preview')) return;
+    if (window.parent && window.parent !== window) return;   // 미리보기 iframe 내부 제외
+    setTimeout(function(){
+      var g = document.getElementById('dim-gate');
+      if (g) { g.classList.add('show'); g.setAttribute('aria-hidden','false'); document.body.classList.add('gate-locked'); }
+    }, 3000);
+  }catch(e){}
+})();
+
+// 출력하기: 인쇄 큐에 등록한 뒤 다음 사람을 위해 설문으로 복귀 ──
+async function dimPrintAndReturn(btn){
+  if (btn.disabled) return;
+  btn.disabled = true; btn.textContent = '출력 중…';
+  try{
+    if (window.supa && window.enqueuePrint){
+      await window.enqueuePrint(window.CURRENT_EXAM || '경찰', A, null, window.__SEED__);
+    } else {
+      await fetch('/print', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ ans: A, cur: localStorage.getItem('admin_curation_v2_경찰') }) });
+    }
+  }catch(e){ /* 실패해도 다음 사람을 위해 설문으로 복귀 */ }
+  var dest = (window.__withDevice ? window.__withDevice('police_survey.html') : 'police_survey.html');
+  location.replace(dest);
+}
 </script>
+
+<!-- 3초 후 화면을 가리고 출력 유도 (행사 키오스크) -->
+<div id="dim-gate" aria-hidden="true">
+  <div class="dg-inner">
+    <div class="dg-title">결과가 준비됐어요</div>
+    <div class="dg-sub">자세한 내용은 인쇄된 리포트로 확인하세요.<br>아래 버튼을 누르면 리포트가 출력됩니다.</div>
+    <button class="dg-print" id="dim-print-btn" onclick="dimPrintAndReturn(this)">출력하기</button>
+  </div>
+</div>
 </body>
 </html>

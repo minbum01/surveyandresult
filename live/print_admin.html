@@ -65,11 +65,14 @@
   <div class="stations" id="stations"></div>
   <table>
     <thead><tr>
-      <th>번호</th><th>태블릿</th><th>시험</th><th>프로필</th><th>상태</th><th>스테이션</th><th>시각</th><th></th>
+      <th>번호</th><th>태블릿</th><th>시험</th><th>프로필</th><th>상태</th><th>스테이션</th><th>시각</th><th>출력횟수</th><th></th>
     </tr></thead>
-    <tbody id="rows"><tr><td colspan="8" class="empty">불러오는 중…</td></tr></tbody>
+    <tbody id="rows"><tr><td colspan="9" class="empty">불러오는 중…</td></tr></tbody>
   </table>
-  <p class="muted" style="margin-top:12px">대기/오류 작업은 <b>재인쇄</b>로 큐에 다시 올립니다 → 프린트대 컴퓨터(에이전트)가 받아 출력합니다.</p>
+  <p class="muted" style="margin-top:12px">
+    <b>보기</b>=결과지를 새 탭에서 그대로 확인 · <b>직접출력</b>=이 PC 브라우저로 인쇄(횟수 +1) · <b>재인쇄</b>=프린트대 컴퓨터(에이전트) 큐에 다시 올림.<br>
+    답변·시드·큐레이션이 작업에 동결돼 있어 <b>언제 다시 뽑아도 결과물은 동일</b>합니다.
+  </p>
 </div>
 
 <script>
@@ -126,8 +129,9 @@ async function loadStats(){
 async function loadJobs(){
   const { data, error } = await supa.from('print_jobs')
     .select('*').order('created_at',{ascending:false}).limit(60);
-  if(error){ $('rows').innerHTML = `<tr><td colspan="8" class="empty">읽기 오류: ${error.message}</td></tr>`; return; }
-  if(!data.length){ $('rows').innerHTML = '<tr><td colspan="8" class="empty">아직 인쇄 요청이 없습니다.</td></tr>'; return; }
+  if(error){ $('rows').innerHTML = `<tr><td colspan="9" class="empty">읽기 오류: ${error.message}</td></tr>`; return; }
+  if(!data.length){ $('rows').innerHTML = '<tr><td colspan="9" class="empty">아직 인쇄 요청이 없습니다.</td></tr>'; return; }
+  JOBS = {}; data.forEach(j => { JOBS[j.id] = j; });   // 보기/직접출력에서 작업데이터 조회용
   const st = { pending:'대기', printing:'인쇄중', done:'완료', error:'오류' };
   $('rows').innerHTML = data.map(j=>`
     <tr>
@@ -138,9 +142,32 @@ async function loadJobs(){
       <td><span class="badge ${j.status}">${st[j.status]||j.status}</span></td>
       <td>${esc(j.station||'—')}</td>
       <td class="muted">${fmtTime(j.created_at)}</td>
-      <td class="row-actions">${(j.status==='error'||j.status==='done'||j.status==='pending')
-        ? `<button onclick="reprint(${j.id})">${j.status==='done'?'재인쇄':'다시 출력'}</button>`:''}</td>
+      <td style="text-align:center">${j.print_count ? `<b style="color:var(--done)">${j.print_count}</b>회` : '<span class="muted">0</span>'}</td>
+      <td class="row-actions">
+        <button onclick="viewJob(${j.id})">📄 보기</button>
+        <button class="primary" onclick="directPrint(${j.id})">🖨 직접출력</button>
+        ${(j.status==='error'||j.status==='done'||j.status==='pending')
+          ? `<button onclick="reprint(${j.id})">${j.status==='done'?'재인쇄':'다시 출력'}</button>`:''}
+      </td>
     </tr>`).join('');
+}
+
+// ── 직접출력/보기: 작업의 답변·시드·큐레이션·날짜를 result 페이지에 넘겨 그 자리에서 렌더 ──
+//   서버에 파일 저장 0 — 작업에 박힌 데이터로 매번 동일하게 다시 그림.
+let JOBS = {};
+function pageFor(exam){ return exam === '경찰' ? 'police_result.html' : 'result.html'; }
+function openResult(j, auto){
+  const payload = { ans:j.answers, cur:(j.cur==null?null:j.cur), seed:j.seed,
+                    ticket:j.ticket, label:label(j), date:j.created_at };
+  localStorage.setItem('admin_print_payload', JSON.stringify(payload));
+  window.open(pageFor(j.exam) + '?print=1&src=local' + (auto?'&auto=1':''), '_blank');
+}
+function viewJob(id){ const j = JOBS[id]; if(j) openResult(j, false); }
+async function directPrint(id){
+  const j = JOBS[id]; if(!j) return;
+  openResult(j, true);                                  // 새 탭에서 렌더 후 자동 인쇄창
+  try { await supa.rpc('bump_print_count', { p_id: id }); refresh(); }  // 출력 횟수 +1
+  catch(e){ console.warn('bump_print_count', e); }
 }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 // 기기별 라벨(C-3). 기기/순번 없으면 전체 출력번호(#ticket) 폴백.

@@ -62,8 +62,8 @@ body{ font-family:var(--sans); background:var(--paper); color:var(--navy); -webk
 .panel{ position:relative; overflow:hidden; background:var(--card); color:var(--navy);
   padding:30px 36px 22px; display:flex; flex-direction:column; height:905px; border-right:2px solid var(--blue); }
 /* ONE SHOT KILL — 외곽선만(잉크 거의 0) */
-.ghost{ position:absolute; top:8px; right:-14px; z-index:0; font-weight:900; font-style:italic; font-size:104px; line-height:.9;
-  letter-spacing:-.03em; text-align:right; color:transparent; -webkit-text-stroke:1.4px rgba(31,79,224,.16);
+.ghost{ position:absolute; top:6px; right:-6px; z-index:0; font-weight:900; font-style:italic; font-size:54px; line-height:.86;
+  letter-spacing:-.03em; text-align:right; color:transparent; -webkit-text-stroke:1px rgba(31,79,224,.12);
   text-transform:uppercase; pointer-events:none; white-space:nowrap; }
 .panel > *{ position:relative; z-index:1; }
 
@@ -81,7 +81,7 @@ body{ font-family:var(--sans); background:var(--paper); color:var(--navy); -webk
 .profile-line{ font-weight:800; font-size:33px; line-height:1.26; letter-spacing:-.022em; color:var(--navy); }
 
 .panel-passage{ margin-top:15px; padding-top:13px; border-top:1px solid var(--bd-soft); }
-.passage-value{ font-weight:500; font-size:14px; line-height:1.78; color:var(--ink-soft); padding-left:15px; border-left:3px solid var(--blue); -webkit-line-clamp:6; display:-webkit-box; -webkit-box-orient:vertical; overflow:hidden; }
+.passage-value{ font-weight:500; font-size:14px; line-height:1.78; color:var(--ink-soft); padding-left:15px; border-left:3px solid var(--blue); -webkit-line-clamp:9; display:-webkit-box; -webkit-box-orient:vertical; overflow:hidden; }
 .passage-source{ font-weight:600; font-size:10px; letter-spacing:.3px; color:var(--ink-mute); margin-top:11px; padding-left:18px; }
 
 .panel-tags{ margin-top:14px; }
@@ -112,9 +112,9 @@ body{ font-family:var(--sans); background:var(--paper); color:var(--navy); -webk
 .cards-row{ display:grid; grid-template-columns:1fr 1fr; gap:11px; }
 .mini-card{ background:var(--card); border:1px solid var(--bd); border-left:4px solid var(--blue); padding:12px 14px; }
 .cards-row .mini-card:only-child{ grid-column:1 / -1; padding:16px 18px; }
-.cards-row .mini-card:only-child .mini-card-passage{ -webkit-line-clamp:4; font-size:13px; }
+.cards-row .mini-card:only-child .mini-card-passage{ -webkit-line-clamp:8; font-size:13px; }
 .mini-card-title{ font-weight:700; font-size:10px; color:var(--blue); margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.mini-card-passage{ font-weight:500; font-size:11.5px; line-height:1.6; color:var(--ink-soft); -webkit-line-clamp:3; display:-webkit-box; -webkit-box-orient:vertical; overflow:hidden; }
+.mini-card-passage{ font-weight:500; font-size:11.5px; line-height:1.6; color:var(--ink-soft); -webkit-line-clamp:6; display:-webkit-box; -webkit-box-orient:vertical; overflow:hidden; }
 
 .quote-block{ background:var(--card); border:1px solid var(--bd); border-left:4px solid var(--blue); padding:13px 16px; }
 .quote-keyword{ font-weight:800; font-size:10.5px; color:var(--blue); margin-bottom:6px; }
@@ -154,27 +154,21 @@ body{ font-family:var(--sans); background:var(--paper); color:var(--navy); -webk
 .story-tag{ font-weight:600; font-size:9px; padding:2px 7px; border:1px solid var(--bd); color:var(--ink-soft); border-radius:2px; }
 .story-tag.matched{ border-color:var(--blue); color:var(--blue); }
 
-.bottom-grid{ display:grid; grid-template-columns:1fr 340px; gap:15px; margin-top:16px; }
+.bottom-grid{ display:grid; grid-template-columns:1fr; gap:15px; margin-top:16px; }
 .insight-card{ background:var(--card); border:1px solid var(--bd); border-left:4px solid var(--blue); padding:17px 18px; }
-.hard-subject{ display:flex; flex-direction:column; }
-.strat-item{ margin-bottom:13px; padding-left:13px; border-left:3px solid var(--blue); }
-.strat-item:last-child{ margin-bottom:0; }
+.strat-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px 28px; }
+.strat-item{ padding-left:11px; border-left:3px solid var(--blue); }
 .strat-cat{ display:inline-block; font-weight:800; font-size:9px; letter-spacing:.3px; color:var(--blue); border:1px solid var(--blue); border-radius:2px; padding:1px 6px; margin-bottom:5px; }
 .strat-cat.exam{ color:var(--navy); border-color:var(--navy); }
 .strat-cat.life{ color:var(--ink-mute); border-color:var(--ink-mute); }
-.strat-text{ font-weight:500; font-size:12px; color:var(--ink-soft); line-height:1.58; -webkit-line-clamp:3; display:-webkit-box; -webkit-box-orient:vertical; overflow:hidden; }
+.strat-cat.mind{ color:#1f8a5b; border-color:#1f8a5b; }
+.strat-text{ font-weight:500; font-size:12px; color:var(--ink-soft); line-height:1.55; -webkit-line-clamp:3; display:-webkit-box; -webkit-box-orient:vertical; overflow:hidden; }
 .first-month-list{ display:flex; flex-direction:column; gap:11px; }
 .fm-item{ display:flex; align-items:flex-start; gap:10px; }
 .fm-number{ width:23px; height:23px; border:1.5px solid var(--blue); color:var(--blue); font-weight:800; font-size:11px; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
 .fm-content{ font-weight:500; font-size:12px; color:var(--ink-soft); line-height:1.5; }
 .fm-content strong{ color:var(--navy); font-weight:800; }
 .fm-sub{ font-weight:500; font-size:10.5px; color:var(--ink-mute); }
-.subject-bars{ display:flex; flex-direction:column; gap:7px; flex:1; }
-.course-row{ display:flex; align-items:center; justify-content:space-between; gap:9px; padding:6px 9px; border:1px solid var(--bd); border-left:3px solid var(--blue); background:#fff; }
-.course-subject{ font-weight:700; font-size:11.5px; color:var(--navy); flex-shrink:0; }
-.course-inst{ font-weight:800; font-size:12px; color:var(--blue); display:flex; align-items:center; gap:6px; }
-.course-tag{ font-weight:700; font-size:8.5px; color:var(--ink-mute); border:1px solid var(--bd); border-radius:2px; padding:1px 5px; }
-.subject-tip{ margin-top:12px; font-weight:500; font-size:11px; color:var(--ink-soft); line-height:1.5; padding:8px 11px; border:1px solid var(--bd); border-left:4px solid var(--blue); }
 
 /* CTA — 흰 바탕 + 블루 프레임 */
 .cta{ margin-top:auto; position:relative; overflow:hidden; display:flex; align-items:center; gap:22px; background:var(--card); border:2px solid var(--blue); padding:20px 30px; }
@@ -226,7 +220,53 @@ body.preview-embed .dev-toolbar,
 body.preview-embed .loading{ display:none !important; }
 body.preview-embed .layout-row{ display:block; max-width:none; margin:0; }
 body.preview-embed .sheets{ gap:14px; }
+/* ── 3초 후 딤 게이트(행사 키오스크): 화면을 가려 다 읽지 못하게 하고 출력 유도 ── */
+#dim-gate{ position:fixed; inset:0; z-index:9999; display:none;
+  align-items:center; justify-content:center; flex-direction:column;
+  background:rgba(10,16,30,.72);
+  -webkit-backdrop-filter:blur(16px) saturate(.8); backdrop-filter:blur(16px) saturate(.8);
+  opacity:0; transition:opacity .55s ease; }
+#dim-gate.show{ display:flex; opacity:1; }
+#dim-gate .dg-inner{ text-align:center; color:#fff; padding:24px; }
+#dim-gate .dg-title{ font-size:clamp(22px,4vw,34px); font-weight:900; letter-spacing:-.03em; margin-bottom:12px; }
+#dim-gate .dg-sub{ font-size:clamp(13px,2vw,16px); color:rgba(255,255,255,.7); margin-bottom:30px; line-height:1.65; }
+#dim-gate .dg-print{ font-family:inherit; cursor:pointer; border:none;
+  background:linear-gradient(135deg,#3B7FFF,#2B5FFF); color:#fff;
+  font-size:clamp(17px,2.6vw,22px); font-weight:800; letter-spacing:-.01em;
+  padding:18px 60px; border-radius:999px; box-shadow:0 14px 40px -8px rgba(43,95,255,.6);
+  transition:transform .2s ease, box-shadow .2s ease; }
+#dim-gate .dg-print:hover{ transform:translateY(-2px); box-shadow:0 18px 48px -8px rgba(43,95,255,.7); }
+#dim-gate .dg-print:active{ transform:scale(.97); }
+#dim-gate .dg-print[disabled]{ opacity:.6; cursor:default; }
+body.gate-locked{ overflow:hidden; }
+@media print{ #dim-gate{ display:none !important; } }
 </style>
+<script>
+/* 기기 라벨(?d) 고정: ?d=A 가 한 번 들어오면 localStorage에 저장하고, 이후 URL에
+   없어도 다시 붙여 계속 살려둔다. 내부 이동은 __withDevice()로 d 를 이어붙인다. */
+(function(){
+  try{
+    var sp = new URLSearchParams(location.search);
+    var d = sp.get('d');
+    if (d) { localStorage.setItem('device_id', d); }
+    else {
+      d = localStorage.getItem('device_id');
+      var embedded = (window.parent && window.parent !== window);
+      if (d && !sp.get('print') && !sp.get('preview') && !embedded) {
+        sp.set('d', d);
+        history.replaceState(null, '', location.pathname + '?' + sp.toString() + location.hash);
+      }
+    }
+    window.__withDevice = function(url){
+      try{
+        var dd = localStorage.getItem('device_id');
+        if (!dd || /[?&]d=/.test(url)) return url;
+        return url + (url.indexOf('?') >= 0 ? '&' : '?') + 'd=' + encodeURIComponent(dd);
+      }catch(e){ return url; }
+    };
+  }catch(e){}
+})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supa.js"></script>
 <script src="curation_sync.js"></script>
@@ -300,7 +340,7 @@ body.preview-embed .sheets{ gap:14px; }
       </div>
 
       <div class="sec">
-        <div class="sec-head"><i class="mark"></i><span class="sec-title">같은 출발점에서 시작한 분들</span></div>
+        <div class="sec-head"><i class="mark"></i><span class="sec-title">나와 비슷한 합격생의 합격 전략</span></div>
         <div class="sec-body cards-row" id="sec06-body"><div class="empty-msg">— 로딩 중 —</div></div>
       </div>
       <div class="sec">
@@ -331,16 +371,11 @@ body.preview-embed .sheets{ gap:14px; }
       <div class="stories-section" id="stories-section"></div>
     </div>
 
-    <!-- 하단 3분할 -->
+    <!-- 하단 — 2026 합격자의 공부법(전체폭) -->
     <div class="bottom-grid">
       <div class="insight-card">
         <div class="sec-head"><i class="mark"></i><span class="sec-title">2026 합격자의 공부법</span></div>
         <div id="regret-body">— 로딩 중 —</div>
-      </div>
-      <div class="insight-card hard-subject">
-        <div class="sec-head"><i class="mark"></i><span class="sec-title">2026 합격자가 들은 강의</span></div>
-        <div class="subject-bars" id="hardsubject-body"><div class="empty-msg">— 로딩 중 —</div></div>
-        <div class="subject-tip" id="hardsubject-tip"></div>
       </div>
     </div>
 
@@ -591,7 +626,7 @@ function renderNo06(passnotes, combo) {
     const forced = Curation.pinnedRandom('no.06', combo, passnotes.filter(p => p.passage), cnt);
     if (forced && forced.length) {
       document.getElementById('sec06-body').innerHTML = forced.map(p => {
-        const psg = (p.passage || '').slice(0, 120);
+        const psg = (p.passage || '').slice(0, 200);
         return `<div class="mini-card"><div class="mini-card-title">${escapeHtml(p.title || '')}</div><div class="mini-card-passage">"${escapeHtml(psg)}…"</div></div>`;
       }).join('');
       return { matched: forced.length, picked: forced.length, pinned: true };
@@ -613,7 +648,7 @@ function renderNo06(passnotes, combo) {
     return { matched: 0 };
   }
   document.getElementById('sec06-body').innerHTML = top2.map(({p}) => {
-    const psg = (p.passage || '').slice(0, 120);
+    const psg = (p.passage || '').slice(0, 200);
     return `<div class="mini-card"><div class="mini-card-title">${escapeHtml(p.title || '')}</div><div class="mini-card-passage">"${escapeHtml(psg)}…"</div></div>`;
   }).join('');
   return { matched: cands.length, picked: top2.length };
@@ -793,8 +828,7 @@ function pickField(q3, field, min, cap) {
   }
   return out.slice(0, cap);
 }
-const strategyFor = (q3) => pickField(q3, 'strategy', 3, 3);
-const coursesFor  = (q3) => pickField(q3, 'courses', 4, 5);
+const strategyFor = (q3) => pickField(q3, 'strategy', 8, 8);
 function renderPage2(C) {
   // no.11 — 유사 후기 카드 3건
   const top3 = pickTopStories(C('no.11'));
@@ -821,31 +855,16 @@ function renderPage2(C) {
 
   // no.12 — 다시 시작한다면 꼭 할 것 (긍정 전략 · 실제 후기 · 숫자 미노출)
   const q3 = get(2);
-  const CAT_CLASS = { '공부전략': 'study', '수험전략': 'exam', '생활습관': 'life' };
+  const CAT_CLASS = { '공부전략': 'study', '수험전략': 'exam', '생활습관': 'life', '멘탈관리': 'mind' };
   const strats = strategyFor(q3);
   if (strats.length) {
-    document.getElementById('regret-body').innerHTML = strats.map(s => `
+    document.getElementById('regret-body').innerHTML = `<div class="strat-grid">` + strats.map(s => `
       <div class="strat-item">
         <div class="strat-cat ${CAT_CLASS[s.cat] || ''}">${escapeHtml(s.cat || '합격전략')}</div>
         <div class="strat-text">${escapeHtml(s.text)}</div>
-      </div>`).join('');
+      </div>`).join('') + `</div>`;
   } else {
     document.getElementById('regret-body').innerHTML = emptyHtml('합격수기에서 모으는 중');
-  }
-
-  // no.14 — 2026 합격자가 들은 강의 (구매유도)
-  const courses = coursesFor(q3);
-  const st = statFor(q3);
-  if (courses.length) {
-    document.getElementById('hardsubject-body').innerHTML = courses.map(c => `
-      <div class="course-row">
-        <div class="course-subject">${escapeHtml(c.subject)}</div>
-        <div class="course-inst">${escapeHtml(c.instructor)}<span class="course-tag">단과</span></div>
-      </div>`).join('');
-    document.getElementById('hardsubject-tip').innerHTML = `🎓 ${escapeHtml((st && st.passCopy) || (STATS && STATS['_default'] && STATS['_default'].passCopy) || '')}`;
-  } else {
-    document.getElementById('hardsubject-body').innerHTML = emptyHtml('강의 데이터를 모으는 중');
-    document.getElementById('hardsubject-tip').innerHTML = '';
   }
 
   // no.15 — CTA 닫는 인용구
@@ -864,9 +883,9 @@ function loadAndRender() {
   document.getElementById('loading').classList.remove('hidden');
   if (location.protocol === 'file:') {
     document.getElementById('loading').textContent = '⚠ 로컬 서버에서 열어주세요';
-    return;
+    return Promise.resolve();
   }
-  Promise.all([
+  return Promise.all([
     fetch('reviews_data.json').then(r => r.json()),
     fetch('result_stats.json').then(r => r.ok ? r.json() : null).catch(() => null),
   ]).then(([data, stats]) => {
@@ -1001,28 +1020,48 @@ document.getElementById('demo-select').addEventListener('change', (e) => {
   syncSelectorsFromA();
   loadAndRender();
 });
-// ── 인쇄모드(?print=1): 헤드리스 크롬이 답변·큐레이션을 주입받아 렌더 ──
-const _printMode = new URLSearchParams(location.search).get('print');
+// ── 인쇄모드(?print=1) ──
+//   · 에이전트(헤드리스):  ?print=1&pd=_printdata_X.json  → PDF로 굽기(인쇄창 없음)
+//   · 어드민 직접출력:     ?print=1&src=local&auto=1       → localStorage 작업데이터로 렌더 후 브라우저 인쇄창
+//   답변·시드·큐레이션 스냅샷·날짜가 작업에 박혀 있어 "언제 다시 뽑아도 동일".
+const _sp = new URLSearchParams(location.search);
+const _printMode = _sp.get('print');
 if (_printMode) {
-  const _pdFile = new URLSearchParams(location.search).get('pd') || '_printdata.json';
-  fetch(_pdFile + '?_=' + Date.now())
-    .then(r => r.json())
-    .then(async pd => {
-      if (pd.seed != null) window.__setSeed(pd.seed);          // 저장된 시드로 고정 → 화면과 동일 출력
-      if (Array.isArray(pd.ans) && pd.ans.length >= 8) A = pd.ans;
-      if (pd.cur != null) {
-        window.__PRINT_CUR__ = pd.cur;                       // 작업에 스냅샷 있으면 사용
-      } else if (window.Curation && Curation.loadRemote) {
-        try { await Curation.loadRemote(); } catch (e) {}    // 없으면 서버 큐레이션으로 인쇄
-      }
-      if (pd.label != null || pd.ticket != null) {           // 출력번호 종이에 찍기 (라벨 C-3 우선)
-        const tk = document.getElementById('print-ticket');
-        if (tk) { tk.textContent = pd.label || ('#' + pd.ticket); tk.classList.add('show'); }
-      }
-      syncSelectorsFromA();
-      loadAndRender();
-    })
-    .catch(() => loadAndRender());
+  const _auto = _sp.get('auto');     // 렌더가 끝나면 브라우저 인쇄창 자동 호출(어드민 직접출력)
+  const _apply = async (pd) => {
+    pd = pd || {};
+    if (pd.seed != null) window.__setSeed(pd.seed);          // 저장된 시드로 고정 → 화면과 동일 출력
+    if (Array.isArray(pd.ans) && pd.ans.length >= 8) A = pd.ans;
+    if (pd.cur != null) {
+      // 작업에 동결된 큐레이션 스냅샷 사용(문자열/객체 모두 허용) → 핀·제외 그대로 재현
+      window.__PRINT_CUR__ = (typeof pd.cur === 'string') ? pd.cur : JSON.stringify(pd.cur);
+    } else if (window.Curation && Curation.loadRemote) {
+      try { await Curation.loadRemote(); } catch (e) {}      // 스냅샷 없으면 서버 큐레이션으로 인쇄
+    }
+    if (pd.date) {                                            // 출력일자 동결(늦게 뽑아도 원래 날짜)
+      const dt = new Date(pd.date);
+      if (!isNaN(dt)) document.getElementById('rpt-date').textContent =
+        `${dt.getFullYear()}.${String(dt.getMonth()+1).padStart(2,'0')}.${String(dt.getDate()).padStart(2,'0')}`;
+    }
+    if (pd.label != null || pd.ticket != null) {             // 출력번호 종이에 찍기 (라벨 C-3 우선)
+      const tk = document.getElementById('print-ticket');
+      if (tk) { tk.textContent = pd.label || ('#' + pd.ticket); tk.classList.add('show'); }
+    }
+    syncSelectorsFromA();
+    await loadAndRender();
+    if (_auto) {                                              // 폰트 로딩까지 기다렸다 인쇄창
+      try { if (document.fonts && document.fonts.ready) await document.fonts.ready; } catch (_) {}
+      setTimeout(() => { try { window.print(); } catch (_) {} }, 350);
+    }
+  };
+  if (_sp.get('src') === 'local') {                          // 어드민에서 localStorage로 넘긴 작업데이터
+    let pd = {};
+    try { pd = JSON.parse(localStorage.getItem('admin_print_payload') || '{}'); } catch (e) {}
+    _apply(pd);
+  } else {
+    const _pdFile = _sp.get('pd') || '_printdata.json';
+    fetch(_pdFile + '?_=' + Date.now()).then(r => r.json()).then(_apply).catch(() => loadAndRender());
+  }
 } else {
   loadAndRender();
   // 관리자 페이지에서 핀/제외가 바뀌면(다른 탭) 즉시 재렌더 — 바로바로 연동
@@ -1080,6 +1119,45 @@ window.addEventListener('message', (e) => {
 });
 // 부모(관리자) 프레임에 "준비됨" 통지 → 관리자가 초기 답변을 주입
 try { if (window.parent && window.parent !== window) window.parent.postMessage({ type: 'previewReady' }, '*'); } catch (_) {}
+
+// ── 3초 후 딤 게이트: 화면을 가려 더 읽지 못하게 하고 출력 유도 ──
+//    인쇄(?print=1)·관리자 미리보기(?preview=1)·iframe 임베드에선 동작 안 함.
+(function(){
+  try{
+    var sp = new URLSearchParams(location.search);
+    if (sp.get('print') || sp.get('preview')) return;
+    if (window.parent && window.parent !== window) return;   // 미리보기 iframe 내부 제외
+    setTimeout(function(){
+      var g = document.getElementById('dim-gate');
+      if (g) { g.classList.add('show'); g.setAttribute('aria-hidden','false'); document.body.classList.add('gate-locked'); }
+    }, 3000);
+  }catch(e){}
+})();
+
+// 출력하기: 인쇄 큐에 등록한 뒤 다음 사람을 위해 설문으로 복귀 ──
+async function dimPrintAndReturn(btn){
+  if (btn.disabled) return;
+  btn.disabled = true; btn.textContent = '출력 중…';
+  try{
+    if (window.supa && window.enqueuePrint){
+      await window.enqueuePrint(window.CURRENT_EXAM || '공무원', A, null, window.__SEED__);
+    } else {
+      await fetch('/print', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ ans: A, cur: localStorage.getItem('admin_curation_v2') }) });
+    }
+  }catch(e){ /* 실패해도 다음 사람을 위해 설문으로 복귀 */ }
+  var dest = (window.__withDevice ? window.__withDevice('index.html') : 'index.html');
+  location.replace(dest);
+}
 </script>
+
+<!-- 3초 후 화면을 가리고 출력 유도 (행사 키오스크) -->
+<div id="dim-gate" aria-hidden="true">
+  <div class="dg-inner">
+    <div class="dg-title">결과가 준비됐어요</div>
+    <div class="dg-sub">자세한 내용은 인쇄된 리포트로 확인하세요.<br>아래 버튼을 누르면 리포트가 출력됩니다.</div>
+    <button class="dg-print" id="dim-print-btn" onclick="dimPrintAndReturn(this)">출력하기</button>
+  </div>
+</div>
 </body>
 </html>
